@@ -16,6 +16,7 @@ public class DemoTestController {
 	public String index(Model model) {
 		model.addAttribute("name", "SpringBlog from Millky");
 		System.out.println("여기탔어????");
+		System.out.println("여기탔어????");
 		return "index.html";
 	}
 
