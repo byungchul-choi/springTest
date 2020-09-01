@@ -1,0 +1,161 @@
+package tpost.acmdCerf.service;
+
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import tpost.acmdCerf.dao.ofapElctAddrDao;
+import tpost.acmdCerf.vo.ofapElctAddrVO;
+import tpost.commCode.controller.commCdMgntController;
+import tpost.egovcomm.EgovUserDetailsHelper;
+
+@Service
+public class ofapElctAddrService {
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Autowired
+	ofapElctAddrDao dao;
+	
+	public List<ofapElctAddrVO> ofapElctAddrListSelect(ofapElctAddrVO ofapElctAddrVO){
+		return dao.ofapElctAddrListSelect(ofapElctAddrVO);
+	}
+	
+	public int ofapElctAddrListCountSelect(ofapElctAddrVO ofapElctAddrVO){
+		return dao.ofapElctAddrListCountSelect(ofapElctAddrVO);
+	}
+	
+	@Transactional
+	public void ofapElctAddrClacUpdate(ofapElctAddrVO ofapElctAddrVO){		
+		String[] pkList = ofapElctAddrVO.getInputPk().split(",");
+		
+		for(int i = 0; i < pkList.length; i++) {
+			ofapElctAddrVO tempVO = new ofapElctAddrVO();
+			tempVO.setInputPk(pkList[i]);
+			tempVO.setAmdr(EgovUserDetailsHelper.getUserId());
+			
+			dao.ofapElctAddrClacUpdate(tempVO);
+			dao.ofapElctAddrHisClacInsert(tempVO);
+		}
+	}
+
+	@Transactional
+	public void ofapElctAddrListInsert(@ModelAttribute ofapElctAddrVO ofapElctAddrVO){
+		String[] popuChk = ofapElctAddrVO.getPopuChk().split(",");
+		String[] popuName = ofapElctAddrVO.getPopuName().split(",");
+		String[] popuEn = ofapElctAddrVO.getPopuEn().split(",");
+		String[] popuCiNum = ofapElctAddrVO.getPopuCiNum().split(",");
+		String[] popuRnrsCls = ofapElctAddrVO.getPopuRnrsCls().split(",");
+		String[] popuFronBrdt = ofapElctAddrVO.getPopuFronBrdt().split(",");
+		String[] popuSexClcd = ofapElctAddrVO.getPopuSexClcd().split(",");
+		String[] popuCelpNum = ofapElctAddrVO.getPopuCelpNum().split(",");
+		
+		String popuBsrpCls = ofapElctAddrVO.getPopuBsrpCls();
+		
+		String userId = EgovUserDetailsHelper.getUserId();
+
+		for(int i = 0; i < popuChk.length; i++) {
+			if(popuChk[i].equals("true")) {
+
+				ofapElctAddrVO tempVO = new ofapElctAddrVO();
+				
+				//맥스 PK 셋팅
+				Integer pk = dao.getMaxPk();
+				
+				if(popuBsrpCls.equals("100")) {	//개인
+					tempVO.setPopuRnrsCls(popuRnrsCls[i]);
+					tempVO.setPopuCelpNum(popuCelpNum[i]);
+					tempVO.setPopuFronBrdt(popuFronBrdt[i].substring(2));
+					String ofapElctAddr = dao.getOfapElctAddr(tempVO);	
+					tempVO.setPopuOfapElctAddr(ofapElctAddr);
+					
+					//성별구분코드 셋팅
+					if(popuFronBrdt[i].substring(0, 2).equals("19")) {// 1 2 5 6
+						if(popuRnrsCls[i].equals("100")) {	//내국인
+							if(popuSexClcd[i].equals("F")) {
+								tempVO.setPopuSexClcd("2");
+							}else {
+								tempVO.setPopuSexClcd("1");							
+							}
+						} else if(popuRnrsCls[i].equals("200")) { //외국인
+							if(popuSexClcd[i].equals("F")) {
+								tempVO.setPopuSexClcd("6");
+							}else {
+								tempVO.setPopuSexClcd("5");							
+							}
+						}
+					}else if(popuFronBrdt[i].substring(0, 2).equals("20")) { // 3 4 7 8
+						if(popuRnrsCls[i].equals("100")) {	//내국인
+							if(popuSexClcd[i].equals("F")) {
+								tempVO.setPopuSexClcd("4");
+							}else {
+								tempVO.setPopuSexClcd("3");							
+							}
+						} else if(popuRnrsCls[i].equals("200")) { //외국인
+							if(popuSexClcd[i].equals("F")) {
+								tempVO.setPopuSexClcd("8");
+							}else {
+								tempVO.setPopuSexClcd("7");							
+							}
+						}
+					}
+				} else if(popuBsrpCls.equals("200")) {//법인
+					String ofapElctAddr = popuEn[i].toUpperCase() + popuCiNum[i];
+					tempVO.setPopuOfapElctAddr(ofapElctAddr);
+				}
+				
+				tempVO.setPk(pk.toString());
+					
+				tempVO.setPopuBsrpCls(popuBsrpCls);
+				tempVO.setPopuName(popuName[i]);
+				tempVO.setPopuCiNum(popuCiNum[i]);
+				
+				tempVO.setAmdr(userId);
+				tempVO.setCrtr(userId);
+				
+				dao.ofapElctAddrListInsert(tempVO);	//공인전자주소 리스트 추가
+				dao.ofapElctAddrHisListInsert(tempVO);	//공인전자주소 히스토리 리스트 추가
+			}
+		}
+	}
+	
+	
+	
+	public String ofapElctAddrListCheck(@ModelAttribute ofapElctAddrVO ofapElctAddrVO){
+		String[] popuChk = ofapElctAddrVO.getPopuChk().split(",");
+		String[] popuName = ofapElctAddrVO.getPopuName().split(",");
+		String[] popuCiNum = ofapElctAddrVO.getPopuCiNum().split(",");
+		
+		String result = "";
+		for(int i = 0; i < popuChk.length; i++) {
+			if(popuChk[i].equals("true")) {
+				ofapElctAddrVO tempVO = new ofapElctAddrVO();
+				tempVO.setInputCiNum(popuCiNum[i]);
+				tempVO.setInputName(popuName[i]);
+				
+				ofapElctAddrVO dupVO = dao.ofapElctAddrDupCheck_Select(tempVO);
+				
+				if(dupVO.getOfapElctAddr().equals("")) {
+					result += "N,";
+				}else {
+					result += "Y,";
+				}
+			}
+			else {
+				result += "N,";
+			}
+		}
+		
+		return result;
+	}
+
+	public List<ofapElctAddrVO> ofapElctAddrCheckSelect(ofapElctAddrVO ofapElctAddrVO){
+		return dao.ofapElctAddrCheckSelect(ofapElctAddrVO);
+	}
+}

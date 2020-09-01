@@ -1,0 +1,165 @@
+package tpost.elctDoc.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.elctDoc.dao.elctDocDao;
+import tpost.elctDoc.vo.elctDocVO;
+
+@Service
+public class elctDocService {
+	@Autowired
+	elctDocDao dao;
+	
+	public List<elctDocVO> elctDocListSelect(elctDocVO elctDocVO){
+		return dao.elctDocListSelect(elctDocVO);
+	}
+	
+	public int elctDocListCountSelect(elctDocVO elctDocVO){
+		return dao.elctDocListCountSelect(elctDocVO);
+	}
+	
+	public elctDocVO elctDocDetlTitleSelect(elctDocVO elctDocVO){
+		return dao.elctDocDetlTitleSelect(elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocDetlListALLSelect(elctDocVO elctDocVO){
+		return dao.elctDocDetlListALLSelect(elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocDetlListSelect(elctDocVO elctDocVO){
+		return dao.elctDocDetlListSelect(elctDocVO);
+	}
+	
+	public int elctDocDetlListCountSelect(elctDocVO elctDocVO){
+		return dao.elctDocDetlListCountSelect(elctDocVO);
+	}
+	
+	public elctDocVO elctDocDetlSelect(elctDocVO elctDocVO){
+		return dao.elctDocDetlSelect(elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocFailListSelect(elctDocVO elctDocVO){
+		return dao.elctDocFailListSelect(elctDocVO);
+	}
+	
+	public List<elctDocVO> acmdCerfFailListSelect(elctDocVO elctDocVO){
+		return dao.acmdCerfFailListSelect(elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocSndnListSelect(elctDocVO elctDocVO){
+		return dao.elctDocSndnListSelect(elctDocVO);
+	}
+	
+	public elctDocVO elctDocSndnDetlSelect(elctDocVO elctDocVO){
+		return dao.elctDocSndnDetlSelect(elctDocVO);
+	}
+	
+	public void elctDocSndnAprYnUpdate(elctDocVO elctDocVO) {
+		dao.elctDocSndnAprYnUpdate(elctDocVO);
+	}
+	
+	public int elctDocSndnDupCheck(elctDocVO elctDocVO){
+		return dao.elctDocSndnDupCheck(elctDocVO);
+	}
+	
+	@Transactional
+	public void elctDocSndnInsert(elctDocVO elctDocVO){
+		String oganCd = elctDocVO.getOganCd();
+		String tmpltCd = elctDocVO.getTmpltCd();
+		String transDt = elctDocVO.getTransDt();
+		
+		List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+		
+		if(elctDocVO.getSndnPrord().equals("0")) {
+			for(int i = 0; i < 2; i++) {
+				Map<String, Object> temp = new HashMap<String, Object>();
+				temp.put("oganCd", oganCd);
+				temp.put("tmpltCd", tmpltCd);
+				temp.put("transDt", transDt);
+				temp.put("prord", i);
+				if(i == 0) temp.put("sndnMediCd", 0);
+				else if(i == 1) temp.put("sndnMediCd", 1);
+				temp.put("crtr", EgovUserDetailsHelper.getUserId());
+				temp.put("amdr", EgovUserDetailsHelper.getUserId());
+				tempList.add(temp);
+			}
+		}
+		
+		if(elctDocVO.getSndnPrord().equals("1")) {
+			for(int i = 0; i < 2; i++) {
+				Map<String, Object> temp = new HashMap<String, Object>();
+				temp.put("oganCd", oganCd);
+				temp.put("tmpltCd", tmpltCd);
+				temp.put("transDt", transDt);
+				temp.put("prord", i);
+				if(i == 0) temp.put("sndnMediCd", 1);
+				else if(i == 1) temp.put("sndnMediCd", 0);
+				temp.put("crtr", EgovUserDetailsHelper.getUserId());
+				temp.put("amdr", EgovUserDetailsHelper.getUserId());
+				tempList.add(temp);
+			}
+		}
+		
+		Map<String, Object> tempMap = new HashMap<String, Object>();
+		tempMap.put("tempList", tempList);
+		
+		dao.elctDocSndnInsert(elctDocVO);
+		dao.elctDocSndnDtlInsert(tempMap);
+	}
+	
+	@Transactional
+	public void elctDocSndnUpdate(elctDocVO elctDocVO) {
+		dao.elctDocSndnDtlDelete(elctDocVO);
+		
+		String oganCd = elctDocVO.getOganCd();
+		String tmpltCd = elctDocVO.getTmpltCd();
+		String transDt = elctDocVO.getTransDt();
+		
+		List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+		
+		if(elctDocVO.getSndnPrord().equals("0")) {
+			for(int i = 0; i < 2; i++) {
+				Map<String, Object> temp = new HashMap<String, Object>();
+				temp.put("oganCd", oganCd);
+				temp.put("tmpltCd", tmpltCd);
+				temp.put("transDt", transDt);
+				temp.put("prord", i);
+				if(i == 0) temp.put("sndnMediCd", 0);
+				else if(i == 1) temp.put("sndnMediCd", 1);
+				temp.put("crtr", EgovUserDetailsHelper.getUserId());
+				temp.put("amdr", EgovUserDetailsHelper.getUserId());
+				tempList.add(temp);
+			}
+		}
+		
+		if(elctDocVO.getSndnPrord().equals("1")) {
+			for(int i = 0; i < 2; i++) {
+				Map<String, Object> temp = new HashMap<String, Object>();
+				temp.put("oganCd", oganCd);
+				temp.put("tmpltCd", tmpltCd);
+				temp.put("transDt", transDt);
+				temp.put("prord", i);
+				if(i == 0) temp.put("sndnMediCd", 1);
+				else if(i == 1) temp.put("sndnMediCd", 0);
+				temp.put("crtr", EgovUserDetailsHelper.getUserId());
+				temp.put("amdr", EgovUserDetailsHelper.getUserId());
+				tempList.add(temp);
+			}
+		}
+		
+		Map<String, Object> tempMap = new HashMap<String, Object>();
+		tempMap.put("tempList", tempList);
+		
+		dao.elctDocSndnUpdate(elctDocVO);
+		dao.elctDocSndnDtlInsert(tempMap);
+	}
+}

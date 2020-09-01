@@ -1,0 +1,60 @@
+package tpost.acmdCerf.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.acmdCerf.vo.ofapElctAddrVO;
+
+@Repository
+public class ofapElctAddrDao {
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<ofapElctAddrVO> ofapElctAddrListSelect(ofapElctAddrVO ofapElctAddrVO){
+		return sqlSessionTemplate.selectList("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrListSelect", ofapElctAddrVO);
+	}
+	
+	public int ofapElctAddrListCountSelect(ofapElctAddrVO ofapElctAddrVO){
+		return sqlSessionTemplate.selectOne("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrListCountSelect", ofapElctAddrVO);
+	}
+	
+	public void ofapElctAddrClacUpdate(ofapElctAddrVO ofapElctAddrVO){
+		sqlSessionTemplate.update("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrClacUpdate", ofapElctAddrVO);
+	}
+	
+	public void ofapElctAddrHisClacInsert(ofapElctAddrVO ofapElctAddrVO){
+		sqlSessionTemplate.insert("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrHisClacInsert", ofapElctAddrVO);
+	}
+	
+	public void ofapElctAddrListInsert(ofapElctAddrVO ofapElctAddrVO){
+		sqlSessionTemplate.insert("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrListInsert", ofapElctAddrVO);
+	}
+	
+	public void ofapElctAddrHisListInsert(ofapElctAddrVO ofapElctAddrVO){
+		sqlSessionTemplate.insert("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrHisListInsert", ofapElctAddrVO);
+	}
+	
+	public ofapElctAddrVO ofapElctAddrDupCheck_Select(ofapElctAddrVO ofapElctAddrVO){
+		return sqlSessionTemplate.selectOne("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrDupCheck_Select", ofapElctAddrVO);
+	}
+	
+	public void ofapElctAddrDupUpdate(ofapElctAddrVO ofapElctAddrVO){
+		sqlSessionTemplate.insert("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrDupUpdate", ofapElctAddrVO);
+	}
+	
+	public List<ofapElctAddrVO> ofapElctAddrCheckSelect(ofapElctAddrVO ofapElctAddrVO){
+		return sqlSessionTemplate.selectList("tpost.acmdCerf.dao.ofapElctAddrDao.ofapElctAddrCheckSelect", ofapElctAddrVO);
+	}
+	
+	public Integer getMaxPk(){
+		return sqlSessionTemplate.selectOne("tpost.acmdCerf.dao.ofapElctAddrDao.getMaxPk");
+	}
+	
+	public String getOfapElctAddr(ofapElctAddrVO ofapElctAddrVO) {
+		return sqlSessionTemplate.selectOne("tpost.acmdCerf.dao.ofapElctAddrDao.getOfapElctAddr", ofapElctAddrVO);
+	}
+	
+}

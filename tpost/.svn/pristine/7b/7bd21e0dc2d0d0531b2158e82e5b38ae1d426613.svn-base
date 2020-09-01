@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns="http://www.nhncorp.com/lucy-xss"
+	extends="lucy-xss-superset-sax.xml">
+	<elementRule>
+		<element name="applet" disable="true" />
+		<element name="base" disable="true" />
+		<element name="body" disable="true" />
+		<element name="form" disable="true" />
+		<element name="html" disable="true" />
+		<element name="iframe" disable="true" />
+		<element name="meta" disable="true" />
+		<element name="script" disable="true" />
+		<!-- 추가사항 START -->
+		<element name="style" disable="false" />
+		<element name="path" disable="false" />
+		<element name="svg" disable="false" />
+		<element name="defs" disable="false" />		
+		<element name="pattern" disable="false" />
+		<element name="rect" disable="false" />	
+		<!-- 추가사항 END -->
+		<element name="textarea" disable="true" />
+		<element name="xml" disable="true" />
+		<element name="xmp" disable="true" />
+		<element name="embed" disable="true" />
+		<element name="object" disable="true" />	
+	</elementRule>
+
+	<attributeRule>
+		<attribute name="src">
+			<allowedPattern><![CDATA[['"]?\s*http://.*]]></allowedPattern>
+		</attribute>
+		<attribute name="href">
+			<notAllowedPattern><![CDATA[(?i:script)]]></notAllowedPattern>
+			<notAllowedPattern><![CDATA[(?i:\.css)]]></notAllowedPattern>
+		</attribute>
+		<attribute name="style">
+			<notAllowedPattern><![CDATA[(?i:expression)]]></notAllowedPattern>
+			<notAllowedPattern><![CDATA[(?i:alert)]]></notAllowedPattern>
+		</attribute>
+		<!-- 추가사항 START -->
+		<attribute name="d">
+			<allowedPattern><![CDATA[['"]?.*]]></allowedPattern>
+		</attribute>
+		<attribute name="viewBox">
+			<allowedPattern><![CDATA[['"]?.*]]></allowedPattern>
+		</attribute>
+		<attribute name="fill">
+			<allowedPattern><![CDATA[['"]?.*]]></allowedPattern>
+		</attribute>
+		<attribute name="patternUnits">
+			<allowedPattern><![CDATA[['"]?.*]]></allowedPattern>
+		</attribute>
+		<!-- 추가사항 END -->
+	</attributeRule>
+</config>

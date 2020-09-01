@@ -1,0 +1,282 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<title>비밀번호 초기화</title>
+<script src="/resource/js/jquery.min.js"></script>
+<script src="/resource/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="/tpost/resource/js/comm.js"></script>
+
+<script type="text/javascript">
+
+var num = 0; // 몇분을 설정할지의 대한 변수 선언
+var myVar;
+
+function time1(){
+    myVar = setInterval(alertFunc, 1000); 
+}
+
+function time()
+{
+	num = 60 * 3 ;
+	clearInterval(myVar); 
+	time1();
+}
+
+
+function alertFunc() {
+    var min = num / 60; 
+    min = Math.floor(min);
+    var sec = num - (60 * min);
+    console.log(min)
+    console.log(sec)
+    var $input = $('#timer').val(min + '분' + sec + '초');
+    if(num <= 0){
+        clearInterval(myVar); // num 이 0초가 되었을대 clearInterval로 타이머 종료
+        num = 0;
+    }else{
+    	num--;
+    }
+    
+}
+
+
+/*****************************************************************/
+$(document).ready(function(){
+	commCd_bas('mvTscoClcd', '00008');
+});
+
+function callBack(){
+	
+}
+
+/*패스워드 변경하기*/
+function fn_Change() {
+	
+	if(num <= 0 ){
+		alert("인증요청 시간이 지났습니다. 다시 요청해주시기 바랍니다.");
+		return;	
+	}
+	
+	
+	
+	/*패스워드 체크가 성공일때 비밀번호 변경함 */
+	if ( fn_pw_check() ){
+		var parameters = $("#frm").serialize();
+		$.ajax({
+			type:"post", 
+			dataType:"json",
+			async:false,
+			url:'passWordChg_init.ajax',
+			data:parameters ,
+			success:function(data){
+				if(data.result == 'Y'){
+					alert( data.errorMessage );
+					window.close();
+				}else{
+					alert( data.errorMessage );
+				}
+				
+			},
+			error: function(request, status, error){  
+			} 
+		});
+		
+	}
+}
+
+/*비밀번호 정합성 체크 */
+function fn_pw_check() {
+	
+ 	var pw_passed = true;  // 추후 벨리데이션 처리시에 해당 인자값 확인을 위해
+	var id = document.getElementById("custId").value; // 아이디
+	var pw = document.getElementById("newPassWord").value; //비밀번호
+	var pw2 = document.getElementById("CfmPassWord").value; // 확인 비밀번호
+	pw_passed = true;
+
+	var pattern1 = /[0-9]/;
+	var pattern2 = /[a-zA-Z]/;
+	var pattern3 = /[~!@\#$%<>^&*]/;     // 원하는 특수문자 추가 제거
+	var pw_msg = "";
+
+	if(id.length == 0) {
+		alert("아이디를 입력해주세요");
+		return false;
+	} else {                //필요에따라 아이디 벨리데이션
+	}
+
+	if(pw.length == 0) {
+		alert("비밀번호를 입력해주세요");
+		return false;
+	} else {
+		if( pw  !=  pw2) {
+			alert("비밀번호가 일치하지 않습니다.");
+			return false;
+		}
+   }
+
+
+	if(!pattern1.test(pw)||!pattern2.test(pw)||!pattern3.test(pw)||pw.length<9||pw.length>50){
+		alert("영문+숫자+특수기호 9자리 이상으로 구성하여야 합니다.");
+		return false;
+
+	}          
+
+	if(pw.indexOf(id) > -1) {
+		alert("비밀번호는 ID를 포함할 수 없습니다.");
+		return false;
+	}
+
+	var SamePass_0 = 0; //동일문자 카운트
+	var SamePass_1 = 0; //연속성(+) 카운드
+	var SamePass_2 = 0; //연속성(-) 카운드
+
+	for(var i=0; i < pw.length; i++) {
+		var chr_pass_0;
+		var chr_pass_1;
+		var chr_pass_2;
+
+		if(i >= 2) {
+			chr_pass_0 = pw.charCodeAt(i-2);
+			chr_pass_1 = pw.charCodeAt(i-1);
+			chr_pass_2 = pw.charCodeAt(i);
+
+			if((chr_pass_0 == chr_pass_1) && (chr_pass_1 == chr_pass_2)) {
+				SamePass_0++;
+			}else {
+				SamePass_0 = 0;
+			}
+
+			//연속성(+) 카운드
+			if(chr_pass_0 - chr_pass_1 == 1 && chr_pass_1 - chr_pass_2 == 1) {
+				SamePass_1++;
+            }
+			else {
+				SamePass_1 = 0;
+			}
+
+			//연속성(-) 카운드
+			if(chr_pass_0 - chr_pass_1 == -1 && chr_pass_1 - chr_pass_2 == -1) {
+				SamePass_2++;
+			}else {
+				SamePass_2 = 0;
+            }  
+		}     
+
+		if(SamePass_0 > 0) {
+			alert("동일문자를 3자 이상 연속 입력할 수 없습니다.");
+			pw_passed=false;
+		}
+
+ 		if(SamePass_1 > 0 || SamePass_2 > 0 ) {
+            alert("영문, 숫자는 3자 이상 연속 입력할 수 없습니다.");
+            pw_passed=false;
+ 		} 
+
+ 		if(!pw_passed) {             
+ 			return false;
+ 			break;
+ 		}
+	}
+	
+	return true;
+ }
+
+/*인증번호 요청*/
+function factorAuth_req(){
+	var celpNum1 =   $('#mvTscoKind').val() + $('#celpNum1').val(); 
+	
+	$('#celpNum').val(celpNum1);
+	
+	var parameters = $("#frm").serialize();
+	$.ajax({
+		type:"post", 
+		dataType:"json",
+		async:false,
+		url:'factorAuth_req.ajax',
+		data:parameters ,
+		success:function(data){
+			if(data.result == "N" ) {
+				alert(data.errorMessage);
+			}else if(data.result == "Y"  ){
+				/*시간타임머*/
+				time();
+				
+				$('#ctifNo').val(data.ctifNo);
+				
+				
+				
+			}
+		},
+		error: function(request, status, error){
+			
+			alert(request  + "    " + status + "    " + error);
+		} 
+	});
+	
+}
+
+ 
+ 
+</script>
+</head>
+<body>
+<div id="wrapper">
+	<main id="main">
+        <div class="content-box">
+        	<div id="contentZone" class="contents-zone">
+               
+                <!-- Change Contents (↓↓콘텐츠 변경↓↓) -->
+                <section class="login-wrapper comm-padding">
+                    <h2 class="title-typeC1">비밀번호 초기화</h2>
+                    <div class="form-wrapper">
+                        <div class="form-login">
+                            <form name="frm" id="frm">
+                            	
+                                <div class="inp-area">로그인ID
+                                    <input type="text"  name="custId" id="custId" placeholder="아이디" value="${custId}"  /> 
+                                </div>
+                                <div class="inp-area">통신사
+                                    <select id="mvTscoClcd" name="mvTscoClcd" ></select> 
+                                </div>
+                                <div class="inp-area">휴대전화번호
+                                    <select id="mvTscoKind" name="mvTscoKind" >
+                                		<option value="010">010</option>
+                                		<option value="011">011</option>
+                                		<option value="016">016</option>
+                                		<option value="018">018</option>
+                                		<option value="019">019</option>
+                                	</select>
+                                	<input type="text" id="celpNum1" name="celpNum1" value="" />
+                                	<input type="hidden" id="celpNum" name="celpNum" value="" />
+                                </div>
+                                <div class="inp-area">인증번호
+                                    <input type="text" id="ctifNo" name="ctifNo" />
+                                    <button type="button" onclick="factorAuth_req();">인증요청</button>
+                                     <input type="text" id ="timer" name="timer" /> 
+                                     
+                                </div>
+                                <div class="inp-area">신규비밀번호
+                                    <input type="text"  name="newPassWord" id="newPassWord" placeholder="새로운 비밀번호">
+                                </div>
+                                <div class="inp-area">신규비밀번호확인
+                                    <input type="text"  name="passWordCfm" id="CfmPassWord" placeholder="비밀번호 확인">
+                                </div>
+                                <div class="inp-area">
+                                    	비밀번호는 영문, 숫자, 특수문자를 사용하여 9자리 이상으로 구성되어야 합니다.
+                                </div>
+                            </form>
+                                <div class="form-btn">
+                                    <button type="submit" class="btn red" onclick="fn_Change();">확인 </button>
+                                    <button type="submit" class="btn red" onclick="window.close();"> 취소</button>
+                                </div>
+                        </div>
+                    </div> <!-- //form-wrapper -->
+                </section>
+                <!-- //Change Contents (↑↑콘텐츠 변경↑↑) -->
+                
+            </div> <!--//contents-zone-->
+        </div> <!--//content-box-->
+       
+    </main>
+</div>
+</body>
+</html>

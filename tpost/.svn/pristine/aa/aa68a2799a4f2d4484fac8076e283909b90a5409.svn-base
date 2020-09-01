@@ -1,0 +1,154 @@
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<script type="text/javascript" src="<c:url value='/js/egovframework/com/cmm/showModalDialogCallee.js'/>" ></script>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="format-detection" content="telephone=no">
+	
+    <title>코드관리</title>
+	
+	<!-- css -->
+	
+	<link rel="stylesheet" href="/resource/css/admin/common.css">
+	
+	<!-- script -->
+<!--	<script src="../../js/comm/jquery-3.4.1.js"></script>   -->
+<!--	<script src="../../js/comm/jquery-ui-1.12.1.js"></script> -->
+<!--	<script src="../../js/admin/html_comm.js"></script>  -->
+<!--	<script src="../../js/admin/html_style.js"></script> -->
+	
+	<script>
+	  function userList() {
+	    var userForm = document.getElementById("userForm");
+	    userForm.action = "find-all";
+	    userForm.method = "post";
+	    userForm.submit();
+	  }
+
+	  function userUpdate() {
+	    var userForm = document.getElementById("userForm");
+	    userForm.action = "update-view";
+	    userForm.method = "post";
+	    userForm.submit();
+	  }
+	  
+	  /*코드저장*/
+	  function cfcd_pop_up_insert(){
+		  alert("저장하겟습니다.");
+		  var commCdMgntForm = document.getElementById("commCdMgnt");
+		  commCdMgntForm.action = "cfcdPopu-insert";
+		                                
+		  commCdMgntForm.method = "post";
+		  commCdMgntForm.submit();
+		  
+	  }
+	  function cfcd_pop_up_close(){
+		  
+		  
+	  }
+	  
+	  /*코드삭제*/
+	  function cfcd_pop_up_delete(){
+		  
+		  var commCdMgntForm = document.getElementById("commCdMgnt");
+		  commCdMgntForm.action = "cfcdPopu-delete";
+		  commCdMgntForm.method = "post";
+		  commCdMgntForm.submit();
+		  
+	  }
+	  
+	  /*코드 업데이트 */
+	  function cfcd_pop_up_update(){
+		  
+		  var commCdMgntForm = document.getElementById("commCdMgnt");
+		  commCdMgntForm.action = "cfcdPopu-delete";
+		  commCdMgntForm.method = "post";
+		  commCdMgntForm.submit();
+		  
+	  }
+	  
+	  
+	</script>
+						 
+
+</head>
+<body>
+<form id="commCdMgnt">
+<div id="wrap">
+	<header id="header">
+		<nav class="top-menu">
+            <div class="container">
+           
+            </div>
+		</nav>
+      
+	</header>
+
+	<main id="main">
+		<section class="contents-wrap">
+            <h2 class="title1">분류코드 등록/ 수정</h2>   
+			
+           ${commCdMgntList.cfcd}
+           ${commCdMgntList.cfcdNm}
+           
+           
+           ${test10}
+           ${test11}
+		    
+		    <div class="item-col3-wrapper">
+		    	<div class="col">
+		    		<table class="table center">
+						<colgroup>
+							<col style="width: 50%">
+							<col>
+						</colgroup>
+						<tbody>
+						
+							<tr>
+								<td >분류코드</td>
+								<td colspan="2">
+									<input type="text" name="cfcd" id="cfcd" style="width:100px;" value="" autocomplete="off">
+								</td>
+							</tr>
+							
+							<tr>
+								<td >분류코드명</td>
+								<td colspan="2">
+									<input type="text" name="cfcdNm" id="cfcdNm" style="width:100px;" value="" autocomplete="off">
+								</td>
+							</tr>
+						
+							<tr>
+								<td  >분류코드설명</td>
+								<td colspan="2">
+									<input type="text" name="cfcdDesc" id="cfcdDesc" style="width:100px;" value="" autocomplete="off">
+								</td>
+							</tr>
+							
+						</tbody>
+						<tbody>
+						   <tr>
+						   	<td><button type="button" class="btn black" onclick="cfcd_pop_up_insert();" >저장</button></td>
+						   	<td><button type="button" class="btn black" onclick="cfcd_pop_up_close();">닫기</button></td>
+						   	<td><button type="button" class="btn black" onclick="cfcd_pop_up_delete();">삭제</button></td>
+						   </tr>
+						</tbody>
+					</table>
+		    	</div>
+		    	
+		    </div> <!-- //item-col3-wrapper -->
+		    
+		   
+		</section> <!--//contents-wrap-->
+	</main>
+
+	<footer id="footer">
+		
+	</footer>
+</div> <!--//wrap-->
+</form>
+</body>
+</html>

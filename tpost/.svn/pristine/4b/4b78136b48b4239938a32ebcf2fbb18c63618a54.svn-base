@@ -1,0 +1,38 @@
+package tpost.batch.service;
+
+import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.batch.dao.moblSndnRsltArgDao;
+import tpost.batch.vo.moblSndnRsltArgVO;
+import tpost.commCode.controller.commCdMgntController;
+
+@Service
+public class moblSndnRsltArgService {
+
+	@Autowired
+	moblSndnRsltArgDao dao;
+	
+	/* 로그설정 */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Transactional
+	public void moblSndnRsltArgSuccIns(moblSndnRsltArgVO moblSndnRsltArgVO) {
+		
+		
+		dao.moblSndnRsltArgSuccIns(moblSndnRsltArgVO);
+	}
+	
+	@Transactional
+	public void moblSndnRsltArgFailIns(moblSndnRsltArgVO moblSndnRsltArgVO) {
+		
+		
+		dao.moblSndnRsltArgFailIns(moblSndnRsltArgVO);
+	}
+	
+	
+}

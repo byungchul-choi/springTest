@@ -1,0 +1,90 @@
+package tpost.acmdCerf.service;
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.acmdCerf.dao.oganRcveRfDao;
+import tpost.acmdCerf.vo.oganRcveRfVO;
+
+@Service
+public class oganRcveRfService {
+	
+	@Autowired
+	oganRcveRfDao dao;
+	
+	public List<oganRcveRfVO> oganRcveRfListSelect(oganRcveRfVO oganRcveRfVO){
+		return dao.oganRcveRfListSelect(oganRcveRfVO);
+	}
+	
+	public int oganRcveRfListCountSelect(oganRcveRfVO oganRcveRfVO){
+		return dao.oganRcveRfListCountSelect(oganRcveRfVO);
+	}
+	
+	public int allCsntCountSelect(oganRcveRfVO oganRcveRfVO){
+		return dao.allCsntCountSelect(oganRcveRfVO);
+	}
+	
+	public int allRfslCountSelect(oganRcveRfVO oganRcveRfVO){
+		return dao.allRfslCountSelect(oganRcveRfVO);
+	}
+	
+	@Transactional
+	public String sndnExecInsert(oganRcveRfVO oganRcveRfVO) {
+		String errorMessage = "";
+		oganRcveRfVO tempVO = oganRcveRfVO;
+		
+		String execDup = dao.sndnExecDupSelect(tempVO).getExecDup();
+		
+		if(!execDup.equals("0")) {
+			if(oganRcveRfVO.getExecISndnClcd().equals("0")) {
+				errorMessage = "발송구분이 발송이고 발송예외처리기간이 겹치는 데이터가 있습니다. 기존 데이터를 수정해주세요.";	
+			}
+			else if(oganRcveRfVO.getExecISndnClcd().equals("1")) {
+				errorMessage = "발송구분이 미발송이고 발송예외처리기간이 겹치는 데이터가 있습니다. 기존 데이터를 수정해주세요.";	
+			}
+		} else {
+			dao.sndnExecInsert(oganRcveRfVO);
+			dao.sndnExecHisInsert(oganRcveRfVO);	
+		}
+		
+		return errorMessage;
+	}
+	
+	@Transactional
+	public String sndnExecUpdate(oganRcveRfVO oganRcveRfVO) {
+		String errorMessage = "";
+		oganRcveRfVO tempVO = oganRcveRfVO;
+		
+		String execDup = dao.sndnExecDupSelect(tempVO).getExecDup();
+		
+		if(!execDup.equals("0")) {
+			if(oganRcveRfVO.getExecISndnClcd().equals("0")) {
+				errorMessage = "발송구분이 발송이고 발송예외처리기간이 겹치는 데이터가 있습니다. 기존 데이터를 수정해주세요.";	
+			}
+			else if(oganRcveRfVO.getExecISndnClcd().equals("1")) {
+				errorMessage = "발송구분이 미발송이고 발송예외처리기간이 겹치는 데이터가 있습니다. 기존 데이터를 수정해주세요.";	
+			}
+		} else {
+			dao.sndnExecUpdate(oganRcveRfVO);
+			dao.sndnExecHisInsert(oganRcveRfVO);
+		}
+		return errorMessage;
+	}
+	
+	public List<oganRcveRfVO> sndnExecSelect(oganRcveRfVO oganRcveRfVO) {
+		return dao.sndnExecSelect(oganRcveRfVO);
+	}
+	
+	public int getMaxPk(oganRcveRfVO oganRcveRfVO) {
+		return dao.getMaxPk(oganRcveRfVO);
+	}
+	
+	public int getHisSeq(oganRcveRfVO oganRcveRfVO) {
+		return dao.getHisSeq(oganRcveRfVO);
+	}
+	
+}

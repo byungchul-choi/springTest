@@ -1,0 +1,167 @@
+package tpost.acmdCerf.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import egovframework.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+import tpost.commCode.controller.commCdMgntController;
+import tpost.commUtil.commUtil;
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.acmdCerf.service.oganRcveRfService;
+import tpost.acmdCerf.vo.oganRcveRfVO;
+
+@Controller
+@RequestMapping(value = "/acmdCerf")
+public class oganRcveRfController {
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+
+	@Autowired
+	oganRcveRfService oganRcveRfService;
+	
+	@RequestMapping(value = "/oganRcveRfMgnt", method = RequestMethod.POST)
+	public String oganRcveRfMgntInit(Model model) {
+		log.debug("/acmdCerf/oganRcveRfMgntInit - oganRcveRfMgnt");
+		
+		oganRcveRfVO oganRcveRfVO = new oganRcveRfVO();
+		if(EgovUserDetailsHelper.getAthLev().equals("00")){
+			oganRcveRfVO.setInputOganCd("");
+		} else if(EgovUserDetailsHelper.getAthLev().equals("01")){
+			oganRcveRfVO.setInputOganCd(EgovUserDetailsHelper.getOganCd());
+		}
+		
+		oganRcveRfVO.setInputCiNum("");
+		oganRcveRfVO.setInputName("");
+		oganRcveRfVO.setInputOfapElctAddr("");
+		oganRcveRfVO.setInputRcveRfClcd("");
+		oganRcveRfVO.setInputStDt(commUtil.YYYYMMFirstDate());
+		oganRcveRfVO.setInputClosDt(commUtil.YYYYMMLastDate());
+		
+		oganRcveRfListSelect(model, oganRcveRfVO);
+		
+		return "acmdCerf/oganRcveRfMgnt";
+	}
+	
+	//상단 조회 버튼 클릭 시 (페이징 포함)
+	@RequestMapping(value="/oganRcveRfListSelect", method = RequestMethod.POST)
+	public String oganRcveRfListSelect(Model model, @ModelAttribute oganRcveRfVO oganRcveRfVO) {
+		log.debug("/acmdCerf/ofapElctAddrListSelect - ofapElctAddrListSelect");
+		
+		model.addAttribute("inputStDt", oganRcveRfVO.getInputStDt());
+		model.addAttribute("inputClosDt", oganRcveRfVO.getInputClosDt());
+		model.addAttribute("inputOganCd", oganRcveRfVO.getInputOganCd());
+		model.addAttribute("inputName", oganRcveRfVO.getInputName());
+		model.addAttribute("inputOfapElctAddr", oganRcveRfVO.getInputOfapElctAddr());
+		model.addAttribute("inputRcveRfClcd", oganRcveRfVO.getInputRcveRfClcd());
+		model.addAttribute("inputCiNum", oganRcveRfVO.getInputCiNum());
+		model.addAttribute("athLev", EgovUserDetailsHelper.getAthLev());
+		
+		PaginationInfo paginationInfo = new PaginationInfo();
+		paginationInfo.setCurrentPageNo(oganRcveRfVO.getPageIndex()); //현재 페이지 번호
+		paginationInfo.setRecordCountPerPage(5);  //한 페이지에 게시되는 게시물 건수
+		paginationInfo.setPageSize(10); //페이징 리스트의 사이즈
+		
+		oganRcveRfVO.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		oganRcveRfVO.setLastIndex(paginationInfo.getLastRecordIndex());
+		oganRcveRfVO.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+		
+		oganRcveRfVO.setInputStDt(commUtil.dateToText(oganRcveRfVO.getInputStDt()));
+		oganRcveRfVO.setInputClosDt(commUtil.dateToText(oganRcveRfVO.getInputClosDt()));
+		
+		//내역 조회
+		model.addAttribute("oganRcveRfList", oganRcveRfService.oganRcveRfListSelect(oganRcveRfVO));
+		
+		//총건수셋팅
+		paginationInfo.setTotalRecordCount((Integer)oganRcveRfService.oganRcveRfListCountSelect(oganRcveRfVO));
+		model.addAttribute("paginationInfo", paginationInfo);
+		
+		oganRcveRfVO tempVO = new oganRcveRfVO();
+		if(EgovUserDetailsHelper.getAthLev().equals("00")){
+			tempVO.setInputOganCd("");
+		} else if(EgovUserDetailsHelper.getAthLev().equals("01")){
+			tempVO.setInputOganCd(EgovUserDetailsHelper.getOganCd());
+		}
+		
+		//수신동의 총 건수
+		model.addAttribute("allCsntCount", oganRcveRfService.allCsntCountSelect(tempVO));
+		
+		//수신거부 총 건수
+		model.addAttribute("allRfslCount", oganRcveRfService.allRfslCountSelect(tempVO));
+		
+		return "acmdCerf/oganRcveRfMgnt";
+	}
+	
+	//발송예외 조회
+	@ResponseBody
+	@RequestMapping(value = "/sndnExecSelect.ajax")
+	public Map sndnExecSelect(@ModelAttribute("oganRcveRfVO") oganRcveRfVO oganRcveRfVO) {
+		log.debug("/acmdCerf/sndnExecSelect - sndnExecSelect");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		List<oganRcveRfVO> sndnExecList = oganRcveRfService.sndnExecSelect(oganRcveRfVO);
+		
+		String errorMessage ="";
+
+		resultMap.put("sndnExecList", sndnExecList);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//발송예외 수정
+	@ResponseBody
+	@RequestMapping(value = "/sndnExecUpdate.ajax")
+	public Map sndnExecUpdate(@ModelAttribute("oganRcveRfVO") oganRcveRfVO oganRcveRfVO) {
+		log.debug("/acmdCerf/sndnExecUpdate - sndnExecUpdate");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		oganRcveRfVO.setExecIStDt(commUtil.dateToText(oganRcveRfVO.getExecIStDt()));
+		oganRcveRfVO.setExecIClosDt(commUtil.dateToText(oganRcveRfVO.getExecIClosDt()));
+		oganRcveRfVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		oganRcveRfVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		oganRcveRfVO.setExecIHisSeq(Integer.toString(oganRcveRfService.getHisSeq(oganRcveRfVO)));
+
+		String errorMessage ="";
+		errorMessage= oganRcveRfService.sndnExecUpdate(oganRcveRfVO);
+			
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//발송예외 등록
+	@ResponseBody
+	@RequestMapping(value = "/sndnExecInsert.ajax")
+	public Map sndnExecInsert(@ModelAttribute("oganRcveRfVO") oganRcveRfVO oganRcveRfVO) {
+		log.debug("/acmdCerf/sndnExecInsert - sndnExecInsert");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		oganRcveRfVO.setExecIStDt(commUtil.dateToText(oganRcveRfVO.getExecIStDt()));
+		oganRcveRfVO.setExecIClosDt(commUtil.dateToText(oganRcveRfVO.getExecIClosDt()));
+		oganRcveRfVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		oganRcveRfVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		oganRcveRfVO.setExecIPk(Integer.toString(oganRcveRfService.getMaxPk(oganRcveRfVO)));
+		oganRcveRfVO.setExecIHisSeq(Integer.toString(oganRcveRfService.getHisSeq(oganRcveRfVO)));
+		
+		String errorMessage ="";
+		errorMessage = oganRcveRfService.sndnExecInsert(oganRcveRfVO); //마스터 테이블 인서트
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.commCode.dao.commCdMgntDao">
+                   
+
+  <select id="selectOne" parameterType="commCdMgntVO" resultType="commCdMgntVO">
+   SELECT TEST  as cfcd
+   , TEST1 as cfcdNm
+      FROM tpost.TESTTABLE
+  </select>
+  
+  <select id="selectList" parameterType="commCdMgntVO" resultType="commCdMgntVO">
+    SELECT CFCD  AS cfcd
+     , CFCD_NM   AS cfcdNm
+     , CFCD_DESC AS cfcdDesc
+     , CRT_DATE  AS cfcdDate
+     , MDF_DATE  AS mdfDate
+     , CRTR      AS crtr
+     , AMDR      AS amdr
+    FROM  tpost.TB_BZNS_CD
+   WHERE CFCD LIKE  #{cfcd} || '%' 
+  </select>
+  
+  <!-- 페이징 테스트 st -->
+  <select id="selectList_page" parameterType="commCdMgntVO" resultType="commCdMgntVO">
+    SELECT
+		 CFCD     		AS cfcd
+		,CFCD_NM		AS cfcdNm
+		,CFCD_DESC      AS cfcdDesc
+		, RNUM          AS rn
+  FROM (
+		SELECT 
+			CFCD
+			,CFCD_NM
+			,CFCD_DESC
+			,@rownum := @rownum+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */
+		  FROM tpost.TB_BZNS_CD, (SELECT @rownum :=0) AS R
+		  WHERE CFCD LIKE  '%' || #{cfcd} || '%'
+		  ORDER BY CFCD 
+  		) A
+ 	WHERE RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex} 
+  </select>
+  
+  <!-- 페이징 테스트 st -->
+  <select id="selectList_page1" parameterType="commCdMgntVO" resultType="commCdMgntVO">
+    SELECT
+		 CFCD     		AS cfcd
+		,CFCD_NM		AS cfcdNm
+		,CFCD_DESC      AS cfcdDesc
+		, RNUM          AS rn
+  FROM (
+		SELECT 
+			CFCD
+			,CFCD_NM
+			,CFCD_DESC
+			,@rownum := @rownum+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */
+		  FROM tpost.TEST, (SELECT @rownum :=0) AS R
+		  WHERE CFCD LIKE  '%' || #{cfcd} || '%'
+		  ORDER BY CFCD 
+  		) A
+ 	WHERE RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex} 
+  </select>
+  
+  <select id="selectList_cnt1" parameterType="commCdMgntVO" resultType="int">
+    SELECT 
+			count(*)
+    FROM  tpost.TEST
+   WHERE CFCD LIKE  '%' || #{cfcd} || '%' 
+  </select>
+<!-- 페이징 테스트 ed -->
+
+
+	<update  id="insert1" parameterType="commCdMgntVO">
+INSERT INTO tpost.TB_BZNS_CD
+	VALUES (
+	#{cfcd}
+	, #{cfcdNm}
+	, #{cfcdDesc}
+	, now()
+	, now()
+	, 'TEST'
+	, 'TEST'
+	)
+	</update>
+
+</mapper>
+
+

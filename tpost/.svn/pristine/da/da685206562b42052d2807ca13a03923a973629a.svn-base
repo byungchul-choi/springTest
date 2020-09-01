@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd 
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util 
+					       http://www.springframework.org/schema/util/spring-util-3.2.xsd
+                           ">
+
+<!--   <context:property-placeholder location="classpath:database.properties"/> -->
+<!-- <util:properties id="config" location="classpath:config/properties/${spring.profiles.active}.properties"/> -->
+
+  <!-- 1. dataSource 설정  -->
+<!--   <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> -->
+<!--      <property name="driverClassName" value="${db.driverClassName}"/>   -->
+<!--     <property name="url" value="${db.url}"/>   -->
+<!--     <property name="username" value="${db.name}"/> -->
+<!--     <property name="password" value="${db.password}"/> -->
+<!--   </bean> -->
+
+
+	<beans profile="poc">
+		<context:property-placeholder location="classpath:poc_database.properties"/>
+        <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> 
+	     <property name="driverClassName" value="${db.driverClassName}"/>  
+	    <property name="url" value="${db.url}"/>  
+	    <property name="username" value="${db.name}"/>
+	    <property name="password" value="${db.password}"/>
+	  </bean>
+  
+	  <!-- MyBatis-Spring SqlSessionFactoryBean 설정 -->
+	  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>
+	    <property name="configLocation" value="classpath:config/sql-map-config.xml"/>
+	    <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+	  </bean>
+	  
+	  <!-- MyBatis-Spring SqlSessionTemplate 설정-->
+		  <bean id="template" class="org.mybatis.spring.SqlSessionTemplate">
+		    <constructor-arg ref="sqlSessionFactoryBean"/>
+		  </bean>
+		  
+	    <util:properties id="properties" location="classpath:poc_database.properties"/>
+
+    </beans>
+    
+    
+	<beans profile="dev">
+    	<context:property-placeholder location="classpath:dev_database.properties"/>  
+        <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> 
+ 		<property name="driverClassName" value="${db.driverClassName}"/>  
+	    <property name="url" value="${db.url}"/>  
+	    <property name="username" value="${db.name}"/>
+	    <property name="password" value="${db.password}"/>
+	  </bean>
+  
+	  <!-- MyBatis-Spring SqlSessionFactoryBean 설정 -->
+	  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>
+	    <property name="configLocation" value="classpath:config/sql-map-config.xml"/>
+	    <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+	  </bean>
+  
+  	<!-- MyBatis-Spring SqlSessionTemplate 설정-->
+	  <bean id="template" class="org.mybatis.spring.SqlSessionTemplate">
+	    <constructor-arg ref="sqlSessionFactoryBean"/>
+	  </bean>
+	    <util:properties id="properties" location="classpath:dev_database.properties"/>
+    
+    </beans>
+
+
+
+	<beans profile="stage">
+       <context:property-placeholder location="classpath:stage_database.properties"/>  
+        <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> 
+ 		<property name="driverClassName" value="${db.driverClassName}"/>  
+	    <property name="url" value="${db.url}"/>  
+	    <property name="username" value="${db.name}"/>
+	    <property name="password" value="${db.password}"/>
+	  </bean>
+  
+	  <!-- MyBatis-Spring SqlSessionFactoryBean 설정 -->
+	  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>
+	    <property name="configLocation" value="classpath:config/sql-map-config.xml"/>
+	    <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+	  </bean>
+	  
+	  <!-- MyBatis-Spring SqlSessionTemplate 설정-->
+	  <bean id="template" class="org.mybatis.spring.SqlSessionTemplate">
+	    <constructor-arg ref="sqlSessionFactoryBean"/>
+	  </bean>
+    
+	    <util:properties id="properties" location="classpath:stage_database.properties"/>
+    </beans>
+
+	<beans profile="prod">
+       <context:property-placeholder location="classpath:prod_database.properties"/>  
+        <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"> 
+ 		<property name="driverClassName" value="${db.driverClassName}"/>  
+	    <property name="url" value="${db.url}"/>  
+	    <property name="username" value="${db.name}"/>
+	    <property name="password" value="${db.password}"/>
+	  </bean>
+  
+	  <!-- MyBatis-Spring SqlSessionFactoryBean 설정 -->
+	  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>
+	    <property name="configLocation" value="classpath:config/sql-map-config.xml"/>
+	    <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+	  </bean>
+	  
+	  <!-- MyBatis-Spring SqlSessionTemplate 설정-->
+	  <bean id="template" class="org.mybatis.spring.SqlSessionTemplate">
+	    <constructor-arg ref="sqlSessionFactoryBean"/>
+	  </bean>
+    
+		<util:properties id="properties" location="classpath:prod_database.properties"/>
+    </beans>
+
+</beans>

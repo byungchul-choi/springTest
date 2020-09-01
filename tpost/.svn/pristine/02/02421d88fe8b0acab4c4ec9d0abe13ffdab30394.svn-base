@@ -1,0 +1,421 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui" %>  <!-- 전자정부태그라이브러리 -->
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>  <!-- jstl펑션 -->
+
+<!doctype html>
+<html lang="ko">
+
+<head>
+	<meta charset="UTF-8">
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="viewport"
+		content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+	<meta http-equiv="content-Script-type" content="text/javascript">
+	<meta http-equiv="content-Style-type" content="text/css">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>공공알림문자 서비스</title>
+	<!-- CSS  STYLE -->
+	<link rel="stylesheet" href="/tpost/resource/css/common.css">
+	<style>
+		#onesCtif .layer {height:440px; width:700px;}
+		#popuRdngList .layer {width:650px;}
+	</style>
+	<!-- ---------- -->
+	<!--     JS     -->
+	<script src="/tpost/resource/js/jquery.min.js"></script>
+	<script src="/tpost/resource/js/jquery-migrate-1.2.1.min.js"></script>
+	<script src="/tpost/resource/js/jquery-ui.min.js"></script>
+	<script src="/tpost/resource/js/comm.js"></script>
+	<!-- ---------- -->
+	<script type="text/javascript">
+	 	$('document').ready(function(){	
+	 		commCd_bas('inputIssCls', '00007');
+	 		commCd_bas('inputOganCd', '00001');
+	 		commCd_bas('tscoCd', '00008');
+	 		
+	 		changeTmpltList();
+	    	
+	    	if($("#inputRcveStDt").val() == "" && $("#inputRcveClosDt").val() == "") {
+	    		getYYYYMMFirstDay('inputRcveStDt');
+				getYYYYMMLastDay('inputRcveClosDt');
+	    	}
+	    	
+	    	datepicker();
+	    	
+	    	if($('#ciNum').val() == "" || $('#ciNum').val() == null){
+	 			jQuery("#onesCtif").show();
+	 		}
+	    })
+	    
+	     function enterSerch(){
+	    	if(window.event.keyCode == 13){
+	    		guAcmdCerfListSelect();
+	    	}
+	    }
+	    
+	    function selectMale(){
+			$('#sexCls').val('1');
+			document.getElementById("male").className="state-highlight";
+			document.getElementById("female").className="";
+			
+		}
+		function selectFemale(){
+			$('#sexCls').val('2');
+
+			document.getElementById("male").className="";
+			document.getElementById("female").className="state-highlight";
+		}
+	    
+	    //기관코드에 따른 템플릿 명
+		function changeTmpltList(){
+			var oganCd = document.getElementById("inputOganCd");
+			tmpltCd_bas('inputTmpltCd', oganCd.options[oganCd.options.selectedIndex].value);
+		}
+	 	
+	    //본인인증
+	    function onesCtifCheck(){
+	    	var parameters = {
+	    			name 		: $('#name').val(),
+	    			brdt		: $('#brdt').val(),
+					sexCls		: $('#sexCls').val()
+	    	}
+	    	
+	    	$.ajax({
+	    		type : "post",
+				dataType : "json",
+				async : false,
+				url : "onesCtifCheck.ajax",
+				data : parameters,
+				success : function(data) {
+					if(data.result == "Y"){
+						$('#ciNum').val(data.ciNum);
+						guAcmdCerfListSelect();
+						closePopu();
+					}
+					else{
+						alert("본인확인에 실패하였습니다.");
+					}
+				},
+				complete : function(data) {
+				}
+	    	});
+	    }
+	    
+	    function guAcmdCerfListSelect(){
+			$('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+			
+			var guAcmdCerfListForm = document.getElementById("guAcmdCerfMgnt");
+			guAcmdCerfListForm.action = "guAcmdCerfListSelect";
+			guAcmdCerfListForm.method = "post";
+			guAcmdCerfListForm.submit();
+	    }
+	    
+	  	//다음페이지
+		function linkPage(pageNo){
+			if(pageIndex == ""){
+				pageIndex = 1;
+			}
+				  
+			$('#pageIndex').val(pageNo);
+				
+			var guAcmdCerfListForm = document.getElementById("guAcmdCerfMgnt");
+			guAcmdCerfListForm.action = "guAcmdCerfListSelect";
+			guAcmdCerfListForm.method = "post";
+			guAcmdCerfListForm.submit();
+		}
+	  	
+	  	function goPopuRdngList(sndnDate, oganCd, tmpltCd, oganNm, tmpltNm){     	
+	  		jQuery("#popuRdngList").show();
+			$("#popuRdngList .topBox").html("");
+			$("#popuRdngList .empty-pnl").html("");
+			$("#popuRdngList #rdngList").html("");
+			
+			var inner = '';
+			inner += '<h3>' + sndnDate + ' ' + oganNm + '(' + tmpltNm + ')' + ' 열람일시 이력</h3>';
+			inner += '<a class="close" onclick="closePopu()">&#10005;</a>';
+			$("#popuRdngList .topBox").append(inner);
+			
+			inner = '';
+			inner += '<em>0 건</em>';
+			$("#popuRdngList .empty-pnl").append(inner);
+	  		
+	  		var parameters = {
+	  				sndnDate : sndnDate,
+	  				oganCd : oganCd,
+	  				tmpltCd : tmpltCd,
+	  				ciNum : $('#ciNum').val(),
+	  		}
+	  		
+	  		$.ajax({
+	    		type : "post",
+				dataType : "json",
+				async : false,
+				url : "goPopuRdngList.ajax",
+				data : parameters,
+				success : function(data) {
+					if(parseInt(data.allCount) > 0){
+						$("#popuRdngList .empty-pnl").html("");
+						
+						inner = '';
+						inner += '<em>' + data.allCount + ' 건</em>';
+						$("#popuRdngList .empty-pnl").append(inner);
+	
+						inner = '';
+						for(var i = 0; i < data.allCount; i++){
+							var rdngList = data.rdngList[i];
+							
+							inner += '<tr>';
+							inner += '<td>' + rdngList.histSeq + '</td>';
+							inner += '<td>' + rdngList.rdngDate + '</td>';
+							inner += '</tr>';
+						}
+						
+						$("#popuRdngList #rdngList").append(inner);
+					}
+				},
+				complete : function(data) {
+				}
+	    	});
+	  	}
+	    
+	 	function callBack(sel_id, codeNum){
+			if(sel_id == "#inputOganCd") {
+				$(sel_id).prepend('<option value="" selected="true">전체</option>');	
+				
+				var value = '${inputOganCd}';
+				
+				if(value == "") return;
+				
+				var size = $("#inputOganCd option").size();
+				for(var i = 0; i < size; i++){
+					var selector = $("#inputOganCd option:eq("+ i +")");
+					if(selector.val() == value){
+						selector.attr("selected", "selected");
+					}
+				}
+				
+			}
+			
+			if(sel_id == "#inputTmpltCd") {
+				var value = '${inputTmpltCd}';
+		
+				if(value == "") return;
+				
+				var size = $("#inputTmpltCd option").size();
+				for(var i = 0; i < size; i++){
+					var selector = $("#inputTmpltCd option:eq("+ i +")");
+					if(selector.val() == parseInt(value)){
+						selector.attr("selected", "selected");
+					}
+				}
+			}
+		}
+	    
+		//팝업 닫기
+	    function closePopu(){
+	    	jQuery(".layerBox").hide();
+	    }
+	</script>
+</head>
+
+<body>
+<form id="guAcmdCerfMgnt">
+<input type="hidden" id="pageIndex" name="pageIndex" value="${pageIndex}"/> 
+<input type="hidden" id="sexCls" name="sexCls" value="1">
+<input type="hidden" id="ciNum" name="ciNum" value="${ciNum}">
+<!-- wrap -->
+    <div id="wrap">
+        <!-- contents -->
+        <div id="contents">
+            <!-- section -->
+            <div class="section">
+                <!-- caption-pnl -->
+                <div class="caption-pnl">
+                    <h2>증명서 보관함</h2>
+                </div>
+                <!-- //caption-pnl -->
+                <!-- search-pnl -->
+                <div class="search-pnl">
+                    <table>
+                        <colgroup>
+                            <col width="140px" />
+                            <col width="*" />
+                            <col width="140px" />
+                            <col width="200px" />
+                            <col width="140px" />
+                            <col width="*" />
+                            <col width="30px" />
+                            <col width="200px" />
+                        </colgroup>
+                        <tr>
+                            <th>수신일자</th>
+                            <td><input type="text" size="13" class="dateinput" id="inputRcveStDt" name="inputRcveStDt" value="${inputRcveStDt}" onkeypress="dateFormat(this)" onKeyDown="enterSerch()"> ~ <input type="text" size="13" class="dateinput" id="inputRcveClosDt" name="inputRcveClosDt" value="${inputRcveClosDt}" onkeypress="dateFormat(this)" onKeyDown="enterSerch()"></td>
+                            <th>기관명</th>
+                            <td><select id="inputOganCd" name="inputOganCd" onchange="changeTmpltList()"></select></td>
+                            <th></th>
+                            <td></td>
+                            <td></td>
+                            <td class="buttonset"><button type="button" onclick="guAcmdCerfListSelect()">조회</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- //search-pnl -->
+                <!-- grid-pnl -->
+                <div class="grid-pnl">
+                    <!-- table -->
+                    <table class="align-center">
+                        <colgroup>
+                            <col width="10%">
+                            <col width="15%">
+                            <col width="*">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="8%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">수신일자</th>
+                                <th scope="col">기관명</th>
+                                <th scope="col">고지(안내)서</th>
+                                <th scope="col">열람이력</th>
+                                <th scope="col">유통증명서신청</th>
+                                <th scope="col">신청일자</th>
+                                <th scope="col">발급구분</th>
+                                <th scope="col">다운로드</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	<c:forEach var="guAcmdCerfList" items="${guAcmdCerfList}">
+                        	<tr>
+				         	<td>${guAcmdCerfList.sndnDate}</td>
+				         	<td>${guAcmdCerfList.oganNm}</td>
+				         	<td>${guAcmdCerfList.tmpltNm}</td>
+				         	<td><button type="button" onclick="goPopuRdngList('${guAcmdCerfList.sndnDate}','${guAcmdCerfList.oganCd}','${guAcmdCerfList.tmpltCd}','${guAcmdCerfList.oganNm}','${guAcmdCerfList.tmpltNm}')">이력조회</button></td>
+				         	<c:if test="${guAcmdCerfList.apctYn.equals('Y')}">
+					         	<td></td>
+					         	<td>${guAcmdCerfList.apctDate}</td>
+					         	<td>${guAcmdCerfList.issCls}</td>
+					         	<td>${guAcmdCerfList.dwldUrl}</td>
+				         	</c:if>
+				         	<c:if test="${guAcmdCerfList.apctYn.equals('N')}">
+					         	<td><button type="button">신청</button></td>
+					         	<td></td>
+					         	<td></td>
+					         	<td></td>
+				         	</c:if>
+				         	<tr>
+				         	</c:forEach>
+                        </tbody>
+                    </table>
+                    <!-- //table -->
+                </div>
+                <!-- //grid-pnl -->
+            </div>
+            <!--// section -->
+            <!-- paging -->
+			<div class="paging">
+				<c:if test="${fn:length(guAcmdCerfList) ne 0 }">  
+					<ul>
+						<ui:pagination paginationInfo="${paginationInfo}" type="text" jsFunction="linkPage" />
+					</ul>
+				</c:if>
+			</div>
+			<!-- //paging -->
+        </div>
+        <!-- //contents -->
+    </div>
+
+    <!-- //wrap -->
+    <div id="onesCtif" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>본인인증</h3>
+			</div>
+			
+			<div class="contBox">
+				<div class="section">
+					<div class="table-pnl">
+                		<!-- table -->
+                		<table>
+						<colgroup><col width="175px"><col width="100px"><col width="*"></colgroup>
+                    	<tbody id ="acmdCerfInsPopuTbody"><tr>
+                        	<th>성명</th>
+                            <td colspan="2"><input type="text" id="name" name="name"></td>
+                        </tr>
+						<tr>
+                        	<th>생년월일</th>
+							<td colspan="2"><input type="text" maxlength="8" oninput="_maxLengthCheck(this)" placeholder="생년월일8자리(19800101)" id="brdt" name="brdt"></td>
+                        </tr>
+						<tr>
+                        	<th>성별</th>
+							<td colspan="2">
+								<button type="button" class="state-highlight" onclick="selectMale()" id="male" name="male">남성</button>
+								<button type="button" onclick="selectFemale()" id="female" name="female">여성</button>
+							</td>
+                        </tr>
+						<tr>
+                        	<th>전화번호</th>
+							<td><select id="tscoCd" name="tscoCd"></select></td>
+							<td><input size="28" type="text" maxlength="11" oninput="_maxLengthCheck(this)" id="phoneNum" name="phoneNum"><button type="button" class="state-submit">인증번호</button></td>
+                        </tr>
+						<tr>
+                        	<th>인증번호</th>
+							<td colspan="2"><input type="number" onkeypress="onlyNumber()" id="ctifNum" name="ctifNum"><button type="button" class="state-submit" onclick="onesCtifCheck()">확인</button></td>
+                        </tr>
+						</tbody>
+						</table>
+                    	<!-- //table -->
+                	</div>
+			</div>
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<div id="popuRdngList" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<div class="empty-pnl"></div>
+
+					<div class="grid-pnl" style="overflow-x:hidden; overflow-y:auto; height:300px;">
+						<!-- table -->
+						<table class="align-center">
+							<colgroup>
+								<col width="20%">
+								<col width="*">
+							</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">순번</th>
+								<th scope="col">열람일시</th>
+							</tr>
+						</thead>
+						<tbody id="rdngList">
+						</tbody>
+						</table>
+						<!-- //table -->
+					</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit" onclick="closePopu()">닫기</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			</div>
+			<!-- //contBox -->
+		</div>
+	<div class="fade"></div>
+	</div>
+</form>
+</body>
+</html>

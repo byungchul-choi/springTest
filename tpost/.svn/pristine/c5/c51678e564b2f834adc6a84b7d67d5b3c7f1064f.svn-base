@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.sttc.dao.sttcInfoDao">   
+<select id="sttcInfoSelect" parameterType="tpost.sttc.vo.sttcInfoVO" resultType="tpost.sttc.vo.sttcInfoVO">
+/*통계정보 본문자 합 춰리*/
+select /* sttcInfoSelect */ 
+       SUM(SUCC_CNT +  FAIL_CNT) AS allSndnCnt  /*전체발송건수*/ 
+     , SUM(SUCC_CNT )            AS allSuccCnt     /*성공건수*/ 
+     , SUM(FAIL_CNT )            AS allFailCnt     /*실패건수*/
+     , ROUND( SUM(SUCC_CNT ) / SUM(SUCC_CNT +  FAIL_CNT) * 100 , 2) AS  allSuccRate /*성공률*/
+     , SUM(RDNG_CNT )            AS allRdngCnt /*열람건수*/
+     , ROUND( SUM(RDNG_CNT ) / SUM(SUCC_CNT) * 100  , 2) AS allRdngRate /* 열람성공률*/  
+from tpost.TB_STTC_INFO A
+WHERE A.OGAN_CD = #{oganCd}
+ AND A.TMPLT_CD  LIKE CONCAT('%', #{tmpltCd}, '%') 
+ AND A.TRANS_DT BETWEEN #{inputIssStDt} AND #{inputIssClosDt}  
+group by A.OGAN_CD 
+</select>
+
+<select id="sttcInfoDetlSelect" parameterType="tpost.sttc.vo.sttcInfoVO" resultType="tpost.sttc.vo.sttcInfoVO">
+/*통계정보 - 본문자 밑에것 */
+select /* sttcInfoDetlSelect */ 
+       A.OGAN_CD                         AS oganCd
+     , A.TMPLT_CD                        AS tmpltCd
+     , A.TRANS_DT                        AS transDt
+     , SUM(SUCC_CNT +  FAIL_CNT)         AS sndnCnt  /*전체발송건수*/ 
+     , SUM(SUCC_CNT )                    AS succCnt     /*성공건수*/ 
+     , SUM(FAIL_CNT )                    AS failCnt     /*실패건수*/
+     , ROUND( SUM(SUCC_CNT ) / SUM(SUCC_CNT +  FAIL_CNT) * 100 , 2)  AS  succRate /*성공률*/
+     , SUM(RDNG_CNT )                    AS rdngCnt /*열람건수*/
+     , ROUND( SUM(RDNG_CNT ) / SUM(SUCC_CNT) * 100  , 2)             AS rdngRate /* 열람성공률*/   
+from tpost.TB_STTC_INFO A
+WHERE 1=1 
+ AND  A.OGAN_CD = #{oganCd}
+ AND A.TMPLT_CD  LIKE CONCAT('%', #{tmpltCd}, '%') 
+ AND A.TRANS_DT BETWEEN #{inputIssStDt} AND #{inputIssClosDt}  
+group by A.OGAN_CD, A.TMPLT_CD , A.TRANS_DT 
+</select>
+
+
+
+</mapper>

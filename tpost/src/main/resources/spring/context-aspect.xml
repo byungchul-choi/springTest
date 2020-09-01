@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	
+	<!--인증된 유저의 LoginVO, 권한, 인증 여부를 확인 할 수있는 서비스 클래스-->
+    <bean id="egovUserDetailsHelper" class="egov.egovcomm.EgovUserDetailsHelper">
+        <property name="egovUserDetailsService">
+            <ref bean="egovUserDetailsSessionService" />
+        </property>
+    </bean>
+
+    <!-- 세션을 이용한 인증을 사용하는 빈 -->
+    <bean id="egovUserDetailsSessionService" class="egov.egovcomm.service.impl.EgovUserSessionServiceImpl"/>
+	
+</beans>

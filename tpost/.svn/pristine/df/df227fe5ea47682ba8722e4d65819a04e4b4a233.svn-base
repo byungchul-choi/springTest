@@ -1,0 +1,46 @@
+package tpost.batch.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import tpost.batch.service.elctDocSnrcService;
+import tpost.commCode.controller.commCdMgntController;
+import tpost.commUtil.commUtil;
+import tpost.batch.vo.elctDocSnrcVO;
+
+@Component
+@Controller
+@RequestMapping(value = "/batch/elctDocSnrcController")
+public class elctDocSnrcController {
+
+	@Autowired
+	elctDocSnrcService elctDocSnrcService;
+	
+	/* 로그설정 */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@ResponseBody
+	@RequestMapping(value="/elctDocSnrcMgnt")
+	public Map elctDocSnrcMgnt(Model model , @ModelAttribute elctDocSnrcVO elctDocSnrcVO) {
+		log.debug("elctDocSnrcController - elctDocSnrcMgnt");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		if(elctDocSnrcVO.getSndnDate() == null || elctDocSnrcVO.getSndnDate().equals("")) {
+			elctDocSnrcVO.setSndnDate(commUtil.getYesterday());
+		}
+		
+		elctDocSnrcService.elctDocSnrcMgnt(elctDocSnrcVO);
+		
+		return resultMap;
+	}
+}

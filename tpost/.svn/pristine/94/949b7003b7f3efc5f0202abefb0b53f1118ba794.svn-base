@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.acmdCerf.dao.ofapElctAddrDao">   
+<select id="ofapElctAddrListSelect" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO" resultType="tpost.acmdCerf.vo.ofapElctAddrVO">
+SELECT /* ofapElctAddrListSelect */
+	pk
+	,name 													AS name
+	,ofapElctAddr 											AS ofapElctAddr
+	,ciNum 													AS ciNum
+	,tpost.FN_GET_BASCD_NM('00006',A.bsrpCls)				AS bsrpCls
+	,regnYn													AS regnYn
+	,issDate												AS issDate
+	,apctDate 												AS apctDate
+	,regnDate 												AS regnDate
+	,clacDate												AS clacDate
+	,RNUM 													AS rn
+FROM (
+	SELECT
+		OFAP_ELCT_ADDR_PK 		AS pk 
+		,NAME 					AS name
+		,IF(BSRP_CLS = '100', CONCAT(SUBSTR(OFAP_ELCT_ADDR,1,3), '-', SUBSTR(OFAP_ELCT_ADDR,4,2), '-', SUBSTR(OFAP_ELCT_ADDR,6,8))
+							, CONCAT(SUBSTR(OFAP_ELCT_ADDR,1,3), '-', SUBSTR(OFAP_ELCT_ADDR,4,3), '-', SUBSTR(OFAP_ELCT_ADDR,7,2), '-', SUBSTR(OFAP_ELCT_ADDR,9,5)))  		AS ofapElctAddr
+		,CI_NUM 				AS ciNum
+		,BSRP_CLS 				AS bsrpCls
+		,REGN_YN 				AS regnYn
+		,DATE_FORMAT(STR_TO_DATE(ISS_DATE, '%Y%m%d%s'), '%Y-%m-%d')					AS issDate
+		,DATE_FORMAT(STR_TO_DATE(APCT_DATE, '%Y%m%d%s'), '%Y-%m-%d')				AS apctDate
+		,DATE_FORMAT(STR_TO_DATE(REGN_DATE, '%Y%m%d%s'), '%Y-%m-%d') 				AS regnDate
+		,DATE_FORMAT(STR_TO_DATE(CLAC_DATE, '%Y%m%d%s'), '%Y-%m-%d')				AS clacDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM 
+		tpost.TB_OFAP_ELCT_ADDR
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		ISS_DATE BETWEEN #{inputIssStDt} AND #{inputIssClosDt}
+	<if test="!inputBsrpCls.equals('')">
+	AND BSRP_CLS = #{inputBsrpCls}
+	</if>
+	<if test="!inputRegnYn.equals('')">
+	AND REGN_YN = #{inputRegnYn}
+	</if>
+	<if test="!inputName.equals('')">
+	AND NAME LIKE CONCAT('%', #{inputName}, '%') 
+	</if>
+	<if test="!inputOfapElctAddr.equals('')">
+	AND OFAP_ELCT_ADDR LIKE CONCAT('%', #{inputOfapElctAddr}, '%') 
+	</if>
+	<if test="!inputCiNum.equals('')">
+	AND CI_NUM LIKE CONCAT('%', #{inputCiNum}, '%')
+	</if> 
+	ORDER BY ISS_DATE *-1, OFAP_ELCT_ADDR *-1
+) A
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+
+</select>
+<select id="ofapElctAddrListCountSelect" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO" resultType="java.lang.Integer">
+SELECT /* ofapElctAddrListCountSelect */
+	COUNT(pk)
+FROM(
+	SELECT 
+		OFAP_ELCT_ADDR_PK 				AS pk
+	FROM 
+		tpost.TB_OFAP_ELCT_ADDR	
+	WHERE
+		ISS_DATE BETWEEN #{inputIssStDt} AND #{inputIssClosDt}
+	<if test="!inputBsrpCls.equals('')">
+	AND BSRP_CLS = #{inputBsrpCls}
+	</if>
+	<if test="!inputRegnYn.equals('')">
+	AND REGN_YN = #{inputRegnYn}
+	</if>
+	<if test="!inputName.equals('')">
+	AND NAME LIKE CONCAT('%', #{inputName}, '%') 
+	</if>
+	<if test="!inputOfapElctAddr.equals('')">
+	AND OFAP_ELCT_ADDR LIKE CONCAT('%', #{inputOfapElctAddr}, '%') 
+	</if>
+	<if test="!inputCiNum.equals('')">
+	AND CI_NUM LIKE CONCAT('%', #{inputCiNum}, '%')
+	</if> 
+) A
+</select>
+<update id="ofapElctAddrClacUpdate" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO">
+UPDATE /* ofapElctAddrClacUpdate */
+	tpost.TB_OFAP_ELCT_ADDR
+SET 
+	REGN_YN = 'N'
+	,CLAC_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE OFAP_ELCT_ADDR_PK = #{inputPk}
+</update>
+<insert id="ofapElctAddrHisClacInsert" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO">
+INSERT /* ofapElctAddrHisClacInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR_HIS (
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,APCT_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+SELECT 
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,APCT_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR 
+WHERE 
+	OFAP_ELCT_ADDR_PK = #{inputPk}
+</insert>
+<insert id="ofapElctAddrListInsert" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO">
+INSERT /* ofapElctAddrListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR (
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+(
+	#{pk}
+	,#{popuName}
+	,#{popuOfapElctAddr}
+	,#{popuCiNum}
+	,#{popuBsrpCls}
+	,'Y'
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+)
+</insert>
+<insert id="ofapElctAddrHisListInsert" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO">
+INSERT /* ofapElctAddrHisListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR_HIS (
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,APCT_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+SELECT 
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,APCT_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR 
+WHERE 
+	OFAP_ELCT_ADDR_PK = #{pk}
+</insert>
+<select id="ofapElctAddrDupCheck_Select" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO" resultType="tpost.acmdCerf.vo.ofapElctAddrVO">
+SELECT /* ofapElctAddrDupCheck_Select */
+	IFNULL(MAX(OFAP_ELCT_ADDR), '') 		AS ofapElctAddr
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR 
+WHERE  
+	CI_NUM = #{inputCiNum}
+AND NAME = #{inputName}
+</select>
+<update id="ofapElctAddrDupUpdate" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO">
+UPDATE /* ofapElctAddrDupUpdate */
+	tpost.TB_OFAP_ELCT_ADDR
+SET
+	NAME = #{popuName}
+	,OFAP_ELCT_ADDR = #{popuOfapElctAddr}
+	,CI_NUM = #{popuCiNum}
+	,BSRP_CLS = #{popuBsrpCls}
+	,REGN_YN = 'Y'
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE
+	OFAP_ELCT_ADDR_PK = #{inputPk}
+</update>
+<select id="ofapElctAddrCheckSelect" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO" resultType="tpost.acmdCerf.vo.ofapElctAddrVO">
+SELECT /* ofapElctAddrCheckSelect */
+	NAME as name
+	,OFAP_ELCT_ADDR as ofapElctAddr
+	,REGN_YN as regnYn
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR
+WHERE
+	CI_NUM = #{inputCiNum}
+AND NAME = #{inputName}
+</select>
+<select id="getMaxPk" resultType="java.lang.Integer">
+SELECT /* getMaxPk */
+	MAX(OFAP_ELCT_ADDR_PK) + 1 AS pk
+FROM tpost.TB_OFAP_ELCT_ADDR
+</select>
+<select id="getOfapElctAddr" parameterType="tpost.acmdCerf.vo.ofapElctAddrVO" resultType="java.lang.String">
+SELECT /* getOfapElctAddr */
+	CONCAT(#{popuRnrsCls},SUBSTR(DATE_FORMAT(NOW(), '%Y'), '3', '2'),LPAD(IFNULL( MAX(AA.SEQ) , 0) +1, '8', '0')) AS  ofapElctAddr
+FROM (
+	SELECT 
+		SUBSTR( OFAP_ELCT_ADDR , 1,  3) AS inputRnrsCls
+		,SUBSTR( OFAP_ELCT_ADDR , 4,  2) AS YE
+		,SUBSTR( OFAP_ELCT_ADDR , 6,  8) AS SEQ
+	FROM 
+		tpost.TB_OFAP_ELCT_ADDR
+	) AA
+WHERE AA.inputRnrsCls = #{popuRnrsCls}	 
+AND AA.YE = SUBSTR(DATE_FORMAT(NOW(), '%Y'), '3', '2') 
+</select>
+</mapper>

@@ -1,0 +1,22 @@
+package tpost.restTestSever;
+
+import org.springframework.stereotype.Controller;
+
+
+
+@Controller
+public class restTestServerVO {
+
+	private String result  =""    ;
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
+	}
+	
+	 
+	
+}

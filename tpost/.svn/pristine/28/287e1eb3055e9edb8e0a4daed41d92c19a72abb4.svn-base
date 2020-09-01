@@ -1,0 +1,218 @@
+//package tpost.batch.service;
+//
+//import java.util.ArrayList;
+//import java.util.Calendar;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//import javax.transaction.Transactional;
+//
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//
+//import tpost.acmdCerf.vo.ofapElctAddrVO;
+//import tpost.batch.dao.fileTestDao;
+//import tpost.batch.vo.fileTestVO;
+//import tpost.batch.vo.tbMoblSndnMsgVO;
+//import tpost.commCode.controller.commCdMgntController;
+//import tpost.common.vo.aoMgntVO;
+//
+//import tpost.commUtil.commUtil;
+
+//@Service
+//public class fileTestService {
+//
+//  @Autowired
+//  fileTestDao	 dao;
+//  
+//  Logger log = (Logger) LogManager.getLogger(fileTestService.class);
+//
+//  	@Transactional
+//  	public void fileTestInsert(List<fileTestVO> arrayFileTestVO){
+//  		 
+//	     dao.fileTestInsert(arrayFileTestVO);
+//	     
+//	  }
+//  	
+//	public void fileTestSelectInsert(fileTestVO fileTestVO) {
+//		// TODO Auto-generated method stub
+//		dao.fileTestSelectInsert(fileTestVO);
+//	}
+//	
+//	public void tbBatchFileUpldTempTruncate(fileTestVO fileTestVO) {
+//		// TODO Auto-generated method stub
+//		dao.tbBatchFileUpldTempTruncate(fileTestVO);
+//	}
+//
+//
+//
+//	public List<fileTestVO> fileTestTempSel(fileTestVO fileTestVO_tempSel) {
+//		// TODO Auto-generated method stub
+//		return dao.fileTestTempSel(fileTestVO_tempSel);
+//	}
+//
+//
+//	public void fileTestInsert_fail(fileTestVO retStr) {
+//		// TODO Auto-generated method stub
+//		dao.Chk_fileTestSelectInsert_Fail(retStr);
+//	}
+//
+//
+//
+//	public void tbMoblSndnMsg_upload(fileTestVO fileTestVO) {
+//		// TODO Auto-generated method stub
+////		dao.tbMoblSndnMsg_upload(transDt); /*한방쿼리 */
+//		 
+//		/*건바이건 인서트로 전환 이미지 생성때문*/
+//		/*step 1 발송목록 가져오기*/
+//		List<tbMoblSndnMsgVO> sendList = dao.tbMoblSndnMsgSendList(fileTestVO.getExeDt() ); 
+//		
+//		/*step 2 발송목록 가져온건에대해 이미지 경로 매핑 */
+//		String oranNm = "";
+//		for(int i = 0 ; i < sendList.size() ; i ++ ) {
+//			if("100".equals(sendList.get(i).getSvcOrgCd())) {
+//				oranNm = "nhis";
+//			}
+//
+//			/*이미지파일 만드는 부분입니다. */
+////			String chk = makeImage.makeImage(sendList.get(i).getName(), sendList.get(i).getMmsImg() , oranNm);
+//			/*
+//			if(!chk.equals("FAIL")) {
+//				sendList.get(i).setMmsImg (chk);      
+//				sendList.get(i).setMmsImgSize((long) chk.length());      
+//			}
+//			*/
+//			
+//		}
+//		
+//		
+//		/*step 3 발송목록 테이블에 insert */
+//		List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+//		for(int i = 0; i < sendList.size(); i++) {
+//			
+//			Map<String, Object> temp = new HashMap<String, Object>();
+//				
+//			temp.put("transDt"      	, sendList.get(i).getTransDt      ());
+//			temp.put("svcOrgCd"     	, sendList.get(i).getSvcOrgCd     ());
+//			temp.put("seqNo"        	, sendList.get(i).getSeqNo        ());
+//			temp.put("dataGbnCd"    	, sendList.get(i).getDataGbnCd    ());
+//			temp.put("ipinCi"       	, sendList.get(i).getIpinCi       ());
+//			temp.put("svcOrgNm"     	, sendList.get(i).getSvcOrgNm     ());
+//			temp.put("msgType"      	, sendList.get(i).getMsgType      ());
+//			temp.put("msgInfo"      	, sendList.get(i).getMsgInfo      ());
+//			temp.put("msgSize"      	, sendList.get(i).getMsgSize      ());
+//			temp.put("msgText"      	, sendList.get(i).getMsgText      ());
+//			temp.put("mmsImgSize"   	, sendList.get(i).getMmsImgSize   ());
+//			temp.put("mmsImg"       	, sendList.get(i).getMmsImg       ());
+//			temp.put("srcCallNo"    	, sendList.get(i).getSrcCallNo    ());
+//			temp.put("cnForm"          	, sendList.get(i).getCnForm       ());
+//			temp.put("msgTitle"        	, sendList.get(i).getMsgTitle     ());
+//			temp.put("balsongGbn"      	, sendList.get(i).getBalsongGbn     ());
+//			temp.put("multiMblPrcGbn"  	, sendList.get(i).getMultiMblPrcGbn ());
+//			temp.put("cellNoListSize"  	, sendList.get(i).getCellNoListSize ());
+//			temp.put("cellNoList"		, sendList.get(i).getCellNoList     ());
+//			temp.put("sndnDtm"			, sendList.get(i).getSndnDtm        ());
+//			temp.put("sndnVldDtm"		, sendList.get(i).getSndnVldDtm     ());
+//			temp.put("sndnProcCl"		, sendList.get(i).getSndnProcCl     ());
+//			temp.put("tmpltCd"			, sendList.get(i).getTmpltCd        ());
+//			temp.put("anocInfoUrl"		, sendList.get(i).getAnocInfoUrl        ());
+//			temp.put("rcveRfslUrl"		, sendList.get(i).getRcveRfslUrl        ());
+//			temp.put("ofapElctAddr"		, sendList.get(i).getOfapElctAddr        ());
+//				
+//			tempList.add(temp);
+//		
+//		}
+//		if(tempList.size() > 0) {
+//			Map<String, Object> paramMap = new HashMap<String, Object>();
+//			paramMap.put("tempList", tempList);
+//		
+//			dao.tbMoblSndnMsgtInsert(paramMap);
+//		}
+//		
+//		
+//	}
+//	
+//	
+//
+//	public void fileTestElctAddrInsert(fileTestVO fileTestVO) {
+//		// TODO Auto-generated method stub
+//		/*공인전자 주소가 없는것 가져오기*/
+//		List<fileTestVO>  ofapElctAddrList = dao.elecAddrSel(fileTestVO);
+//		
+//		java.util.Calendar cal = java.util.Calendar.getInstance();
+//		int nYear = cal.get(cal.YEAR);
+//		
+//		
+//		if( "5".equals(fileTestVO.getSexClcd()) 
+//			||	"6".equals(fileTestVO.getSexClcd())	
+//			||	"7".equals(fileTestVO.getSexClcd())
+//			||	"8".equals(fileTestVO.getSexClcd())
+//			) {
+//			fileTestVO.setBsrpCls("200");  /*외국인 */
+//		} else {
+//			fileTestVO.setBsrpCls("100");  /*내국인*/
+//		}
+//				
+//		/*공인전자 주소 max +1 가져오기*/
+//		String inputBsrpCls = fileTestVO.getBsrpCls();
+//		log.debug( "ye1 ==> " + nYear);
+//		String ye = (""+nYear).substring(2, 4);
+//		log.debug( "ye ==> " + ye);
+//		
+//		fileTestVO.setInputBsrpCls(fileTestVO.getBsrpCls());
+//		fileTestVO.setYe(ye);
+//		
+//		fileTestVO ofapElctAddr = new fileTestVO();
+//		            ofapElctAddr = dao.elecAddrInputSeq(fileTestVO);
+//		
+//		 Integer pk = Integer.parseInt(ofapElctAddr.getInputPk());
+//		 Integer inputpk = Integer.parseInt(ofapElctAddr.getInputPk());
+//		 int  inputOfapElctAddr = Integer.parseInt(ofapElctAddr.getInputOfapElctAddr());
+//		 
+//		 /*************************************************************/
+//		 /*입력데어터 생성*/
+//		 List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+//			for(int i = 0; i < ofapElctAddrList.size(); i++) {
+//				
+//					ofapElctAddrVO tempVO = new ofapElctAddrVO();
+//					 //중복된게 없을 경우
+//						Map<String, Object> temp = new HashMap<String, Object>();
+//						
+//						temp.put("inputPk", pk);
+//						temp.put("name", ofapElctAddrList.get(i).getName());
+//						temp.put("inputOfapElctAddr",  inputBsrpCls+ye+ commUtil.setLPad(""+inputOfapElctAddr, 8,"0"));
+//						
+//						log.debug("1111 " + inputBsrpCls+ye+ commUtil.setLPad(""+inputOfapElctAddr, 8,"0"));
+//						log.debug("1111 " + ye+ commUtil.setLPad(""+inputOfapElctAddr, 8,"0"));
+//						log.debug("1111 " + commUtil.setLPad(""+inputOfapElctAddr, 8,"0"));
+//						
+//						temp.put("ciNum", ofapElctAddrList.get(i).getCiNum());
+////						temp.put("bsrpCls", ofapElctAddrList.get(i).getBsrpCls()); /* 100 : 개인 200: 법인*/
+//						temp.put("crtr", "batch");
+//						temp.put("amdr", "batch");
+//						
+//						tempList.add(temp);
+//						pk++;
+//						inputOfapElctAddr++;
+//				
+//			}
+//
+//			if(tempList.size() > 0) {
+//				Map<String, Object> paramMap = new HashMap<String, Object>();
+//				paramMap.put("tempList", tempList);
+//				
+//				/*공인전자주소 입력 */
+//				  dao.ofapElctAddrListInsert_bat(paramMap);
+//				 
+//				/*공인전자 주소 이력입력  pkVO.setInputPk(pk.toString()); */
+//				  dao.ofapElctAddrHisListInsert_bat(inputpk);
+//			}
+//		
+//	}
+//
+//
+//	 
+//}

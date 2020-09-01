@@ -1,0 +1,140 @@
+package tpost.common.vo;
+
+@SuppressWarnings("serial")
+public class athGrpMgntAOVO extends athGrpMgntVO {   /*페이징 vo 확장시켜서 사용*/
+
+	
+	/*조회조건 */
+	private String aoIdSel = "";
+	private String aoNmSel = "";
+	/*권한관리 그룹 ID*/
+	private String athGrpIdLink = "";
+	
+	
+	private String athGrpInfoAoSeq       ="";
+	private String aoId       ="";
+	private String aoDesc       ="";
+	private String aoNm       ="";
+	
+	private String crtr       = "";
+	private String amdr       = "";
+
+	private String menuNm       = "";
+	private String menuId       = "";
+	
+	
+	public athGrpMgntAOVO() {
+	  }
+
+	  public athGrpMgntAOVO(
+			  			  String athGrpInfoAoSeq
+			  			, String aoId
+			         
+			            ) {
+		  this.athGrpInfoAoSeq	   = athGrpInfoAoSeq		;
+		  this.aoId	   = aoId		;
+		
+	  }
+
+	@Override
+	public String toString() {
+	  return "athGrpMgntVO{" +
+			  "athGrpInfoAoSeq		='"+athGrpInfoAoSeq		+'\''+
+			  ",aoId		='"+aoId		+'\''+
+			
+	      '}';
+	}
+
+	
+	public String getMenuNm() {
+		return menuNm;
+	}
+
+	public void setMenuNm(String menuNm) {
+		this.menuNm = menuNm;
+	}
+
+	public String getMenuId() {
+		return menuId;
+	}
+
+	public void setMenuId(String menuId) {
+		this.menuId = menuId;
+	}
+
+	public String getCrtr() {
+		return crtr;
+	}
+
+	public void setCrtr(String crtr) {
+		this.crtr = crtr;
+	}
+
+	public String getAmdr() {
+		return amdr;
+	}
+
+	public void setAmdr(String amdr) {
+		this.amdr = amdr;
+	}
+
+	public String getAoDesc() {
+		return aoDesc;
+	}
+
+	public void setAoDesc(String aoDesc) {
+		this.aoDesc = aoDesc;
+	}
+
+	public String getAoNm() {
+		return aoNm;
+	}
+
+	public void setAoNm(String aoNm) {
+		this.aoNm = aoNm;
+	}
+
+	public String getAthGrpIdLink() {
+		return athGrpIdLink;
+	}
+
+	public void setAthGrpIdLink(String athGrpIdLink) {
+		this.athGrpIdLink = athGrpIdLink;
+	}
+
+	public String getAoIdSel() {
+		return aoIdSel;
+	}
+
+	public void setAoIdSel(String aoIdSel) {
+		this.aoIdSel = aoIdSel;
+	}
+
+	public String getAoNmSel() {
+		return aoNmSel;
+	}
+
+	public void setAoNmSel(String aoNmSel) {
+		this.aoNmSel = aoNmSel;
+	}
+
+	public String getAthGrpInfoAoSeq() {
+		return athGrpInfoAoSeq;
+	}
+
+	public void setAthGrpInfoAoSeq(String athGrpInfoAoSeq) {
+		this.athGrpInfoAoSeq = athGrpInfoAoSeq;
+	}
+
+	public String getAoId() {
+		return aoId;
+	}
+
+	public void setAoId(String aoId) {
+		this.aoId = aoId;
+	}
+
+	
+	
+	
+}

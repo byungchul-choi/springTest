@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.commUtil.dao.commUtilDao">   
+
+<select id="getBascdList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getBascdList */
+	B.BASCD AS bascd
+	,B.BASCD_NM AS bascdNm
+FROM
+	tpost.TB_BZNS_CD A
+	,tpost.TB_BZNS_BAS_CD B
+WHERE
+	A.CFCD = #{cfcd}
+AND A.CFCD = B.CFCD 
+AND B.BASCD_USE_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN B.BASCD_APPL_ST_DT AND B.BASCD_APPL_CLOS_DT
+ORDER BY B.BASCD
+</select>
+<select id="getDtcdList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getDtcdList */
+	C.DTCD AS dtcd
+	,C.DTCD_NM AS dtcdNm
+FROM
+	tpost.TB_BZNS_CD A
+	,tpost.TB_BZNS_BAS_CD B
+	,tpost.TB_BZNS_DTL_CD C
+WHERE
+	A.CFCD = #{cfcd}
+AND A.CFCD = B.CFCD
+AND A.CFCD = C.CFCD 
+AND B.BASCD = #{bascd}
+AND B.BASCD = C.BASCD 
+AND B.BASCD_USE_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN B.BASCD_APPL_ST_DT AND B.BASCD_APPL_CLOS_DT
+AND C.DTCD_USE_YN = 'Y'
+AND DATE_FORMAT(Now(), '%Y%m%d') BETWEEN C.DTCD_APPL_ST_DT AND C.DTCD_APPL_CLOS_DT 
+ORDER BY C.DTCD
+</select>
+<select id="getBascdNmOne" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getBascdNmOne */
+	tpost.FN_GET_BASCD_NM(#{cfcd}, #{bascd}) AS bascdNm 
+FROM 
+	DUAL
+</select>
+<select id="getDtcdNmOne" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getDtcdNmOne */
+	tpost.FN_GET_DTCD_NM(#{cfcd}, #{bascd}, #{dtcd}) AS dtcdNm 
+FROM 
+	DUAL
+</select>
+<select id="getOganTmpltList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getOganTmpltList */
+	TMPLT_CD 		AS tmpltCd
+	,TMPLT_NM 		AS tmpltNm
+FROM tpost.TB_DOC_TMPLT_MGNT
+WHERE 
+	LST_HIST_YN = 'Y'
+AND USE_YN = 'Y'
+<if test="!oganCd.equals('')">	
+AND	OGAN_CD = #{oganCd}
+</if>
+ORDER BY TMPLT_NM
+</select>
+<select id="getHolyYn" parameterType="java.lang.String" resultType="java.lang.String">
+SELECT /* getHolyYn */
+	tpost.FN_GET_HOLI_YN(NOW()) 
+FROM 
+	DUAL
+</select>
+</mapper>

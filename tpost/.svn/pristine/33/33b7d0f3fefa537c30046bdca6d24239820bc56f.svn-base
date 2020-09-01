@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>공공알림문자</title>
+
+    <link rel="stylesheet" type="text/css" href="../resources/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="../resources/css/main.css">
+
+</head>
+
+<body>
+    <!-- wrap -->
+    <div id="wrap">
+        <!-- contents -->
+        <div id="contents">
+            <!-- section -->
+            <div class="section">
+                <!-- caption-pnl -->
+                <div class="caption-pnl">
+                    <h2>전자문서 송/수신목록</h2>
+                </div>
+                <!-- //caption-pnl -->
+                <!-- search-pnl -->
+                <div class="search-pnl">
+                    <div class="buttonset">
+                    </div>
+                    <table>
+                        <colgroup>
+                            <col width="100px" />
+                            <col width="*" />
+                            <col width="100px" />
+                            <col width="*" />
+                            <col width="130px" />
+                            <col width="*" />
+                            <col width="200px" />
+                        </colgroup>
+                        <tr>
+                            <th>기관명</th>
+                            <td><select>
+                                    <option>테스트 발송 기관 1</option>
+                                </select></td>
+                            <th>업무유형</th>
+                            <td><select>
+                                    <option>전체</option>
+                                </select></td>
+                            <th>연계정보(CI)</th>
+                            <td><input type="text" size="8"></td>
+                            <td class="buttonset" rowspan="2"><button type="button">조회</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>템플릿</th>
+                            <td><input type="text" size="16"></td>
+                            <th>발송날짜</th>
+                            <td><input type="text" size="10"> ~ <input type="text" size="10"></td>
+                            <th>발송유형</th>
+                            <td><select>
+                                    <option>SMS</option>
+                                </select></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- //search-pnl -->
+                <!-- grid-pnl -->
+                <div class="grid-pnl">
+                    <!-- table -->
+                    <table class="align-center">
+                        <thead>
+                            <tr>
+                                <th scope="col">발송 기관(회사)명</th>
+                                <th scope="col">발송유형</th>
+                                <th scope="col">업무유형</th>
+                                <th scope="col">템플릿명</th>
+                                <th scope="col">전체발송건수</th>
+                                <th scope="col">성공건수</th>
+                                <th scope="col">실패건수</th>
+                                <th scope="col">발송일자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>독촉</td>
+                                <td>일반건강검진 안내서</td>
+                                <td>2020-02-01</td>
+                                <td>99</td>
+                                <td>99</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>안내</td>
+                                <td>본인부담환급금안내서</td>
+                                <td>2020-02-02</td>
+                                <td>7,894</td>
+                                <td>7,894</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>독촉</td>
+                                <td>일반건강검진 안내서</td>
+                                <td>2020-02-01</td>
+                                <td>99</td>
+                                <td>99</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>안내</td>
+                                <td>본인부담환급금안내서</td>
+                                <td>2020-02-02</td>
+                                <td>7,894</td>
+                                <td>7,894</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>독촉</td>
+                                <td>일반건강검진 안내서</td>
+                                <td>2020-02-01</td>
+                                <td>99</td>
+                                <td>99</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>안내</td>
+                                <td>본인부담환급금안내서</td>
+                                <td>2020-02-02</td>
+                                <td>7,894</td>
+                                <td>7,894</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>독촉</td>
+                                <td>일반건강검진 안내서</td>
+                                <td>2020-02-01</td>
+                                <td>99</td>
+                                <td>99</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>안내</td>
+                                <td>본인부담환급금안내서</td>
+                                <td>2020-02-02</td>
+                                <td>7,894</td>
+                                <td>7,894</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>독촉</td>
+                                <td>일반건강검진 안내서</td>
+                                <td>2020-02-01</td>
+                                <td>99</td>
+                                <td>99</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                            <tr>
+                                <td>테스트 발송기관 1</td>
+                                <td>SMS</td>
+                                <td>안내</td>
+                                <td>본인부담환급금안내서</td>
+                                <td>2020-02-02</td>
+                                <td>7,894</td>
+                                <td>7,894</td>
+                                <td>2020-02-01</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- //table -->
+                </div>
+                <!-- //grid-pnl -->
+            </div>
+            <!--// section -->
+            <!-- paging -->
+            <div class="paging">
+                <a href="#">&#10094;</a>
+                <a href="#" class="state-current">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">5</a>
+                <a href="#">6</a>
+                <a href="#">7</a>
+                <a href="#">8</a>
+                <a href="#">9</a>
+                <a href="#">10</a>
+                <a href="#">&#x276F;</a>
+            </div>
+            <!-- //pageing -->
+        </div>
+        <!-- //contents -->
+
+    </div>
+    <!-- //wrap -->
+</body>
+
+</html>

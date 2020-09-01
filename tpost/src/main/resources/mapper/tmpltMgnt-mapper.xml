@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.tmpltMgntDao">   
+<select id="tmpltMgntSelect" parameterType="tpost.common.vo.tmpltMgntVO" resultType="tpost.common.vo.tmpltMgntVO">
+SELECT /* tmpltMgntSelect */
+	 tpost.FN_GET_BASCD_NM('00001', A.OGAN_CD)	AS sndnOgan
+	,A.OGAN_CD									AS sndnOganCd
+	,A.TMPLT_CD 									AS tmpltCd
+	,A.TMPLT_NM 									AS tmpltNm
+	,CASE (
+		SELECT COUNT(ITEM_SNO) 
+		FROM tpost.TB_DOC_TMPLT_ATTR_LST 
+		WHERE OGAN_CD = A.OGAN_CD 
+		AND TMPLT_CD = A.TMPLT_CD
+	) WHEN 0 THEN 'N' ELSE 'Y' END	AS tmpltSchemaYn
+	,CASE (
+		SELECT COUNT(TMPLT_HTML) 
+		FROM tpost.TB_DOC_TMPLT_INFO 
+		WHERE OGAN_CD = A.OGAN_CD
+		AND TMPLT_CD = A.TMPLT_CD
+	) WHEN 0 THEN 'N' ELSE 'Y' END	AS tmpltCrtYn
+	,A.USE_YN 									AS tmpltUseYn
+FROM 
+	tpost.TB_DOC_TMPLT_MGNT A
+WHERE 
+	A.LST_HIST_YN = 'Y'
+<if test="!inputTmpltNm.equals('')"> 
+AND A.TMPLT_NM LIKE CONCAT('%', #{inputTmpltNm}, '%')
+</if>
+<if test="!inputTmpltUseYn.equals('')"> 
+AND A.USE_YN = #{inputTmpltUseYn}
+</if>
+<if test="!inputSndnOgan.equals('')"> 
+AND A.OGAN_CD = #{inputSndnOgan}
+</if>
+ORDER BY A.OGAN_CD, A.TMPLT_CD
+</select>
+<select id="tmpltInfoSelect" parameterType="tpost.common.vo.tmpltMgntVO" resultType="tpost.common.vo.tmpltMgntVO">
+SELECT /* tmpltInfoSelect */
+	 tpost.FN_GET_BASCD_NM('00001', A.OGAN_CD)	AS sndnOgan
+	,A.OGAN_CD									AS sndnOganCd
+	,A.TMPLT_CD 								AS tmpltCd
+	,A.TMPLT_NM 								AS tmpltNm
+	,A.TMPLT_DESC								AS tmpltDesc
+	,CASE (
+		SELECT COUNT(ITEM_SNO) 
+		FROM tpost.TB_DOC_TMPLT_ATTR_LST 
+		WHERE OGAN_CD = A.OGAN_CD 
+		AND TMPLT_CD = A.TMPLT_CD
+	) WHEN 0 THEN 'N' ELSE 'Y' END	AS tmpltSchemaYn
+	,CASE (
+		SELECT COUNT(TMPLT_HTML) 
+		FROM tpost.TB_DOC_TMPLT_INFO 
+		WHERE OGAN_CD = A.OGAN_CD
+		AND TMPLT_CD = A.TMPLT_CD
+	) WHEN 0 THEN 'N' ELSE 'Y' END	AS tmpltCrtYn
+	,A.USE_YN 								AS tmpltUseYn
+FROM 
+	tpost.TB_DOC_TMPLT_MGNT A
+WHERE 
+	A.LST_HIST_YN = 'Y'
+AND A.TMPLT_CD = #{tmpltCd}
+ORDER BY A.OGAN_CD, A.TMPLT_CD
+</select>
+<update id="tmpltInfoUpdate" parameterType="tpost.common.vo.tmpltMgntVO">
+UPDATE /* tmpltInfoUpdate */
+	tpost.TB_DOC_TMPLT_MGNT
+SET 
+	TMPLT_NM = #{tmpltNm}
+	,TMPLT_DESC = #{tmpltDesc}
+	,USE_YN = #{tmpltUseYn}
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE 
+	OGAN_CD = #{sndnOganCd}
+AND TMPLT_CD = #{tmpltCd}
+</update>
+<insert id="tmpltInfoInsert" parameterType="tpost.common.vo.tmpltMgntVO">
+INSERT /* tmpltInfoInsert */
+INTO tpost.TB_DOC_TMPLT_MGNT
+VALUES (
+	#{sndnOganCd}					<!-- OGAN_CD -->
+	,#{tmpltCd}						<!-- TMPLT_CD  				-->
+	,#{tmpltNm}						<!-- TMPLT_NM				-->
+	,'Y'							<!-- LST_HIST_YN 		-->	
+	,#{tmpltUseYn}					<!-- USE_YN 	-->
+	,#{tmpltDesc}					<!-- TMPLT_DESC  -->
+	,NOW()						<!-- CRT_DATE 			-->
+	,NOW()						<!-- MDF_DATE			-->
+	,#{crtr}						<!-- CRTR 		-->
+	,#{amdr}						<!-- AMDR 		-->
+)
+</insert>
+<select id="tmpltSchemaSelect" parameterType="tpost.common.vo.tmpltMgntVO" resultType="tpost.common.vo.tmpltMgntVO">
+SELECT /* tmpltSchemaSelect */
+	ITEM_SNO AS itemSno
+	,ITEM_NM AS itemNm
+	,ITEM_LEN AS itemLen
+	,ITEM_LOC_SEQN AS itemLocSeqn
+FROM
+	tpost.TB_DOC_TMPLT_ATTR_LST
+WHERE 
+	OGAN_CD = #{sndnOganCd}
+AND TMPLT_CD = #{tmpltCd}
+ORDER BY ITEM_LOC_SEQN
+</select>
+<delete id="tmpltSchemaDelete" parameterType="tpost.common.vo.tmpltMgntVO">
+DELETE /* tmpltSchemaDelete */
+FROM tpost.TB_DOC_TMPLT_ATTR_LST
+WHERE 
+	TMPLT_CD = #{tmpltCd}
+AND OGAN_CD = #{sndnOganCd}
+</delete>
+<insert id="tmpltSchemaInsert" parameterType="tpost.common.vo.tmpltMgntVO">
+INSERT /* tmpltSchemaInsert */
+INTO tpost.TB_DOC_TMPLT_ATTR_LST
+VALUES (
+	#{sndnOganCd}					<!-- OGAN_CD -->
+	,#{tmpltCd}						<!-- TMPLT_CD 		-->	
+	,#{itemSno}						<!-- ITEM_SNO 	-->
+	,#{itemNm}						<!-- ITEM_NM  -->
+	,#{itemLen}						<!-- ITEM_LEN  -->
+	,#{itemLocSeqn}					<!-- ITEM_LOC_SEQN	-->
+	,NOW()						<!-- CRT_DATE 			-->
+	,NOW()						<!-- MDF_DATE			-->
+	,#{crtr}						<!-- CRTR 		-->
+	,#{amdr}						<!-- AMDR 		-->
+)
+</insert>
+<select id="tmpltEditSelect" parameterType="tpost.common.vo.tmpltMgntVO" resultType="tpost.common.vo.tmpltMgntVO">
+SELECT /* tmpltEditSelect */
+	 tpost.FN_GET_BASCD_NM('00001', A.OGAN_CD)	AS sndnOgan
+	,A.OGAN_CD 									AS sndnOganCd
+	,A.TMPLT_CD 								AS tmpltCd
+	,A.TMPLT_NM 								AS tmpltNm
+	,CASE (
+		SELECT COUNT(TMPLT_HTML) 
+		FROM tpost.TB_DOC_TMPLT_INFO 
+		WHERE OGAN_CD = A.OGAN_CD 
+		AND TMPLT_CD = A.TMPLT_CD
+		) WHEN 0 THEN 'N' ELSE 'Y' END	AS tmpltCrtYn
+	,(SELECT TMPLT_HTML 
+		FROM tpost.TB_DOC_TMPLT_INFO 
+		WHERE OGAN_CD = A.OGAN_CD 
+		AND TMPLT_CD = A.TMPLT_CD)							AS editHtml
+FROM 
+	tpost.TB_DOC_TMPLT_MGNT A
+WHERE 
+	A.LST_HIST_YN = 'Y'
+AND A.OGAN_CD = #{editOganCd}
+AND A.TMPLT_CD = #{editTmpltCd}
+ORDER BY A.OGAN_CD, A.TMPLT_CD
+</select>
+<insert id="tmpltEditInsert" parameterType="tpost.common.vo.tmpltMgntVO">
+INSERT /* tmpltEditInsert */
+INTO tpost.TB_DOC_TMPLT_INFO
+VALUES (
+	#{editOganCd}			<!-- OGAN_CD -->
+	,#{editTmpltCd}			<!-- TMPLT_CD 		-->	
+	,#{editHtml}			<!-- TMPLT_HTML	-->
+	,'1'					<!-- LAST_HIST_YN		-->
+	,NOW()				<!-- CRT_DATE 			-->
+	,NOW()				<!-- MDF_DATE			-->
+	,#{crtr}				<!-- CRTR 					-->
+	,#{amdr}				<!-- AMDR 				-->
+)
+</insert>
+<delete id="tmpltEditDelete" parameterType="tpost.common.vo.tmpltMgntVO">
+DELETE /* tmpltEditDelete */
+FROM tpost.TB_DOC_TMPLT_INFO
+WHERE 
+	TMPLT_CD = #{editTmpltCd}
+AND OGAN_CD = #{editOganCd}
+</delete>
+<select id="oganMaxTmpltIdSelect" parameterType="tpost.common.vo.tmpltMgntVO" resultType="java.lang.String">
+SELECT /* oganMaxTmpltIdSelect */
+	IFNULL(CONCAT(RPAD(#{sndnOgan}, '4', '0'), LPAD(MAX(RIGHT(TMPLT_CD, 5)) + 1, '5', '0')), CONCAT(#{sndnOgan}, '00001')) 		AS tmpltCd
+FROM tpost.TB_DOC_TMPLT_MGNT
+WHERE 
+	OGAN_CD = #{sndnOgan}
+</select>
+
+</mapper>

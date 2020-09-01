@@ -1,0 +1,132 @@
+package tpost.batch.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.batch.vo.elctDocSnrcVO;
+import tpost.batch.dao.elctDocSnrcDao;
+import tpost.commCode.controller.commCdMgntController;
+
+@Service
+public class elctDocSnrcService {
+
+	@Autowired
+	elctDocSnrcDao dao;
+	
+	/* 로그설정 */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Transactional
+	public void elctDocSnrcMgnt(elctDocSnrcVO elctDocSnrcVO) {
+		
+		List<elctDocSnrcVO> elctDocList = new ArrayList<elctDocSnrcVO>();
+		elctDocList.addAll(sndnMsgLstSelect(elctDocSnrcVO));
+		
+		if(elctDocList.size() > 0) {
+			List<Map<String, Object>> masterList = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> detailList = new ArrayList<Map<String, Object>>();
+			for(int i = 0; i < elctDocList.size(); i++) {
+				//TB_ELCT_DOC_SNRC_LST 테이블에 insert 할 데이터 셋팅 //////////////////////////////////////////////////////
+				int succNum = sndnMsgSuccCountSelect(elctDocList.get(i));
+				int failNum = Integer.parseInt(elctDocList.get(i).getAllSndnNum()) - succNum;
+				int maxPk = maxPkSelect() + i;
+					
+				Map<String, Object> master = new HashMap<String, Object>();
+				
+				master.put("elctDocSndnPk", maxPk);
+				master.put("oganCd", elctDocList.get(i).getOganCd());
+				master.put("sndnPtrn", elctDocList.get(i).getSndnPtrn());
+				master.put("tmpltCd", elctDocList.get(i).getTmpltCd());
+				master.put("transDt", elctDocList.get(i).getTransDt());
+				master.put("sndnDate", elctDocList.get(i).getSndnDate());
+				master.put("allSndnNum", elctDocList.get(i).getAllSndnNum());
+				master.put("succNum", succNum);
+				master.put("failNum", failNum);
+				master.put("amdr", "batch");
+				master.put("crtr", "batch");
+				
+				masterList.add(master);
+				//TB_ELCT_DOC_SNRC_LST 테이블에 insert 할 데이터 셋팅 END//////////////////////////////////////////////////////
+				
+				
+				//TB_ELCT_DOC_SNRC_DETL 테이블에 insert 할 데이터 셋팅 //////////////////////////////////////////////////////
+				elctDocSnrcVO tempVO = new elctDocSnrcVO();
+				tempVO.setOganCd(elctDocList.get(i).getOganCd());
+				tempVO.setTmpltCd(elctDocList.get(i).getTmpltCd());
+				tempVO.setSndnDate(elctDocList.get(i).getSndnDate());
+				tempVO.setTransDt(elctDocList.get(i).getTransDt());
+				
+				List<elctDocSnrcVO> elctDocDtlList = new ArrayList<elctDocSnrcVO>();
+				elctDocDtlList.addAll(sndnMsgDtlLstSelect(tempVO));	
+				
+				for(int j = 0; j < elctDocDtlList.size(); j++) {
+					Map<String, Object> detail = new HashMap<String, Object>();
+
+					detail.put("elctDocSnrcPk", maxPk);
+					detail.put("detlIdx", j);
+					detail.put("ofapElctAddr", elctDocDtlList.get(j).getOfapElctAddr());
+					detail.put("ciNum", elctDocDtlList.get(j).getCiNum());
+					detail.put("name", elctDocDtlList.get(j).getName());
+					detail.put("trnsDate", elctDocDtlList.get(j).getTrnsDate());
+					detail.put("rcveDate", elctDocDtlList.get(j).getRcveDate());
+					detail.put("sendUrl", elctDocDtlList.get(j).getSendUrl());
+					
+					String resultCd = elctDocDtlList.get(j).getResultCd();
+					String reportCd = elctDocDtlList.get(j).getReportCd();
+					String failCd = "";
+					String sendYn = "Y";
+					
+					//발송 실패
+					if(!resultCd.equals("0")) {
+						sendYn = "N";
+						failCd = resultCd;
+					} else if(resultCd.equals("0") && !reportCd.equals("0")){
+						sendYn = "N";
+						failCd = reportCd;
+					}
+						
+					detail.put("sendYn", sendYn);
+					detail.put("sendFailCd", failCd);
+					detail.put("crtr", "batch");
+					detail.put("amdr", "batch");
+					
+					detailList.add(detail);
+				}
+				//TB_ELCT_DOC_SNRC_DETL 테이블에 insert 할 데이터 셋팅 END//////////////////////////////////////////////////////
+			}
+			
+			Map<String, Object> elctDocMap = new HashMap<String, Object>();
+			elctDocMap.put("masterList", masterList);
+			elctDocMap.put("detailList", detailList);
+			
+			dao.elctDocSnrcInsert(elctDocMap);
+			dao.elctDocSnrcDtlInsert(elctDocMap);
+		}
+	}
+	
+	public List<elctDocSnrcVO> sndnMsgLstSelect(elctDocSnrcVO elctDocSnrcVO){
+		return dao.sndnMsgLstSelect(elctDocSnrcVO);
+	}
+	
+	public int sndnMsgSuccCountSelect(elctDocSnrcVO elctDocSnrcVO){
+		return dao.sndnMsgSuccCountSelect(elctDocSnrcVO);
+	}
+	
+	public List<elctDocSnrcVO> sndnMsgDtlLstSelect(elctDocSnrcVO elctDocSnrcVO){
+		return dao.sndnMsgDtlLstSelect(elctDocSnrcVO);
+	}
+	
+	public int maxPkSelect() {
+		return dao.maxPkSelect();
+	}
+
+}

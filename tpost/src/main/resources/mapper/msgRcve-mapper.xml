@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.msgRcve.dao.msgRcveDao">   
+<select id="getHexKeySelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="java.lang.String">
+SELECT  /* getHexKeySelect */
+	MD5(CONCAT(OGAN_CD, tpost.FN_GET_DEC_URL(RCVE_RFSL_URL))) AS hexKey
+FROM 
+	tpost.TB_SNDN_SNRC_INFO_LST
+WHERE
+	ANOC_INFO_URL = #{a}
+</select>
+<select id="getOfapElctAddrSelect_Anoc" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT  /* getOfapElctAddrSelect_Anoc */
+	OGAN_CD AS sndnOgan
+	,TRANS_DT AS transDt
+	,TMPLT_CD AS tmpltCd
+	,tpost.FN_GET_DEC_URL(ANOC_INFO_URL) AS ofapElctAddr
+	,ANOC_INFO_URL AS anocInfoUrl
+FROM 
+	tpost.TB_SNDN_SNRC_INFO_LST
+WHERE
+	ANOC_INFO_URL = #{a}
+</select>
+<select id="getOfapElctAddrSelect_Rcve" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT  /* getOfapElctAddrSelect_Rcve */
+	OGAN_CD AS sndnOgan
+	,TRANS_DT AS transDt
+	,TMPLT_CD AS tmpltCd
+	,tpost.FN_GET_DEC_URL(RCVE_RFSL_URL) AS ofapElctAddr
+FROM 
+	tpost.TB_SNDN_SNRC_INFO_LST
+WHERE
+	RCVE_RFSL_URL = #{a}
+</select>
+<select id="sndnRfslSelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT /* sndnRfslSelect */
+	IFNULL(MAX(M.RCVE_RF_CLCD), '1') AS sndnRfsl
+	,IFNULL(MAX(D.SEQ_NO) + 1, '0') AS seqNo
+FROM 
+	tpost.TB_OGAN_RCVE_RF_MGNT	M
+	,tpost.TB_OGAN_RCVE_RF_DTL D
+WHERE 
+	M.OFAP_ELCT_ADDR = #{ofapElctAddr}
+AND M.OGAN_CD = #{sndnOgan}
+AND M.OFAP_ELCT_ADDR = D.OFAP_ELCT_ADDR 
+AND M.OGAN_CD = D.OGAN_CD 
+</select>
+<update id="sndnRfslUpdate" parameterType="tpost.msgRcve.vo.msgRcveVO">
+UPDATE /* sndnRfslUpdate */
+	tpost.TB_OGAN_RCVE_RF_MGNT
+SET 
+	RCVE_RF_CLCD = #{sndnRfsl}
+	,RCVE_RF_DATE = DATE_FORMAT(NOW(), '%Y%m%d')
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE
+	OGAN_CD = #{sndnOgan}
+AND OFAP_ELCT_ADDR = #{ofapElctAddr}
+</update>
+<insert id="sndnRfslMgntInsert" parameterType="tpost.msgRcve.vo.msgRcveVO">
+INSERT /* sndnRfslMgntInsert */
+INTO tpost.TB_OGAN_RCVE_RF_MGNT (
+	OFAP_ELCT_ADDR 
+	,OGAN_CD 
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,BFCS_SNDN_YN	
+	,RCVE_RF_CLCD
+	,RCVE_RF_DATE
+)
+VALUES
+(
+	#{ofapElctAddr}
+	,#{sndnOgan}
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+	,'N'
+	,'1'
+	,DATE_FORMAT(NOW(), '%Y%m%d')
+)
+</insert>
+<insert id="sndnRfslInsert" parameterType="tpost.msgRcve.vo.msgRcveVO">
+INSERT /* sndnRfslInsert */
+INTO tpost.TB_OGAN_RCVE_RF_DTL (
+	OFAP_ELCT_ADDR 
+	,OGAN_CD 
+	,SEQ_NO 
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,RCVE_RF_CLCD 
+	,RCVE_RF_DATE 
+)
+VALUES
+(
+	#{ofapElctAddr}
+	,#{sndnOgan}
+	,#{seqNo}
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+	,#{sndnRfsl}
+	,DATE_FORMAT(NOW(), '%Y%m%d')
+)
+</insert>
+<select id="anocInfoListSelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT /* anocInfoListSelect */
+	IFNULL(MAX(ANOC_INFO), '') AS anocInfo
+FROM 
+	tpost.TB_SNDN_SNRC_INFO_LST 
+WHERE
+	TRANS_DT = #{transDt}
+AND OGAN_CD = #{sndnOgan}
+AND TMPLT_CD = #{tmpltCd}
+AND OFAP_ELCT_ADDR = #{ofapElctAddr}
+</select>
+<select id="tmpltHtmlSelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT /* tmpltHtmlSelect */
+	TMPLT_HTML AS tmpltHtml
+FROM 
+	tpost.TB_DOC_TMPLT_INFO
+WHERE
+	OGAN_CD = #{sndnOgan}
+AND TMPLT_CD = #{tmpltCd}
+AND LST_HIST_YN = '1'
+</select>
+<select id="tmpltSchemaSelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT /* tmpltSchemaSelect */
+	ITEM_NM AS itemNm
+	,ITEM_LEN AS itemLen
+	,ITEM_LOC_SEQN AS itemLocSeqn
+FROM 
+	tpost.TB_DOC_TMPLT_ATTR_LST
+WHERE
+	OGAN_CD = #{sndnOgan}
+AND TMPLT_CD = #{tmpltCd}
+ORDER BY ITEM_LOC_SEQN
+</select>
+<select id="getRdngMaxHistSeq" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="java.lang.String">
+SELECT /* getRdngMaxHistSeq */
+	IFNULL(MAX(HIST_SEQ) + 1, '0') AS histSeq
+FROM 
+	 tpost.TB_SNDN_RDNG_MGNT
+WHERE
+	OGAN_CD = #{sndnOgan}
+AND TRANS_DT = #{transDt}
+AND TMPLT_CD = #{tmpltCd}
+AND OFAP_ELCT_ADDR = #{ofapElctAddr}
+AND ANOC_INFO_URL = #{anocInfoUrl}
+</select>
+<insert id="rdngMgntInsert" parameterType="tpost.msgRcve.vo.msgRcveVO">
+INSERT /* rdngMgntInsert */
+INTO tpost.TB_SNDN_RDNG_MGNT (
+	OGAN_CD 
+	,TRANS_DT
+	,TMPLT_CD 
+	,OFAP_ELCT_ADDR 
+	,HIST_SEQ 
+	,ANOC_INFO_URL
+	,RDNG_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+(
+	#{sndnOgan}
+	,#{transDt}
+	,#{tmpltCd}
+	,#{ofapElctAddr}
+	,#{histSeq}
+	,#{anocInfoUrl}
+	,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+)
+</insert>
+<select id="sndnInfoSelect" parameterType="tpost.msgRcve.vo.msgRcveVO" resultType="tpost.msgRcve.vo.msgRcveVO">
+SELECT /* sndnInfoSelect */
+	B.NAME AS name
+	,B.SSNO_FRON_BRDT AS brdt
+	,B.SEX_CLCD AS sexCls
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR A
+	,tpost.TB_RCVE_CI_INFO B
+WHERE
+	A.OFAP_ELCT_ADDR = #{ofapElctAddr}
+AND A.CI_NUM = B.CI_NUM 
+</select>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.elctDoc.dao.msgTmpltDao">   
+<select id="tmpltLstSelect" parameterType="tpost.elctDoc.vo.msgTmpltVO" resultType="tpost.elctDoc.vo.msgTmpltVO">
+/* tmpltLstSelect */
+SELECT 
+	oganNm 				AS oganNm
+	,oganCd 			AS oganCd
+	,tmpltCd 			AS tmpltCd
+	,tmpltNm 			AS tmpltNm
+	,msgTmpltYn 		AS msgTmpltYn
+	,tmpltUseYn 		AS tmpltUseYn
+FROM(
+	SELECT 
+		 tpost.FN_GET_BASCD_NM('00001', M.OGAN_CD)	AS oganNm
+		,M.OGAN_CD 									AS oganCd
+		,M.TMPLT_CD 								AS tmpltCd
+		,M.TMPLT_NM 								AS tmpltNm
+		,IF(IFNULL(S.CRTR, '0') = '0', 'N', 'Y') 	AS msgTmpltYn 
+		,M.USE_YN 									AS tmpltUseYn
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM 
+		tpost.TB_DOC_TMPLT_MGNT M
+		LEFT OUTER JOIN tpost.TB_MSG_TMPLT_INFO S
+		ON M.OGAN_CD = S.OGAN_CD 
+	 	AND M.TMPLT_CD = S.TMPLT_CD 
+	 	,(SELECT @ROWNUM:=0) TMP
+	WHERE 
+		M.LST_HIST_YN = 'Y'
+	<if test="!inputTmpltNm.equals('')"> 
+	AND M.TMPLT_NM LIKE CONCAT('%', #{inputTmpltNm}, '%')
+	</if>
+	<if test="!inputTmpltUseYn.equals('')"> 
+	AND M.USE_YN = #{inputTmpltUseYn}
+	</if>
+	<if test="!inputOganCd.equals('')"> 
+	AND M.OGAN_CD = #{inputOganCd}
+	</if>
+	) A
+WHERE
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="tmpltLstCntSelect" parameterType="tpost.elctDoc.vo.msgTmpltVO" resultType="java.lang.Integer">
+SELECT /* tmpltLstSelect */
+	 COUNT(*)
+FROM 
+	tpost.TB_DOC_TMPLT_MGNT M
+	LEFT OUTER JOIN tpost.TB_MSG_TMPLT_INFO S
+	ON M.OGAN_CD = S.OGAN_CD 
+ 	AND M.TMPLT_CD = S.TMPLT_CD 
+WHERE 
+	M.LST_HIST_YN = 'Y'
+<if test="!inputTmpltNm.equals('')"> 
+AND M.TMPLT_NM LIKE CONCAT('%', #{inputTmpltNm}, '%')
+</if>
+<if test="!inputTmpltUseYn.equals('')"> 
+AND M.USE_YN = #{inputTmpltUseYn}
+</if>
+<if test="!inputOganCd.equals('')"> 
+AND M.OGAN_CD = #{inputOganCd}
+</if>
+</select>
+</mapper>

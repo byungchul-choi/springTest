@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.kakaoTestDao">
+
+
+<!-- 처음파일을 임시 테이블 파일에 적재 -->
+<insert id="kakaoTestInsert" parameterType="tpost.batch.vo.kakaoTestVO">
+INSERT INTO tpost.TB_KAKAO_TEST
+(
+  KAKAO_GUBUN   
+, SEND_URL      
+, SSNO_FRON_BRDT
+, CELP_NUM      
+, NAME          
+, TX_ID         
+, TOKEN         
+, ERROR_CD      
+, ERROR_MSG     
+, CRT_DATE      
+, CRTR          
+)
+values
+(
+  #{ kakaoGubun    }
+, #{ sendUrl       }
+, #{ ssnoFronBrdt  }
+, #{ celpNum       }
+, #{ name          }
+, #{ txId          }
+, #{ token         }
+, #{ errorCd       }
+, #{ errorMsg      }
+, NOW()
+, 'kakaoBatch'
+)
+</insert>
+
+<select id="restFulTest" parameterType="tpost.restTestSever.restTestServerVO" resultType="tpost.restTestSever.restTestServerVO">
+SELECT/* restFulTest */
+	    OGAN_CD  as oganCd
+     , TMPLT_CD as tmpltCd
+     , TMPLT_NM as tmpltNm
+  from tpost.TB_DOC_TMPLT_MGNT
+</select>
+
+</mapper>

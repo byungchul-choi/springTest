@@ -1,0 +1,234 @@
+package tpost.acmdCerf.vo;
+
+import tpost.egovcomm.vo.PagingDefaultVO;
+
+public class acmdCerfVO extends PagingDefaultVO{
+	//------------------------------------------------- 유통증명서현황관리 input -------------------------------------------------
+
+	private String inputRengStDt;					/* 시작일자 */
+	private String inputRengClosDt;					/* 종료일자 */
+	private String inputIssCls;						/* 발급구분 */
+	private String inputName;						/* 고객명 */
+	private String inputOfapElctAddr;				/* 공인전자주소 */
+	private String inputCiNum;						/* 고유번호(CI) */
+	
+	public String getInputRengStDt() {
+		return inputRengStDt;
+	}
+	public void setInputRengStDt(String inputRengStDt) {
+		this.inputRengStDt = inputRengStDt;
+	}
+	
+	public String getInputRengClosDt() {
+		return inputRengClosDt;
+	}
+	public void setInputRengClosDt(String inputRengClosDt) {
+		this.inputRengClosDt = inputRengClosDt;
+	}
+	
+	public String getInputIssCls() {
+		return inputIssCls;
+	}
+	public void setInputIssCls(String inputIssCls) {
+		this.inputIssCls = inputIssCls;
+	}
+	
+	public String getInputName() {
+		return inputName;
+	}
+	public void setInputName(String inputName) {
+		this.inputName = inputName;
+	}
+	
+	public String getInputOfapElctAddr() {
+		return inputOfapElctAddr;
+	}
+	public void setInputOfapElctAddr(String inputOfapElctAddr) {
+		this.inputOfapElctAddr = inputOfapElctAddr;
+	}
+	
+	public String getInputCiNum() {
+		return inputCiNum;
+	}
+	public void setInputCiNum(String inputCiNum) {
+		this.inputCiNum = inputCiNum;
+	}
+	
+	
+	//------------------------------------------------- 유통증명서현황관리 -------------------------------------------------
+
+	
+	private String pk;
+	private String apctDate;
+	private String trnsDate;
+	private String apctOgan;
+	private String oganCd;
+	private String tmpltCd;
+	private String name;
+	private String ofapElctAddr;
+	private String ciNum;
+	private String issCls;
+	private String apctCls;
+	private String dwldUrl;
+	
+	public String getPk() {
+		return pk;
+	}
+	public void setPk(String pk) {
+		this.pk = pk;
+	}
+	
+	public String getApctDate() {
+		return apctDate;
+	}
+	public void setApctDate(String apctDate) {
+		this.apctDate = apctDate;
+	}
+	
+	public String getTrnsDate() {
+		return trnsDate;
+	}
+	public void setTrnsDate(String trnsDate) {
+		this.trnsDate = trnsDate;
+	}
+	
+	public String getApctOgan() {
+		return apctOgan;
+	}
+	public void setApctOgan(String apctOgan) {
+		this.apctOgan = apctOgan;
+	}
+	
+	public String getOganCd() {
+		return oganCd;
+	}
+	public void setOganCd(String oganCd) {
+		this.oganCd = oganCd;
+	}
+	
+	public String getTmpltCd() {
+		return tmpltCd;
+	}
+	public void setTmpltCd(String tmpltCd) {
+		this.tmpltCd = tmpltCd;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getOfapElctAddr() {
+		return ofapElctAddr;
+	}
+	public void setOfapElctAddr(String ofapElctAddr) {
+		this.ofapElctAddr = ofapElctAddr;
+	}
+	
+	public String getCiNum() {
+		return ciNum;
+	}
+	public void setCiNum(String ciNum) {
+		this.ciNum = ciNum;
+	}
+	
+	public String getIssCls() {
+		return issCls;
+	}
+	public void setIssCls(String issCls) {
+		this.issCls = issCls;
+	}
+	
+	public String getApctCls() {
+		return apctCls;
+	}
+	public void setApctCls(String apctCls) {
+		this.apctCls = apctCls;
+	}
+	
+	public String getDwldUrl() {
+		return dwldUrl;
+	}
+	public void setDwldUrl(String dwldUrl) {
+		this.dwldUrl = dwldUrl;
+	}
+	
+	
+	
+	//------------------------------------------------- 유통증명서현황신청 input -------------------------------------------------
+
+	
+	
+	private String inputPopuOganCd;					/* 기관코드 */
+	private String inputPopuTmpltCd;				/* 템플릿코드*/
+	private String inputPopuName;					/* 대상고객명 */
+	private String inputPopuOfapElctAddr;			/* 공인전자주소 */
+	private String inputPopuCiNum;					/* CI 또는 사업자번호 */
+	private String inputPopuTrnsDate;				/* 송신일자 */
+	
+	public String getInputPopuOganCd() {
+		return inputPopuOganCd;
+	}
+	public void setInputPopuOganCd(String inputPopuOganCd) {
+		this.inputPopuOganCd = inputPopuOganCd;
+	}
+	
+	public String getInputPopuTmpltCd() {
+		return inputPopuTmpltCd;
+	}
+	public void setInputPopuTmpltCd(String inputPopuTmpltCd) {
+		this.inputPopuTmpltCd = inputPopuTmpltCd;
+	}
+	
+	public String getInputPopuName() {
+		return inputPopuName;
+	}
+	public void setInputPopuName(String inputPopuName) {
+		this.inputPopuName = inputPopuName;
+	}
+	
+	public String getInputPopuOfapElctAddr() {
+		return inputPopuOfapElctAddr;
+	}
+	public void setInputPopuOfapElctAddr(String inputPopuOfapElctAddr) {
+		this.inputPopuOfapElctAddr = inputPopuOfapElctAddr;
+	}
+	
+	public String getInputPopuCiNum() {
+		return inputPopuCiNum;
+	}
+	public void setInputPopuCiNum(String inputPopuCiNum) {
+		this.inputPopuCiNum = inputPopuCiNum;
+	}
+	
+	public String getInputPopuTrnsDate() {
+		return inputPopuTrnsDate;
+	}
+	public void setInputPopuTrnsDate(String inputPopuTrnsDate) {
+		this.inputPopuTrnsDate = inputPopuTrnsDate;
+	}
+	
+
+	//------------------------------------------------- 생성자/수정자 -------------------------------------------------
+	
+	
+	private String crtr;
+	private String amdr;
+	
+	public String getCrtr() {
+		return crtr;
+	}
+	public void setCrtr(String crtr) {
+		this.crtr = crtr;
+	}
+	
+	public String getAmdr() {
+		return amdr;
+	}
+	public void setAmdr(String amdr) {
+		this.amdr = amdr;
+	}
+	
+}

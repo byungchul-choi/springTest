@@ -1,0 +1,207 @@
+package tpost.logIn.vo;
+
+import tpost.common.vo.custInfMgntVO;
+
+public class logInVO  extends custInfMgntVO{   /*페이징 vo 확장시켜서 사용*/
+
+	
+	
+	/**
+	 * 
+	 */
+	
+	private String passWord   = "";
+	private String newPassWord   = "";
+	private int passwordFailCnt   = 0;  
+	private String lastPwChgYn = "" ; //비밀 번호 변경기간 90일 여부 
+	
+	private String uprMenuId  =""    ;
+	
+	private String result  =""    ;
+	
+	/*핸드폰 인증관련*/
+	private int   	ctifCfrmSeq 	= 0;
+	private String 	ctifKncd 		= "";
+	private String 	mvTscoClcd 		="";
+	private String 	ctifNo 			="";
+	private String 	ctifTime 		="";
+	private String 	ctifCfrmYn 		="";
+
+	/*로그인 관련 에러 메시지 에러코드*/
+	private String 	errCode 		="";
+	private String 	errMsg 		="";
+	
+	private String 	url 		="";
+	
+	private String saveId = ""; /*아이디 저장 클릭시*/
+	
+	private String celpNumSha2 = ""; 
+	
+	
+	/*최종 비밀번호 변경일 이후 날짜*/
+	private String mdfDays ="";
+	
+	/*인증번호 확인여부*/
+	private String ctifSuccYn ="";
+	
+	
+	public String getCtifSuccYn() {
+		return ctifSuccYn;
+	}
+
+	public void setCtifSuccYn(String ctifSuccYn) {
+		this.ctifSuccYn = ctifSuccYn;
+	}
+
+	public String getMdfDays() {
+		return mdfDays;
+	}
+
+	public void setMdfDays(String mdfDays) {
+		this.mdfDays = mdfDays;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
+	}
+
+	public String getCelpNumSha2() {
+		return celpNumSha2;
+	}
+
+	public void setCelpNumSha2(String celpNumSha2) {
+		this.celpNumSha2 = celpNumSha2;
+	}
+
+	public String getSaveId() {
+		return saveId;
+	}
+
+	public void setSaveId(String saveId) {
+		this.saveId = saveId;
+	}
+
+	public logInVO() {
+	  }
+
+	public String getPassWord() {
+		return passWord;
+	}
+
+	public void setPassWord(String passWord) {
+		this.passWord = passWord;
+	}
+
+	public String getNewPassWord() {
+		return newPassWord;
+	}
+
+	public void setNewPassWord(String newPassWord) {
+		this.newPassWord = newPassWord;
+	}
+
+	public int getPasswordFailCnt() {
+		return passwordFailCnt;
+	}
+
+	public void setPasswordFailCnt(int passwordFailCnt) {
+		this.passwordFailCnt = passwordFailCnt;
+	}
+
+	public String getLastPwChgYn() {
+		return lastPwChgYn;
+	}
+
+	public void setLastPwChgYn(String lastPwChgYn) {
+		this.lastPwChgYn = lastPwChgYn;
+	}
+
+	public String getUprMenuId() {
+		return uprMenuId;
+	}
+
+	public void setUprMenuId(String uprMenuId) {
+		this.uprMenuId = uprMenuId;
+	}
+
+	public int getCtifCfrmSeq() {
+		return ctifCfrmSeq;
+	}
+
+	public void setCtifCfrmSeq(int ctifCfrmSeq) {
+		this.ctifCfrmSeq = ctifCfrmSeq;
+	}
+
+	public String getCtifKncd() {
+		return ctifKncd;
+	}
+
+	public void setCtifKncd(String ctifKncd) {
+		this.ctifKncd = ctifKncd;
+	}
+
+	public String getMvTscoClcd() {
+		return mvTscoClcd;
+	}
+
+	public void setMvTscoClcd(String mvTscoClcd) {
+		this.mvTscoClcd = mvTscoClcd;
+	}
+
+	public String getCtifNo() {
+		return ctifNo;
+	}
+
+	public void setCtifNo(String ctifNo) {
+		this.ctifNo = ctifNo;
+	}
+
+	public String getCtifTime() {
+		return ctifTime;
+	}
+
+	public void setCtifTime(String ctifTime) {
+		this.ctifTime = ctifTime;
+	}
+
+	public String getCtifCfrmYn() {
+		return ctifCfrmYn;
+	}
+
+	public void setCtifCfrmYn(String ctifCfrmYn) {
+		this.ctifCfrmYn = ctifCfrmYn;
+	}
+
+	public String getErrCode() {
+		return errCode;
+	}
+
+	public void setErrCode(String errCode) {
+		this.errCode = errCode;
+	}
+
+	public String getErrMsg() {
+		return errMsg;
+	}
+
+	public void setErrMsg(String errMsg) {
+		this.errMsg = errMsg;
+	}
+
+	
+	
+	
+	
+}

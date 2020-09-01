@@ -1,0 +1,13 @@
+package tpost.batch.vo;
+
+
+/**
+ * @author smart
+ *
+ */
+public class tbMoblSndnMsgVO {   /*페이징 vo 확장시켜서 사용*/
+
+	
+	
+	
+}

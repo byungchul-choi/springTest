@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.elctDoc.dao.msgTmpltDao">   
+<select id="tmpltLstSelect" parameterType="tpost.elctDoc.vo.msgTmpltVO" resultType="tpost.elctDoc.vo.msgTmpltVO">
+SELECT /* tmpltLstSelect */
+	oganNm 				AS oganNm
+	,oganCd 			AS oganCd
+	,tmpltCd 			AS tmpltCd
+	,tmpltNm 			AS tmpltNm
+	,msgTmpltYn 		AS msgTmpltYn
+	,tmpltUseYn 		AS tmpltUseYn
+FROM(
+	SELECT 
+		 tpost.FN_GET_BASCD_NM('00001', M.OGAN_CD)	AS oganNm
+		,M.OGAN_CD 									AS oganCd
+		,M.TMPLT_CD 								AS tmpltCd
+		,M.TMPLT_NM 								AS tmpltNm
+		,IF(IFNULL(S.CRTR, '0') = '0', 'N', 'Y') 	AS msgTmpltYn 
+		,M.USE_YN 									AS tmpltUseYn
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM 
+		tpost.TB_DOC_TMPLT_MGNT M
+		LEFT OUTER JOIN tpost.TB_MSG_TMPLT_INFO S
+		ON M.OGAN_CD = S.OGAN_CD 
+	 	AND M.TMPLT_CD = S.TMPLT_CD 
+	 	,(SELECT @ROWNUM:=0) TMP
+	WHERE 
+		M.LST_HIST_YN = 'Y'
+	<if test="!inputTmpltNm.equals('')"> 
+	AND M.TMPLT_NM LIKE CONCAT('%', #{inputTmpltNm}, '%')
+	</if>
+	<if test="!inputTmpltUseYn.equals('')"> 
+	AND M.USE_YN = #{inputTmpltUseYn}
+	</if>
+	<if test="!inputOganCd.equals('')"> 
+	AND M.OGAN_CD = #{inputOganCd}
+	</if>
+	) A
+WHERE
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="tmpltLstCntSelect" parameterType="tpost.elctDoc.vo.msgTmpltVO" resultType="java.lang.Integer">
+SELECT /* tmpltLstSelect */
+	 COUNT(*)
+FROM 
+	tpost.TB_DOC_TMPLT_MGNT M
+	LEFT OUTER JOIN tpost.TB_MSG_TMPLT_INFO S
+	ON M.OGAN_CD = S.OGAN_CD 
+ 	AND M.TMPLT_CD = S.TMPLT_CD 
+WHERE 
+	M.LST_HIST_YN = 'Y'
+<if test="!inputTmpltNm.equals('')"> 
+AND M.TMPLT_NM LIKE CONCAT('%', #{inputTmpltNm}, '%')
+</if>
+<if test="!inputTmpltUseYn.equals('')"> 
+AND M.USE_YN = #{inputTmpltUseYn}
+</if>
+<if test="!inputOganCd.equals('')"> 
+AND M.OGAN_CD = #{inputOganCd}
+</if>
+</select>
+<select id="msgTmpltDetlSelect" parameterType="tpost.elctDoc.vo.msgTmpltVO" resultType="tpost.elctDoc.vo.msgTmpltVO">
+SELECT /* msgTmpltDetlSelect */
+	M.OGAN_CD									AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001', M.OGAN_CD)	AS oganNm
+	,M.TMPLT_CD 								AS tmpltCd
+	,M.TMPLT_NM 								AS tmpltNm
+	,IFNULL(S.MSG_TITLE, '') 					AS msgTitle
+	,IFNULL(S.MSG_TEXT, '')						AS msgText
+	,IFNULL(S.MMS_IMG, '') 						AS msgImg
+	,IFNULL(S.MMS_IMG_SIZE, '') 				AS msgImgSize
+FROM
+	tpost.TB_DOC_TMPLT_MGNT M
+	LEFT OUTER JOIN tpost.TB_MSG_TMPLT_INFO S
+	ON M.OGAN_CD = S.OGAN_CD 
+ 	AND M.TMPLT_CD = S.TMPLT_CD 
+ WHERE
+ 	M.LST_HIST_YN = 'Y'
+ AND M.OGAN_CD = #{oganCd}
+ AND M.TMPLT_CD = #{tmpltCd};
+</select>
+<insert id="msgTmpltDetlInsert" parameterType="tpost.elctDoc.vo.msgTmpltVO">
+INSERT /* msgTmpltDetlInsert */
+INTO tpost.TB_MSG_TMPLT_INFO (
+	OGAN_CD
+	,TMPLT_CD
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,MSG_TITLE
+	,MSG_TEXT
+	,MMS_IMG_SIZE
+	,MMS_IMG
+)
+VALUES (
+	#{oganCd}
+	,#{tmpltCd}
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+	,#{msgTitle}
+	,#{msgText}
+	,#{msgImgSize}
+	,#{msgImg}
+)
+</insert>
+
+<update id="msgTmpltDetlUpdate" parameterType="tpost.elctDoc.vo.msgTmpltVO">
+UPDATE /* msgTmpltDetlUpdate */
+	 tpost.TB_MSG_TMPLT_INFO
+SET
+	MDF_DATE = NOW()
+	,AMDR = #{amdr}
+	,MSG_TITLE = #{msgTitle}
+	,MSG_TEXT = #{msgText}
+	,MMS_IMG_SIZE = #{msgImgSize}
+	,MMS_IMG	= #{msgImg}
+WHERE
+	OGAN_CD = #{oganCd}
+AND TMPLT_CD = #{tmpltCd}
+</update>
+</mapper>

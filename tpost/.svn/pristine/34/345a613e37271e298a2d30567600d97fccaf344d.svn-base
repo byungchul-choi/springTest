@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.batSndnInfoLstDao">   
+
+<!-- 수신테이블 INSERT -->
+<insert id="tbSndnSnrcInfoLstUpload" parameterType="tpost.batch.batchSndnInfoLst.vo.batSndnInfoLstVO">
+INSERT /* tbSndnSnrcInfoLstUpload */ 
+  INTO tpost.TB_SNDN_SNRC_INFO_LST
+(
+	  TRANS_DT
+    , OGAN_CD
+    , TMPLT_CD
+    , OFAP_ELCT_ADDR
+    , ANOC_INFO_URL
+    , RCVE_RFSL_URL
+    , ANOC_INFO
+	, CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+	SELECT A.TRANS_DT
+	     , A.OGAN_CD
+	     , A.TMPLT_CD
+	     , B.OFAP_ELCT_ADDR
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , A.ANOC_INFO
+         , NOW()
+ 		 , NOW()
+		 ,'BATCH'
+		 ,'BATCH'
+	  FROM tpost.TB_BATCH_FILE_UPLD_TEMP A
+	     , tpost.TB_RCVE_CI_INFO B 
+ 	 WHERE A.EXE_DT =  CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+ 	                      ELSE #{exeDt}
+ 	                 END     
+ 	   AND A.OGAN_CD = #{oganCd}
+ 	   AND A.TMPLT_CD = #{tmpltCd}
+ 	   AND A.CI_NUM = B.CI_NUM
+</insert>
+
+
+<!-- 송신테이블 INSERT -->
+<insert id="tbSndnTrnsInfoLstUpload" parameterType="tpost.batch.batchSndnInfoLst.vo.batSndnInfoLstVO">
+INSERT /* tbSndnTrnsInfoLstUpload */ 
+  INTO tpost.TB_SNDN_TRNS_INFO_LST
+(
+	  TRANS_DT
+    , OGAN_CD
+    , TMPLT_CD
+    , OFAP_ELCT_ADDR
+    , ANOC_INFO_URL
+    , RCVE_RFSL_URL
+    , CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+	SELECT A.TRANS_DT
+	     , A.OGAN_CD
+	     , A.TMPLT_CD
+	     , A.OFAP_ELCT_ADDR
+  	     , ANOC_INFO_URL
+         , RCVE_RFSL_URL
+	     , NOW()
+ 		 , NOW()
+		 ,'BATCH'
+		 ,'BATCH'
+	  FROM tpost.TB_SNDN_SNRC_INFO_LST A
+ 	 WHERE A.TRANS_DT =  CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+ 	                      ELSE #{exeDt}
+ 	                 END 
+</insert>
+</mapper>

@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.fileTestDao">
+
+
+<!-- 처음파일을 임시 테이블 파일에 적재 -->
+<insert id="batchFileTestInsert" parameterType="java.util.List">
+INSERT /* batchFileTestInsert */
+  INTO tpost.TB_BATCH_FILE_UPLD_TEMP
+  ( EXE_DT
+  , TRANS_DT
+  , OGAN_CD
+  , TMPLT_CD 
+  , NAME 
+  , CI_NUM
+  , SSNO_FRON_BRDT
+  , SEX_CLCD
+  , ANOC_INFO
+  , CRT_DATE
+  , CRTR)
+  VALUES
+  <foreach separator=" , " item="item" collection="list">
+  (
+    CASE WHEN #{item.exeDt} = '' THEN  DATE_FORMAT( NOW()  ,	'%Y%m%d')
+         ELSE #{item.exeDt}
+    END      
+  , CASE WHEN #{item.sndnDate } = '' THEN   DATE_FORMAT( NOW()  ,	'%Y%m%d')
+         ELSE #{item.sndnDate}
+    END     
+  , #{item.oganCd }
+  , #{item.tmpltCd }
+  , #{item.name }
+  , #{item.ciNum }
+  , #{item.ssnoFronBrdt }
+  , #{item.sexClcd }
+  , #{item.anocInfo }
+  , NOW()
+  , 'batch'
+  )
+  </foreach>
+</insert>
+
+<!--발송정보목록 select Insert -->
+<insert id="tbSndnInfoLstUpload" parameterType="tpost.batch.vo.fileTestVO">
+INSERT /* tbSndnInfoLstUpload */ 
+  INTO tpost.TB_SNDN_INFO_LST
+(
+	  TRANS_DT
+	, OGAN_CD
+	, TMPLT_CD
+	, NAME
+	, CI_NUM
+	, SSNO_FRON_BRDT
+	, SEX_CLCD
+	, OFAP_ELCT_ADDR
+	, ANOC_INFO_URL
+    , RCVE_RFSL_URL
+	, ANOC_INFO
+	, CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+	SELECT A.TRANS_DT
+	     , A.OGAN_CD
+	     , A.TMPLT_CD
+	     , A.NAME
+	     , A.CI_NUM
+ 	     , A.SSNO_FRON_BRDT
+  	     , A.SEX_CLCD
+	     , B.OFAP_ELCT_ADDR
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , A.ANOC_INFO
+         , NOW()
+ 		 , NOW()
+		 ,'BATCH'
+		 ,'BATCH'
+	  FROM tpost.TB_BATCH_FILE_UPLD_TEMP A
+	     , tpost.TB_OFAP_ELCT_ADDR B 
+ 	 WHERE A.EXE_DT =  CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+ 	                      ELSE #{exeDt}
+ 	                 END     
+ 	   AND A.OGAN_CD = #{oganCd}
+ 	   AND A.TMPLT_CD = #{tmpltCd}
+ 	   AND A.CI_NUM = B.CI_NUM
+ 	   AND A.NAME = B.NAME
+</insert>
+
+<!-- 수신테이블 INSERT -->
+<insert id="tbSndnSnrcInfoLstUpload" parameterType="tpost.batch.vo.fileTestVO">
+INSERT /* tbSndnSnrcInfoLstUpload */ 
+  INTO tpost.TB_SNDN_SNRC_INFO_LST
+(
+	  TRANS_DT
+    , OGAN_CD
+    , TMPLT_CD
+    , OFAP_ELCT_ADDR
+    , ANOC_INFO_URL
+    , RCVE_RFSL_URL
+    , ANOC_INFO
+	, CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+	SELECT A.TRANS_DT
+	     , A.OGAN_CD
+	     , A.TMPLT_CD
+	     , B.OFAP_ELCT_ADDR
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , tpost.FN_GET_ENC_URL(B.OFAP_ELCT_ADDR)
+	     , A.ANOC_INFO
+         , NOW()
+ 		 , NOW()
+		 ,'BATCH'
+		 ,'BATCH'
+	  FROM tpost.TB_BATCH_FILE_UPLD_TEMP A
+	     , tpost.TB_OFAP_ELCT_ADDR B 
+ 	 WHERE A.EXE_DT =  CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+ 	                      ELSE #{exeDt}
+ 	                 END     
+ 	   AND A.OGAN_CD = #{oganCd}
+ 	   AND A.TMPLT_CD = #{tmpltCd}
+ 	   AND A.CI_NUM = B.CI_NUM
+ 	   AND A.NAME = B.NAME
+</insert>
+
+<!-- 송신테이블 INSERT -->
+<insert id="tbSndnTrnsInfoLstUpload" parameterType="tpost.batch.vo.fileTestVO">
+INSERT /* tbSndnTrnsInfoLstUpload */ 
+  INTO tpost.TB_SNDN_TRNS_INFO_LST
+(
+	  TRANS_DT
+    , OGAN_CD
+    , TMPLT_CD
+    , OFAP_ELCT_ADDR
+    , ANOC_INFO_URL
+    , RCVE_RFSL_URL
+    , CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+	SELECT A.TRANS_DT
+	     , A.OGAN_CD
+	     , A.TMPLT_CD
+	     , A.OFAP_ELCT_ADDR
+  	     , ANOC_INFO_URL
+         , RCVE_RFSL_URL
+	     , NOW()
+ 		 , NOW()
+		 ,'BATCH'
+		 ,'BATCH'
+	  FROM tpost.TB_SNDN_SNRC_INFO_LST A
+ 	 WHERE A.TRANS_DT =  CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+ 	                      ELSE #{exeDt}
+ 	                 END 
+</insert>
+
+<!--파일 임시 업로드 테이블 truncate -->
+<insert id="tbBatchFileUpldTempTruncate" parameterType="tpost.batch.vo.fileTestVO">
+
+TRUNCATE  /*  tbBatchFileUpldTempTruncate */ 
+         TABLE tpost.TB_BATCH_FILE_UPLD_TEMP  
+
+</insert>
+
+<!--발송정보목록 체크쿼리  -->
+<insert id="batchFileTestInsert_Fail" parameterType="tpost.batch.vo.fileTestVO">
+INSERT /* batchFileTestInsert_Fail */ 
+  INTO tpost.TB_BATCH_FILE_ERR
+(EXE_DT, OGAN_CD, TMPLT_CD, SEQ_NO, FILE_CNTS , SUCC_YN, FAIL_CNTS, CRT_DATE, CRTR)
+	SELECT 
+		   CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+		        ELSE #{exeDt}
+		        END
+	     , #{oganCd}
+	     ,  #{tmpltCd}
+	     , B.SEQ_NO
+	     , IFNULL( #{fileCnts} , '') 
+   	     , #{succYn} 
+   	     , IFNULL( #{failCnts} , '')
+   	     , NOW()
+   	     , 'batch'
+	  FROM (SELECT 'A' ) A
+	    ,  (
+	     SELECT IFNULL( MAX(SEQ_NO),0 )+ 1  AS SEQ_NO
+	         FROM tpost.TB_BATCH_FILE_ERR 
+	        WHERE EXE_DT = CASE WHEN #{exeDt} = '' THEN  DATE_FORMAT( NOW()  ,	'%Y%m%d')
+	                            ELSE #{exeDt}
+	                       END     
+	          AND OGAN_CD =#{oganCd}
+	          AND TMPLT_CD = #{tmpltCd}
+	        ) B
+  
+</insert>
+
+<!--템플릿항목 조회 쿼리  -->
+<select id="elecAddrSel" parameterType="tpost.batch.vo.fileTestVO" resultType="tpost.batch.vo.fileTestVO">
+SELECT /* elecAddrSel */
+      0        AS ofapElctAddrPk 
+	 , A.NAME	AS name
+	 , '0'	    AS ofapElctAddr
+	 , CI_NUM	AS ciNum
+	 ,#{bsrpCls}	    AS bsrpCls
+	 ,'Y'	    AS regnYn
+	 , A.SEX_CLCD AS sexClcd
+  FROM tpost.TB_BATCH_FILE_UPLD_TEMP A
+WHERE NOT EXISTS (
+  			SELECT B.NAME
+  			     , B.CI_NUM
+  			  FROM tpost.TB_OFAP_ELCT_ADDR B
+  			WHERE A.NAME = B.NAME
+  			  AND A.CI_NUM = B.CI_NUM
+         )
+</select>
+
+<!--입력시퀀스 확인  -->
+<select id="elecAddrInputSeq" parameterType="tpost.batch.vo.fileTestVO" resultType="tpost.batch.vo.fileTestVO">
+ SELECT /* elecAddrInputSeq */
+         IFNULL( MAX(AA.SEQ) , 0) +1 AS  inputOfapElctAddr
+      , ( SELECT IFNULL( MAX(OFAP_ELCT_ADDR_PK) , 0) +1
+           FROM tpost.TB_OFAP_ELCT_ADDR
+        ) AS inputPk
+   FROM (
+			SELECT SUBSTR( OFAP_ELCT_ADDR , 1,  3) AS inputBsrpCls
+			     , SUBSTR( OFAP_ELCT_ADDR , 4,  2) AS YE
+			     , SUBSTR( OFAP_ELCT_ADDR , 6,  8) AS SEQ
+		     FROM tpost.TB_OFAP_ELCT_ADDR
+		 ) AA
+	WHERE AA.inputBsrpCls =#{inputBsrpCls}	 
+	  AND AA.YE = #{ye}
+</select>
+
+<!-- 공인전자주소 입력 -->
+<insert id="ofapElctAddrListInsert_bat" parameterType="java.util.HashMap">
+INSERT /* ofapElctAddrListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR (
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+<foreach collection="tempList" item="item" separator="," >
+(
+	#{item.inputPk}
+	,#{item.name}
+	,#{item.inputOfapElctAddr}
+	,#{item.ciNum}
+	,'100'   /*100 : 개인 200 :법인 */
+	,'Y'
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+)
+</foreach>
+</insert>
+
+<!-- 공인전자주소 이력입력 -->
+<insert id="ofapElctAddrHisListInsert_bat" parameterType="java.lang.Integer">
+INSERT /* ofapElctAddrHisListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR_HIS (
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+SELECT 
+	OFAP_ELCT_ADDR_PK
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,BSRP_CLS
+	,REGN_YN
+	,ISS_DATE
+	,REGN_DATE
+	,CLAC_DATE
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR 
+WHERE 
+	OFAP_ELCT_ADDR_PK >= #{inputPk}
+</insert>
+
+<!--템플릿항목 조회 쿼리  -->
+<select id="tbSndnInfoLstSelect" parameterType="tpost.batch.vo.fileTestVO" resultType="tpost.batch.vo.fileTestVO">
+SELECT /* tbSndnInfoLstSelect */
+       ITEM_SNO  AS itemSno
+     , ITEM_NM   as itemNm
+     , ITEM_LEN  as itemLen
+  FROM tpost.TB_DOC_TMPLT_ATTR_LST
+ WHERE OGAN_CD = #{oganCd}
+   AND TMPLT_CD =  #{tmpltCd}
+ ORDER BY ITEM_SNO
+</select>
+<select id="tbMoblSndnMsg_upload" parameterType="java.lang.String" resultType="java.lang.String">
+INSERT  /* tbMoblSndnMsg_upload */ 
+      INTO tpost.TB_MOBL_SNDN_MSG (
+	DATA_GBN_CD				-- 01. 자료구분코드(0x00000003: SMS/LMS/MMS발송대상 송신
+	, SVC_ORG_CD			-- 02. 기관코드 
+	, TRANS_DT				-- 03. 요청일자
+    , IPIN_CI				-- 04. 아이핀CI값
+    , SVC_ORG_NM			-- 05. 기관명
+    , MSG_TYPE				-- 06. 메시지타입(0:SMS, 1:LMS, 2:MMS)
+    , MSG_INFO				-- 07. URL포함여부
+    , MSG_SIZE				-- 08. 메시지사이즈
+    , MSG_TEXT				-- 09. 메시지내용
+    , MMS_IMG_SIZE			-- 10. MMS첨부이미지사이즈
+    , MMS_IMG				-- 11. 이미지데이터
+    , SRC_CALL_NO			-- 12. 회신번호
+    , CN_FORM				-- 13. 문서명
+    , MSG_TITLE				-- 14. 메시지제목
+    , BALSONG_GBN			-- 15. 메시지발송구분
+    , MULTI_MBL_PRC_GBN		-- 16. 다회선사용자발송구분
+    , CELL_NO_LIST_SIZE		-- 17. 수신동의리스트사이즈
+    , CELL_NO_LIST			-- 18. 수신동의리스트
+    , SNDN_DTM				-- 19. 발송일시
+    , SNDN_VLD_DTM			-- 20. 발송유효일시
+    , SNDN_PROC_CL			-- 21. 발송처리구분
+    , TOTAL_CNT				-- 22. 총건수(휴대폰매핑요청총건수)
+    , TMPLT_CD				-- 23. 템플릿코드
+    , ANOC_INFO_URL			-- 24. 고지안내URL
+	, RCVE_RFSL_URL			-- 25. 수신거부URL
+	, OFAP_ELCT_ADDR        -- 26. 공인전자주소
+    , CRT_DATE				-- 27. 생성날짜
+    , MDF_DATE				-- 28. 수정날짜
+    , CRTR					-- 29. 생성자
+    , AMDR					-- 30. 수정자
+)
+SELECT
+	 LPAD('3',4,'0')	AS DATA_GBN_CD	-- 01. 자료구분코드
+	, B.OGAN_CD							-- 02. 기관코드
+	, B.TRANS_DT						-- 03. 요청일자
+	, A.CI_NUM							-- 04. 아이핀CI값
+	, FN_GET_BASCD_NM('00001',B.OGAN_CD)	AS SVC_ORG_NM	-- 05. 기관명
+	, B.MSG_TYPE						-- 06. 메시지타입(0:SMS, 1:LMS, 2:MMS)
+	, IF(B.URL_INCL_YN = 'Y', '1','0')	AS MSG_INFO			-- 07. URL포함여부(0: URL 미포함, 1:URL 포함)
+	, LENGTH(
+			REPLACE (
+		   		 REPLACE(  
+	              	REPLACE(MSG_TEXT, '{#수신거부_URL}'  , CONCAT(' 수신거부/해제하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveRfslDsms?a=', A.RCVE_RFSL_URL )) 
+              				, '{#안내_URL}' , CONCAT(' 안내문확인하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveGdc?a=',A.ANOC_INFO_URL   )
+              	), '{#name}', trim(A.NAME))
+           ) AS MSG_SIZE	-- 08. 메시지사이즈
+	, REPLACE (
+	           REPLACE(
+	              REPLACE(MSG_TEXT, '{#수신거부_URL}'  , CONCAT(' 수신거부/해제하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveRfslDsms?a=', A.RCVE_RFSL_URL )) 
+              , '{#안내_URL}' , CONCAT(' 안내문확인하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveGdc?a=',A.ANOC_INFO_URL   )
+             ), '{#name}', trim(A.NAME))  
+                                          AS MSG_TEXT				-- 09. 메시지내용
+	, B.MMS_IMG_SIZE					-- 10. MMS첨부이미지사이즈
+	, B.MMS_IMG							-- 11. 이미지데이터
+	, B.SRC_CALL_NO						-- 12. 회신번호
+ 	, CASE WHEN B.MSG_SNDN_CLCD IN ('2','3') THEN
+		CONCAT(C.TMPLT_NM,'_사전문자')
+	ELSE
+		C.TMPLT_NM
+	END	AS CN_FORM						-- 13. 문서명
+	, B.MSG_TITLE						-- 14. 메시지제목
+	, LPAD(B.MSG_SNDN_CLCD,4,'0')	AS 	BALSONG_GBN			-- 15. 메시지발송구분
+	, LPAD('2',4,'0')				AS MULTI_MBL_PRC_GBN	-- 16. 다회선사용자발송구분
+	, 0		AS CELL_NO_LIST_SIZE		-- 17. 수신동의리스트사이즈
+	, ''	AS  CELL_NO_LIST			-- 18. 수신동의리스트
+	, B.SNDN_DTM						-- 19. 발송일시
+	, DATE_FORMAT(DATE_ADD(STR_TO_DATE(B.SNDN_DTM,'%Y%m%d%H%i%s'), INTERVAL 3 hour),'%Y%m%d%H%i%s')	AS SNDN_VLD_DTM	-- 20. 발송유효일시
+	, '0'	AS SNDN_PROC_CL				-- 21. 발송처리구분(0:발송미처리,1:발송처리)
+	, 0		AS TOTAL_CNT				-- 22. 총건수(휴대폰매핑요청총건수)
+	, B.TMPLT_CD						-- 23. 템플릿코드
+	, A.ANOC_INFO_URL		       	    -- 24. 고지안내URL
+	, A.RCVE_RFSL_URL		 	        -- 25. 수신거부URL
+	, A.OFAP_ELCT_ADDR                    -- 26. 공인전자주소
+	, NOW()	AS CRT_DATE					-- 27. 생성날짜
+	, NOW()	AS MDF_DATE					-- 28. 수정날짜
+	, 'tpostBATCH'	AS CRTR				-- 29. 생성자
+	, 'tpostBATCH'	AS AMDR				-- 30. 수정자
+FROM  tpost.TB_SNDN_INFO_LST	A		
+	, tpost.TB_ELCT_DOC_SNDN_MGNT	B
+ 	, tpost.TB_DOC_TMPLT_MGNT		C
+WHERE A.TRANS_DT = CASE WHEN IFNULL( #{transDt} , '') = '' THEN  DATE_FORMAT( NOW()  ,	'%Y%m%d')
+	                             ELSE IFNULL( #{transDt} , '')
+	             END 
+	AND A.TRANS_DT = B.TRANS_DT 
+	AND A.OGAN_CD = B.OGAN_CD 
+	AND A.TMPLT_CD = B.TMPLT_CD
+	AND B.APR_YN = 'Y'
+	AND B.OGAN_CD = C.OGAN_CD 
+	AND B.TMPLT_CD = C.TMPLT_CD 
+	AND C.USE_YN = 'Y'
+	AND NOT EXISTS (  /*수신거부확인*/
+		 	SELECT 'Y'
+		  FROM tpost.TB_OGAN_RCVE_RF_MGNT
+		 WHERE OFAP_ELCT_ADDR = A.OFAP_ELCT_ADDR`
+		   AND RCVE_RF_CLCD = '0'	/* 거부 */
+		   AND OGAN_CD = A.OGAN_CD
+		   AND NOT EXISTS (
+			SELECT 'Y'
+			  FROM tpost.TB_SNDN_EXEC_MGNT	/* 수신거부 예외처리 */
+			 WHERE OFAP_ELCT_ADDR = A.OFAP_ELCT_ADDR 
+			   AND OGAN_CD = A.OGAN_CD 
+			   AND SNDN_CLCD = '1'
+			   AND DATE_FORMAT(NOW(),'%Y%m%d') BETWEEN SNDN_EXEC_ST_DT AND SNDN_EXEC_EN_DT
+		)
+    )
+  AND NOT EXISTS ( /*발송테이블에 적재시 재적재금지*/
+		SELECT 'Y'
+		  FROM tpost.TB_MOBL_SNDN_MSG
+		 WHERE DATA_GBN_CD = LPAD('3',4,'0')
+		   AND SVC_ORG_CD = B.OGAN_CD
+		   AND TRANS_DT = B.TRANS_DT
+		   AND IPIN_CI = A.CI_NUM
+		   AND TMPLT_CD = C.TMPLT_CD
+	)
+</select>
+
+<!-- mms 발송조회목록 조회 -->
+<select id="tbMoblSndnMsgSendList" parameterType="tpost.batch.vo.tbMoblSndnMsgVO" resultType="tpost.batch.vo.tbMoblSndnMsgVO">
+SELECT /* tbMoblSndnMsgSendList */
+	 LPAD('3',4,'0')	AS dataGbnCd	-- 01. 자료구분코드
+	, B.OGAN_CD			AS svcOrgCd		-- 02. 기관코드
+	, B.TRANS_DT		AS transDt		-- 03. 요청일자
+	, D.CI_NUM			AS ipinCi		-- 04. 아이핀CI값
+	, tpost.FN_GET_BASCD_NM('00001',B.OGAN_CD)	AS svcOrgNm	-- 05. 기관명
+	, B.MSG_TYPE		AS msgType		-- 06. 메시지타입(0:SMS, 1:LMS, 2:MMS)
+	, IF(B.URL_INCL_YN = 'Y', '1','0')	AS msgInfo			-- 07. URL포함여부(0: URL 미포함, 1:URL 포함)
+	, LENGTH(
+			REPLACE (
+		   		 REPLACE(  
+	              	REPLACE(MSG_TEXT, '{#수신거부_URL}'  , CONCAT(' 수신거부/해제하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveRfslDsms?a=', A.RCVE_RFSL_URL )) 
+              				, '{#안내_URL}' , CONCAT(' 안내문확인하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveGdc?a=',A.ANOC_INFO_URL   )
+              	), '{#name}', trim(D.NAME))
+           ) AS msgSize	-- 08. 메시지사이즈
+	, REPLACE (
+	           REPLACE(
+	              REPLACE(MSG_TEXT, '{#수신거부_URL}'  , CONCAT(' 수신거부/해제하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveRfslDsms?a=', A.RCVE_RFSL_URL )) 
+              , '{#안내_URL}' , CONCAT(' 안내문확인하기 : http://10.10.19.64:8080/tpost/msgRcve/msgRcveGdc?a=',A.ANOC_INFO_URL   )
+             ), '{#name}', trim(D.NAME))  
+                                          AS msgText				-- 09. 메시지내용
+	, B.MMS_IMG_SIZE	AS mmsImgSize				-- 10. MMS첨부이미지사이즈
+	, B.MMS_IMG			AS mmsImg				-- 11. 이미지데이터
+	, B.SRC_CALL_NO		AS srcCallNo				-- 12. 회신번호
+ 	, CASE WHEN B.MSG_SNDN_CLCD IN ('2','3') THEN CONCAT(C.TMPLT_NM,'_사전문자')
+	        ELSE C.TMPLT_NM
+	   END	AS cnForm						-- 13. 문서명
+	, B.MSG_TITLE	AS msgTitle					-- 14. 메시지제목
+	, LPAD(B.MSG_SNDN_CLCD,4,'0')	AS 	balsongGbn			-- 15. 메시지발송구분
+	, LPAD('2',4,'0')				AS multiMblPrcGbn	-- 16. 다회선사용자발송구분
+	, 0		AS cellNoListSize		-- 17. 수신동의리스트사이즈
+	, ''	AS  cellNoList			-- 18. 수신동의리스트
+	, B.SNDN_DTM	AS sndnDtm					-- 19. 발송일시
+	, DATE_FORMAT(DATE_ADD(STR_TO_DATE(B.SNDN_DTM,'%Y%m%d%H%i%s'), INTERVAL 3 hour),'%Y%m%d%H%i%s')	AS sndnVldDtm	-- 20. 발송유효일시
+	, '0'	AS sndnProcCl				-- 21. 발송처리구분(0:발송미처리,1:발송처리)
+	, 0		AS totalCnt				-- 22. 총건수(휴대폰매핑요청총건수)
+	, B.TMPLT_CD	AS tmpltCd					-- 23. 템플릿코드
+	, A.ANOC_INFO_URL	AS anocInfoUrl	       	    -- 24. 고지안내URL 난수
+	, A.RCVE_RFSL_URL	AS rcveRfslUrl	 	        -- 25. 수신거부URL
+	, A.OFAP_ELCT_ADDR      AS ofapElctAddr              -- 26. 공인전자주소
+	, D.NAME                AS name                 -- 고객명 그림파일에 넣기
+FROM  tpost.TB_SNDN_TRNS_INFO_LST	A		
+	, tpost.TB_ELCT_DOC_SNDN_MGNT	B
+ 	, tpost.TB_DOC_TMPLT_MGNT		C
+ 	, tpost.TB_OFAP_ELCT_ADDR       D
+WHERE A.TRANS_DT = '20200615' 
+	AND A.TRANS_DT = B.TRANS_DT 
+	AND A.OGAN_CD = B.OGAN_CD 
+	AND A.TMPLT_CD = B.TMPLT_CD
+	AND A.OFAP_ELCT_ADDR = D.OFAP_ELCT_ADDR
+	AND B.APR_YN = 'Y'
+	AND B.OGAN_CD = C.OGAN_CD 
+	AND B.TMPLT_CD = C.TMPLT_CD 
+	AND C.USE_YN = 'Y'
+	AND NOT EXISTS (  /*수신거부확인*/
+		 	SELECT 'Y'
+		  FROM tpost.TB_OGAN_RCVE_RF_MGNT
+		 WHERE OFAP_ELCT_ADDR = A.OFAP_ELCT_ADDR
+		   AND RCVE_RF_CLCD = '0'	/* 거부 */
+		   AND OGAN_CD = A.OGAN_CD
+		   AND NOT EXISTS (
+			SELECT 'Y'
+			  FROM tpost.TB_SNDN_EXEC_MGNT	/* 수신거부 예외처리 */
+			 WHERE OFAP_ELCT_ADDR = A.OFAP_ELCT_ADDR 
+			   AND OGAN_CD = A.OGAN_CD 
+			   AND SNDN_CLCD = '1'
+			   AND DATE_FORMAT(NOW(),'%Y%m%d') BETWEEN SNDN_EXEC_ST_DT AND SNDN_EXEC_EN_DT
+		)
+    )
+  AND NOT EXISTS ( /*발송테이블에 적재시 재적재금지*/
+		SELECT 'Y'
+		  FROM tpost.TB_MOBL_SNDN_MSG
+		 WHERE DATA_GBN_CD = LPAD('3',4,'0')
+		   AND SVC_ORG_CD = B.OGAN_CD
+		   AND TRANS_DT = B.TRANS_DT
+		   AND IPIN_CI = D.CI_NUM
+		   AND TMPLT_CD = C.TMPLT_CD
+	)
+</select>
+
+
+<!-- 공인전자주소 입력 -->
+<insert id="tbMoblSndnMsgtInsert" parameterType="java.util.HashMap">
+INSERT /* tbMoblSndnMsgtInsert */
+INTO tpost.TB_MOBL_SNDN_MSG (
+	DATA_GBN_CD				-- 01. 자료구분코드(0x00000003: SMS/LMS/MMS발송대상 송신
+	, SVC_ORG_CD			-- 02. 기관코드 
+	, TRANS_DT				-- 03. 요청일자
+    , IPIN_CI				-- 04. 아이핀CI값
+    , SVC_ORG_NM			-- 05. 기관명
+    , MSG_TYPE				-- 06. 메시지타입(0:SMS, 1:LMS, 2:MMS)
+    , MSG_INFO				-- 07. URL포함여부
+    , MSG_SIZE				-- 08. 메시지사이즈
+    , MSG_TEXT				-- 09. 메시지내용
+    , MMS_IMG_SIZE			-- 10. MMS첨부이미지사이즈
+    , MMS_IMG				-- 11. 이미지데이터
+    , SRC_CALL_NO			-- 12. 회신번호
+    , CN_FORM				-- 13. 문서명
+    , MSG_TITLE				-- 14. 메시지제목
+    , BALSONG_GBN			-- 15. 메시지발송구분
+    , MULTI_MBL_PRC_GBN		-- 16. 다회선사용자발송구분
+    , CELL_NO_LIST_SIZE		-- 17. 수신동의리스트사이즈
+    , CELL_NO_LIST			-- 18. 수신동의리스트
+    , SNDN_DTM				-- 19. 발송일시
+    , SNDN_VLD_DTM			-- 20. 발송유효일시
+    , SNDN_PROC_CL			-- 21. 발송처리구분
+    , TOTAL_CNT				-- 22. 총건수(휴대폰매핑요청총건수)
+    , TMPLT_CD				-- 23. 템플릿코드
+    , ANOC_INFO_URL			-- 24. 고지안내URL
+	, RCVE_RFSL_URL			-- 25. 수신거부URL
+	, OFAP_ELCT_ADDR        -- 26. 공인전자주소
+    , CRT_DATE				-- 27. 생성날짜
+    , MDF_DATE				-- 28. 수정날짜
+    , CRTR					-- 29. 생성자
+    , AMDR					-- 30. 수정자
+)
+VALUES
+<foreach collection="tempList" item="item" separator="," >
+(
+     #{item.dataGbnCd       }
+	,#{item.svcOrgCd       }
+    ,#{item.transDt        }
+	,#{item.ipinCi         }
+	,#{item.svcOrgNm       }
+	,#{item.msgType        }
+	,#{item.msgInfo        }
+	,#{item.msgSize        }
+	,#{item.msgText        }
+	,#{item.mmsImgSize     }
+	,#{item.mmsImg         }
+	,#{item.srcCallNo      }
+	,#{item.cnForm         }
+	,#{item.msgTitle       }
+	,#{item.balsongGbn     }
+	,#{item.multiMblPrcGbn }
+	,#{item.cellNoListSize }
+	,#{item.cellNoList     }
+	,#{item.sndnDtm        }
+	,#{item.sndnVldDtm     }
+	,#{item.sndnProcCl     }
+	, 0	
+    , #{item.tmpltCd		}	
+    , #{item.anocInfoUrl	}	
+	, #{item.rcveRfslUrl	}	
+	, #{item.ofapElctAddr }  
+	,NOW()
+	,NOW()
+	,'batch'
+	,'batch'
+)
+</foreach>
+</insert>
+
+</mapper>

@@ -1,0 +1,10 @@
+db.driver=com.mysql.jdbc.Driver
+db.name=root
+db.password=PK_root00
+
+db.driverClassName=net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+db.url=jdbc:log4jdbc:mysql://10.10.19.64:3306/tpost?useUnicode=true&characterEncoding=utf8
+
+aesKey=pocTpost 
+
+server=poc

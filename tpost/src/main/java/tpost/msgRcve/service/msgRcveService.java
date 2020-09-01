@@ -1,0 +1,133 @@
+package tpost.msgRcve.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.commCode.controller.commCdMgntController;
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.msgRcve.dao.msgRcveDao;
+import tpost.msgRcve.vo.msgRcveVO;
+
+@Service
+public class msgRcveService{
+	@Autowired
+	msgRcveDao dao;
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	public msgRcveVO anocInfoListSelect(msgRcveVO msgRcveVO) {
+		return dao.anocInfoListSelect(msgRcveVO);
+	}
+	
+	@Transactional
+	public Map onesCheck(msgRcveVO msgRcveVO) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		String errorMessage = "";
+		
+		String name = msgRcveVO.getName();
+		String sexClcd = msgRcveVO.getSexCls();
+		String brdt = msgRcveVO.getBrdt().substring(2);
+		String temp = msgRcveVO.getBrdt().substring(0, 2);
+		
+		if(temp.equals("20")) {
+			if(sexClcd.equals("1")) sexClcd = "3";
+			if(sexClcd.equals("2")) sexClcd = "4";
+		}
+		
+		msgRcveVO tempVO = msgRcveVO;
+		tempVO = dao.getOfapElctAddrSelect_Anoc(tempVO);
+		
+		resultMap.put("sndnOgan", tempVO.getSndnOgan());
+		resultMap.put("tmpltCd", tempVO.getTmpltCd());
+		
+		msgRcveVO.setTransDt(tempVO.getTransDt());
+		msgRcveVO.setSndnOgan(tempVO.getSndnOgan());
+		msgRcveVO.setTmpltCd(tempVO.getTmpltCd());
+		msgRcveVO.setOfapElctAddr(tempVO.getOfapElctAddr());
+		
+		msgRcveVO = dao.sndnInfoSelect(msgRcveVO);
+		
+		if(msgRcveVO.getName().trim().equals(name) && msgRcveVO.getSexCls().trim().equals(sexClcd) && msgRcveVO.getBrdt().trim().equals(brdt)) {
+			
+		}else {
+			errorMessage = "본인확인에 실패하였습니다.";	
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	public String getHexKeySelect(msgRcveVO msgRcveVO) {
+		return dao.getHexKeySelect(msgRcveVO);
+	}
+	
+	public msgRcveVO getOfapElctAddrSelect_Rcve(msgRcveVO msgRcveVO) {
+		return dao.getOfapElctAddrSelect_Rcve(msgRcveVO);
+	}
+	
+	public msgRcveVO getOfapElctAddrSelect_Anoc(msgRcveVO msgRcveVO) {
+		return dao.getOfapElctAddrSelect_Anoc(msgRcveVO);
+	}
+	
+	@Transactional
+	public Map sndnRfslUpdate(msgRcveVO msgRcveVO) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		String errorMessage = "";
+		
+		String seqNo = msgRcveVO.getSeqNo();
+		String sndnRfsl = msgRcveVO.getSndnRfsl();
+		
+		msgRcveVO = getOfapElctAddrSelect_Rcve(msgRcveVO);
+		msgRcveVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		msgRcveVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+
+		if(seqNo.equals("0")) {
+			dao.sndnRfslMgntInsert(msgRcveVO);
+			
+			msgRcveVO.setSeqNo(seqNo);
+			msgRcveVO.setSndnRfsl(sndnRfsl);
+			
+			dao.sndnRfslInsert(msgRcveVO);
+		} else {
+			msgRcveVO.setSeqNo(seqNo);
+			msgRcveVO.setSndnRfsl(sndnRfsl);
+
+			dao.sndnRfslUpdate(msgRcveVO);
+			dao.sndnRfslInsert(msgRcveVO);	
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		return resultMap;
+	}
+	
+	public msgRcveVO sndnRfslSelect(msgRcveVO msgRcveVO) {
+		return dao.sndnRfslSelect(msgRcveVO);
+	}
+	
+	public msgRcveVO tmpltHtmlSelect(msgRcveVO msgRcveVO) {
+		return dao.tmpltHtmlSelect(msgRcveVO);
+	}
+	public List<msgRcveVO> tmpltSchemaSelect(msgRcveVO msgRcveVO) {
+		return dao.tmpltSchemaSelect(msgRcveVO);
+	}
+	
+	public void insertRegnDate(msgRcveVO msgRcveVO) {
+		String histSeq = dao.getRdngMaxHistSeq(msgRcveVO);
+		msgRcveVO.setHistSeq(histSeq);
+		
+		msgRcveVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		msgRcveVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		dao.rdngMgntInsert(msgRcveVO);
+	}
+}

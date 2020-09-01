@@ -1,0 +1,224 @@
+package tpost.common.dao;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+import tpost.commCode.controller.commCdMgntController;
+import tpost.common.vo.athGrpMgntAOVO;
+import tpost.common.vo.athGrpMgntCustVO;
+import tpost.common.vo.athGrpMgntVO;
+import tpost.common.vo.custInfMgntVO;
+import tpost.egovcomm.EgovUserDetailsHelper;
+
+
+@Controller
+public class athGrpMgntDao extends  Exception {
+
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	 @Autowired
+	  SqlSession sqlSessionTemplate;
+
+	 public athGrpMgntVO setCrtrAmdr(athGrpMgntVO athGrpMgntVO) {
+		  
+		  /*세션에 있는 custId 셋팅*/
+		 athGrpMgntVO.setCrtr(EgovUserDetailsHelper.getUserId()); 
+		 athGrpMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());
+		  
+		  return athGrpMgntVO;
+	  }
+	 
+	 public athGrpMgntCustVO setCrtrAmdr(athGrpMgntCustVO athGrpMgntCustVO) {
+		 
+		 /*세션에 있는 custId 셋팅*/
+		 athGrpMgntCustVO.setCrtr(EgovUserDetailsHelper.getUserId()); 
+		 athGrpMgntCustVO.setAmdr(EgovUserDetailsHelper.getUserId());
+		 
+		 return athGrpMgntCustVO;
+	 }
+	 public athGrpMgntAOVO setCrtrAmdr(athGrpMgntAOVO athGrpMgntAOVO) {
+		 
+		 /*세션에 있는 custId 셋팅*/
+		 athGrpMgntAOVO.setCrtr(EgovUserDetailsHelper.getUserId()); 
+		 athGrpMgntAOVO.setAmdr(EgovUserDetailsHelper.getUserId());
+		 
+		 
+		 return athGrpMgntAOVO;
+	 }
+	 
+	 /**
+	  * 권한그룹*/
+	 
+	 /*권한 그룹 등록 */ 
+		public void athGrpMgntInsert(athGrpMgntVO athGrpMgntVO) {
+			
+			athGrpMgntVO =   setCrtrAmdr(athGrpMgntVO);
+			 
+			String[] athGrpId = athGrpMgntVO.getAthGrpId().split(",");
+			String[] athGrpNm = athGrpMgntVO.getAthGrpNm().split(",");
+			String[] athGrpDesc = athGrpMgntVO.getAthGrpDesc().split(",");
+			
+			List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+			String[] getInputChk = athGrpMgntVO.getInputChk().split(",");
+
+			for(int i = 1; i < getInputChk.length; i++) {
+				if(getInputChk[i].equals("true")) {
+					Map<String, Object> temp = new HashMap<String, Object>();
+					temp.put("athGrpId", athGrpId[i-1]);
+					temp.put("athGrpNm",  ( i-1 < athGrpNm.length ) ?  athGrpNm[i-1] : "");
+					temp.put("athGrpDesc",  ( i-1 < athGrpDesc.length ) ?  athGrpDesc[i-1] : "");
+					temp.put("crtr",  athGrpMgntVO.getCrtr());
+					temp.put("amdr",  athGrpMgntVO.getAmdr());
+					tempList.add(temp);
+				}
+			}
+			
+			Map<String, Object> paramMap = new HashMap<String, Object>();
+			paramMap.put("tempList", tempList);
+			
+			sqlSessionTemplate.insert("tpost.common.dao.athGrpMgntDao.athGrpMgntInsert", paramMap);
+		}
+		/*권한 그룹 수정 */ 
+		public void athGrpMgntUpdate(athGrpMgntVO athGrpMgntVO) {
+			athGrpMgntVO =   setCrtrAmdr(athGrpMgntVO);
+			
+			sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntUpdate", athGrpMgntVO);
+		}
+		
+		/*권한 그룹 삭제 */ 
+		public void athGrpMgntDelete(athGrpMgntVO athGrpMgntVO) {
+			
+			String[] getInputChk = athGrpMgntVO.getInputChk().split(",");
+			String[] athGrpId = athGrpMgntVO.getAthGrpId().split(",");
+			
+			List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+			
+			for(int i = 1; i < getInputChk.length; i++) {
+				if(getInputChk[i].equals("true")) {
+					Map<String, Object> temp = new HashMap<String, Object>();
+					temp.put("athGrpId",  ( (i -1) < athGrpId.length ) ?  athGrpId[i -1] : "");
+					tempList.add(temp);
+				}
+			}
+			
+			Map<String, Object> paramMap = new HashMap<String, Object>();
+			paramMap.put("tempList", tempList);
+			sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntDelete", paramMap);
+		}
+		
+		/*권한 그룹조회 조회*/
+		public List<athGrpMgntVO> athGrpMgntSelect(athGrpMgntVO athGrpMgntVO) {
+			return sqlSessionTemplate.selectList("tpost.common.dao.athGrpMgntDao.athGrpMgntSelect",athGrpMgntVO);
+		}
+		
+		/*페이징 카운트 가져오기*/
+		 public int athGrpMgntSelectCnt(athGrpMgntVO athGrpMgntVO) {
+			  return sqlSessionTemplate.selectOne("tpost.common.dao.athGrpMgntDao.athGrpMgntSelectCnt",athGrpMgntVO);
+		  }
+		
+	
+		/**
+		 * 권한그룹 고객정보 */
+		
+	 /*매핑 고객정보 조회*/
+	public List<athGrpMgntCustVO> athGrpMgntCustSelect(athGrpMgntCustVO athGrpMgntCustVO) {
+		 return sqlSessionTemplate.selectList("tpost.common.dao.athGrpMgntDao.athGrpMgntCustSelect",athGrpMgntCustVO);
+	}
+	
+	/*매핑 고객정보  등록*/ 
+	public void athMgntCustInsert(athGrpMgntCustVO athGrpMgntCustVO) {
+		athGrpMgntCustVO =   setCrtrAmdr(athGrpMgntCustVO);
+		
+		int seq = sqlSessionTemplate.selectOne("tpost.common.dao.athGrpMgntDao.athGrpMgntCustInsertSeq" ); 
+
+		String[] custId = athGrpMgntCustVO.getCustId().split(",");
+		
+		List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+		for(int i = 0; i < custId.length; i++) {
+			Map<String, Object> temp = new HashMap<String, Object>();
+			temp.put("seq", (seq + i) );
+			temp.put("custId", custId[i]);
+			temp.put("athGrpId", athGrpMgntCustVO.getAthGrpIdLink());
+			temp.put("crtr", athGrpMgntCustVO.getCrtr());
+			temp.put("amdr", athGrpMgntCustVO.getAmdr());
+			tempList.add(temp);
+		}
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("tempList", tempList);
+		
+		sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntCustInsert", paramMap);
+	}
+	
+	/*매핑 고객정보  수정*/ 
+	public void athMgntCustUpdate(athGrpMgntCustVO athGrpMgntCustVO) {
+		athGrpMgntCustVO =   setCrtrAmdr(athGrpMgntCustVO);
+		sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntCustUpdate", athGrpMgntCustVO);
+	} 
+	
+	/*페이징 카운트 가져오기*/
+	 public int athGrpMgntCustSelectCnt(athGrpMgntCustVO athGrpMgntCustVO) {
+		  return sqlSessionTemplate.selectOne("tpost.common.dao.athGrpMgntDao.athGrpMgntSelectCnt",athGrpMgntCustVO);
+	  }
+	
+	/**
+	 *권한그룹 AO 정보 */
+	
+	/*매핑 AO정보 조회*/
+	public List<athGrpMgntAOVO> athGrpMgntAOSelect(athGrpMgntAOVO athGrpMgntAOVO) {
+		return sqlSessionTemplate.selectList("tpost.common.dao.athGrpMgntDao.athGrpMgntAOSelect",athGrpMgntAOVO);
+	}
+	/*페이징 카운트 가져오기*/
+	 public int athGrpMgntAOSelectCnt(athGrpMgntAOVO athGrpMgntAOVO) {
+		  return sqlSessionTemplate.selectOne("tpost.common.dao.athGrpMgntDao.athGrpMgntSelectCnt",athGrpMgntAOVO);
+	}
+		
+	
+	
+	/*매핑 AO  등록*/ 
+	public void athMgntAOInsert(athGrpMgntAOVO athGrpMgntAOVO) {
+		athGrpMgntAOVO =   setCrtrAmdr(athGrpMgntAOVO);
+		
+		
+		int seq = sqlSessionTemplate.selectOne("tpost.common.dao.athGrpMgntDao.athGrpMgntAOInsertSeq" );
+		
+		String[] aoId = athGrpMgntAOVO.getAoId().split(",");
+		List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+		for(int i = 0; i < aoId.length; i++) {
+			Map<String, Object> temp = new HashMap<String, Object>();
+			
+			temp.put("seq", (seq+i));
+			temp.put("aoId", aoId[i]);
+			temp.put("athGrpId", athGrpMgntAOVO.getAthGrpIdLink());
+			temp.put("crtr", athGrpMgntAOVO.getCrtr());
+			temp.put("amdr", athGrpMgntAOVO.getAmdr());
+			tempList.add(temp);
+		}
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("tempList", tempList);
+		
+		sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntAOInsert", paramMap);
+	}
+		
+	/*매핑 AO 수정 */ 
+	public void athMgntAOUpdate(athGrpMgntAOVO athGrpMgntAOVO) {
+		athGrpMgntAOVO =   setCrtrAmdr(athGrpMgntAOVO);
+		sqlSessionTemplate.update("tpost.common.dao.athGrpMgntDao.athGrpMgntAOUpdate", athGrpMgntAOVO);
+	}
+	
+	  
+	  
+	   
+	 
+	  
+
+
+}

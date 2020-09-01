@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.batchFileUploadTemp.dao.batFileUploadTempDao">
+
+
+<!-- 처음파일을 임시 테이블 파일에 적재 -->
+<insert id="batchFileUploadTempInsert" parameterType="java.util.List">
+INSERT /* batchFileUploadTempInsert */
+  INTO tpost.TB_BATCH_FILE_UPLD_TEMP
+  ( EXE_DT
+  , TRANS_DT
+  , OGAN_CD
+  , TMPLT_CD 
+  , NAME 
+  , CI_NUM
+  , SSNO_FRON_BRDT
+  , SEX_CLCD
+  , ANOC_INFO
+  , CRT_DATE
+  , CRTR)
+  VALUES
+  <foreach separator=" , " item="item" collection="list">
+  (
+    DATE_FORMAT( NOW()  ,	'%Y%m%d')     
+  , CASE WHEN #{item.exeDt } = '' THEN   DATE_FORMAT( NOW()  ,	'%Y%m%d')
+         ELSE #{item.exeDt}
+    END     
+  , #{item.oganCd }
+  , #{item.tmpltCd }
+  , #{item.name }
+  , #{item.ciNum }
+  , #{item.ssnoFronBrdt }
+  , #{item.sexClcd }
+  , #{item.anocInfo }
+  , NOW()
+  , 'batch'
+  )
+  </foreach>
+</insert>
+
+
+<!--파일 임시 업로드 테이블 truncate -->
+<insert id="tbBatchFileUpldTempTruncate" parameterType="tpost.batch.batchFileUploadTemp.vo.batFileUploadTempVO">
+
+TRUNCATE  /*  tbBatchFileUpldTempTruncate */ 
+         TABLE tpost.TB_BATCH_FILE_UPLD_TEMP  
+
+</insert>
+
+<!--발송정보목록 체크쿼리  -->
+<insert id="batchFileTestInsert_Fail" parameterType="tpost.batch.batchFileUploadTemp.vo.batFileUploadTempVO">
+INSERT /* batchFileTestInsert_Fail */ 
+  INTO tpost.TB_BATCH_FILE_ERR
+(EXE_DT, OGAN_CD, TMPLT_CD, SEQ_NO, FILE_CNTS , SUCC_YN, FAIL_CNTS, CRT_DATE, CRTR)
+	SELECT 
+		   CASE WHEN #{exeDt} = '' THEN DATE_FORMAT( NOW()  ,	'%Y%m%d')
+		        ELSE #{exeDt}
+		        END
+	     , #{oganCd}
+	     ,  #{tmpltCd}
+	     , B.SEQ_NO
+	     , IFNULL( #{fileCnts} , '') 
+   	     , #{succYn} 
+   	     , IFNULL( #{failCnts} , '')
+   	     , NOW()
+   	     , 'batch'
+	  FROM (SELECT 'A' ) A
+	    ,  (
+	     SELECT IFNULL( MAX(SEQ_NO),0 )+ 1  AS SEQ_NO
+	         FROM tpost.TB_BATCH_FILE_ERR 
+	        WHERE EXE_DT = CASE WHEN #{exeDt} = '' THEN  DATE_FORMAT( NOW()  ,	'%Y%m%d')
+	                            ELSE #{exeDt}
+	                       END     
+	          AND OGAN_CD =#{oganCd}
+	          AND TMPLT_CD = #{tmpltCd}
+	        ) B
+  
+</insert>
+
+
+<!--템플릿항목 조회 쿼리  -->
+<select id="tbSndnInfoLstSelect" parameterType="tpost.batch.batchFileUploadTemp.vo.batFileUploadTempVO" resultType="tpost.batch.batchFileUploadTemp.vo.batFileUploadTempVO">
+SELECT /* tbSndnInfoLstSelect */
+       ITEM_SNO  AS itemSno
+     , ITEM_NM   as itemNm
+     , ITEM_LEN  as itemLen
+  FROM tpost.TB_DOC_TMPLT_ATTR_LST
+ WHERE OGAN_CD = #{oganCd}
+   AND TMPLT_CD =  #{tmpltCd}
+ ORDER BY ITEM_SNO
+</select>
+
+</mapper>

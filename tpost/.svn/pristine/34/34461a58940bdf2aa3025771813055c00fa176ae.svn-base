@@ -1,0 +1,275 @@
+package tpost.acmdCerf.vo;
+
+import tpost.egovcomm.vo.PagingDefaultVO;
+
+public class ofapElctAddrVO extends PagingDefaultVO{
+	//------------------------------------------------- 공인전자주소 input -------------------------------------------------
+	
+	
+	private String inputChk;
+	private String inputPk;						/* pk */
+	private String inputIssStDt;				/* 신청시작일자 */
+	private String inputIssClosDt;				/* 신청종료일자 */
+	private String inputBsrpCls;				/* 개인/법인 구분 */
+	private String inputName;					/* 고객명 */
+	private String inputOfapElctAddr;			/* 공인전자주소 */
+	private String inputCiNum;					/* 고유번호*/
+	private String inputRegnYn;					/* 상태여부 */
+	
+	
+	public String getInputChk() {
+		return inputChk;
+	}
+	public void setInputChk(String inputChk) {
+		this.inputChk = inputChk;
+	}
+	
+	public String getInputPk() {
+		return inputPk;
+	}
+	public void setInputPk(String inputPk) {
+		this.inputPk = inputPk;
+	}
+	
+	public String getInputIssStDt() {
+		return inputIssStDt;
+	}
+	public void setInputIssStDt(String inputIssStDt) {
+		this.inputIssStDt = inputIssStDt;
+	}
+	
+	public String getInputIssClosDt() {
+		return inputIssClosDt;
+	}
+	public void setInputIssClosDt(String inputIssClosDt) {
+		this.inputIssClosDt = inputIssClosDt;
+	}
+	
+	public String getInputBsrpCls() {
+		return inputBsrpCls;
+	}
+	public void setInputBsrpCls(String inputBsrpCls) {
+		this.inputBsrpCls = inputBsrpCls;
+	}
+	
+	public String getInputName() {
+		return inputName;
+	}
+	public void setInputName(String inputName) {
+		this.inputName = inputName;
+	}
+	
+	public String getInputOfapElctAddr() {
+		return inputOfapElctAddr;
+	}
+	public void setInputOfapElctAddr(String inputOfapElctAddr) {
+		this.inputOfapElctAddr = inputOfapElctAddr;
+	}
+	
+	public String getInputCiNum() {
+		return inputCiNum;
+	}
+	public void setInputCiNum(String inputCiNum) {
+		this.inputCiNum = inputCiNum;
+	}
+	
+	public String getInputRegnYn() {
+		return inputRegnYn;
+	}
+	public void setInputRegnYn(String inputRegnYn) {
+		this.inputRegnYn = inputRegnYn;
+	}
+	
+	
+	//------------------------------------------------- 공인전자주소  -------------------------------------------------
+
+	
+	private String pk;					/* pk */
+	private String name;				/* 고객명 */
+	private String ofapElctAddr;		/* 공인전자주소 */
+	private String ciNum;				/* 고유번호 */
+	private String bsrpCls;				/* 개인/법인 구분 */
+	private String regnYn;				/* 등록/해지 여부 */
+	private String issDate;				/* 발급일자 */
+	private String apctDate;			/* 신청일자 */
+	private String regnDate;			/* 등록일자 */
+	private String clacDate;			/* 해지일자 */
+	
+	
+	public String getPk() {
+		return pk;
+	}
+	public void setPk(String pk) {
+		this.pk = pk;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getOfapElctAddr() {
+		return ofapElctAddr;
+	}
+	public void setOfapElctAddr(String ofapElctAddr) {
+		this.ofapElctAddr = ofapElctAddr;
+	}
+	
+	public String getCiNum() {
+		return ciNum;
+	}
+	public void setCiNum(String ciNum) {
+		this.ciNum = ciNum;
+	}
+	
+	public String getBsrpCls() {
+		return bsrpCls;
+	}
+	public void setBsrpCls(String bsrpCls) {
+		this.bsrpCls = bsrpCls;
+	}
+	
+	public String getRegnYn() {
+		return regnYn;
+	}
+	public void setRegnYn(String regnYn) {
+		this.regnYn = regnYn;
+	}
+	
+	public String getIssDate() {
+		return issDate;
+	}
+	public void setIssDate(String issDate) {
+		this.issDate = issDate;
+	}
+	
+	public String getApctDate() {
+		return apctDate;
+	}
+	public void setApctDate(String apctDate) {
+		this.apctDate = apctDate;
+	}
+	
+	public String getRegnDate() {
+		return regnDate;
+	}
+	public void setRegnDate(String regnDate) {
+		this.regnDate = regnDate;
+	}
+	
+	public String getClacDate() {
+		return clacDate;
+	}
+	public void setClacDate(String clacDate) {
+		this.clacDate = clacDate;
+	}
+	
+	
+	//------------------------------------------------- 공인전자주소 등록  -------------------------------------------------
+
+		private String popuChk;	
+		private String popuRnrsCls;			/* 내국인/외국인 구분*/
+		private String popuBsrpCls;			/* 개인/법인구분 */
+		private String popuName;			/* 이름*/
+		private String popuEn;				/* 사업자 영문 약자 */
+		private String popuOfapElctAddr;	/* 공인전자주소 */
+		private String popuCiNum;			/* 연계번호(CI) */
+		
+		private String popuFronBrdt;		/* 생년월일(6자리) */
+		private String popuSexClcd;			/* 성별구분코드 */
+		private String popuCelpNum;			/* 휴대폰번호 */
+		
+		public String getPopuChk() {
+			return popuChk;
+		}
+		public void setPopuChk(String popuChk) {
+			this.popuChk = popuChk;
+		}
+		
+		public String getPopuRnrsCls() {
+			return popuRnrsCls;
+		}
+		public void setPopuRnrsCls(String popuRnrsCls) {
+			this.popuRnrsCls = popuRnrsCls;
+		}
+		
+		public String getPopuBsrpCls() {
+			return popuBsrpCls;
+		}
+		public void setPopuBsrpCls(String popuBsrpCls) {
+			this.popuBsrpCls = popuBsrpCls;
+		}
+		
+		public String getPopuName() {
+			return popuName;
+		}
+		public void setPopuName(String popuName) {
+			this.popuName = popuName;
+		}
+		
+		public String getPopuFronBrdt() {
+			return popuFronBrdt;
+		}
+		public void setPopuFronBrdt(String popuFronBrdt) {
+			this.popuFronBrdt = popuFronBrdt;
+		}
+		
+		public String getPopuSexClcd() {
+			return popuSexClcd;
+		}
+		public void setPopuSexClcd(String popuSexClcd) {
+			this.popuSexClcd = popuSexClcd;
+		}
+		
+		public String getPopuCelpNum() {
+			return popuCelpNum;
+		}
+		public void setPopuCelpNum(String popuCelpNum) {
+			this.popuCelpNum = popuCelpNum;
+		}
+		
+		public String getPopuEn() {
+			return popuEn;
+		}
+		public void setPopuEn(String popuEn) {
+			this.popuEn = popuEn;
+		}
+		
+		public String getPopuOfapElctAddr() {
+			return popuOfapElctAddr;
+		}
+		public void setPopuOfapElctAddr(String popuOfapElctAddr) {
+			this.popuOfapElctAddr = popuOfapElctAddr;
+		}
+		
+		public String getPopuCiNum() {
+			return popuCiNum;
+		}
+		public void setPopuCiNum(String popuCiNum) {
+			this.popuCiNum = popuCiNum;
+		}
+		
+		
+	
+	//------------------------------------------------- 생성자/수정자 -------------------------------------------------
+	
+	
+	private String crtr;
+	private String amdr;
+	
+	public String getCrtr() {
+		return crtr;
+	}
+	public void setCrtr(String crtr) {
+		this.crtr = crtr;
+	}
+	
+	public String getAmdr() {
+		return amdr;
+	}
+	public void setAmdr(String amdr) {
+		this.amdr = amdr;
+	}
+}

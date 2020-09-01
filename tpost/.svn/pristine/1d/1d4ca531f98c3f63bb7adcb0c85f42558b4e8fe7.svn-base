@@ -1,0 +1,205 @@
+package tpost.batch.vo;
+
+public class elctDocSnrcVO {
+
+	private String elctDocSndnPk;
+	private String oganCd;
+	private String sndnPtrn;
+	private String tmpltCd;
+	private String sndnDate;
+	private String transDt;
+	private String allSndnNum;
+	private String succNum;
+	private String failNum;
+	
+	
+	public String getOganCd() {
+		return oganCd;
+	}
+	public void setOganCd(String oganCd) {
+		this.oganCd = oganCd;
+	}
+	
+	public String getSndnPtrn() {
+		return sndnPtrn;
+	}
+	public void setSndnPtrn(String sndnPtrn) {
+		this.sndnPtrn = sndnPtrn;
+	}
+	
+	public String getTmpltCd() {
+		return tmpltCd;
+	}
+	public void setTmpltCd(String tmpltCd) {
+		this.tmpltCd = tmpltCd;
+	}
+	
+	public String getSndnDate() {
+		return sndnDate;
+	}
+	public void setSndnDate(String sndnDate) {
+		this.sndnDate = sndnDate;
+	}
+	
+	public String getTransDt() {
+		return transDt;
+	}
+	public void setTransDt(String transDt) {
+		this.transDt = transDt;
+	}
+	
+	public String getAllSndnNum() {
+		return allSndnNum;
+	}
+	public void setAllSndnNum(String allSndnNum) {
+		this.allSndnNum = allSndnNum;
+	}
+	
+	public String getSuccNum() {
+		return succNum;
+	}
+	public void setSuccNum(String succNum) {
+		this.succNum = succNum;
+	}
+	
+	public String getFailNum() {
+		return failNum;
+	}
+	public void setFailNum(String failNum) {
+		this.failNum = failNum;
+	}
+	
+	public String getElctDocSndnPk() {
+		return elctDocSndnPk;
+	}
+	public void setElctDocSndnPk(String elctDocSndnPk) {
+		this.elctDocSndnPk = elctDocSndnPk;
+	}
+	
+	
+	private String detlIdx;
+	private String ofapElctAddr;
+	private String ciNum;
+	private String name;
+	private String trnsDate;
+	private String rcveDate;
+	private String acmdInfoCrtDate;
+	private String sendUrl;
+	private String sendFailCd;
+	private String resultCd;
+	private String reportCd;
+	private String acmdInfoCrtYn;
+	private String acmdInfoCrtFailCd;
+	
+	public String getDetlIdx() {
+		return detlIdx;
+	}
+	public void setDetlIdx(String detlIdx) {
+		this.detlIdx = detlIdx;
+	}
+	
+	public String getOfapElctAddr() {
+		return ofapElctAddr;
+	}
+	public void setOfapElctAddr(String ofapElctAddr) {
+		this.ofapElctAddr = ofapElctAddr;
+	}
+	
+	public String getCiNum() {
+		return ciNum;
+	}
+	public void setCiNum(String ciNum) {
+		this.ciNum = ciNum;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getTrnsDate() {
+		return trnsDate;
+	}
+	public void setTrnsDate(String trnsDate) {
+		this.trnsDate = trnsDate;
+	}
+	
+	public String getRcveDate() {
+		return rcveDate;
+	}
+	public void setRcveDate(String rcveDate) {
+		this.rcveDate = rcveDate;
+	}
+	
+	public String getAcmdInfoCrtDate() {
+		return acmdInfoCrtDate;
+	}
+	public void setAcmdInfoCrtDate(String acmdInfoCrtDate) {
+		this.acmdInfoCrtDate = acmdInfoCrtDate;
+	}
+	
+	public String getSendUrl() {
+		return sendUrl;
+	}
+	public void setSendUrl(String sendUrl) {
+		this.sendUrl = sendUrl;
+	}
+	
+	public String getSendFailCd() {
+		return sendFailCd;
+	}
+	public void setSendFailCd(String sendFailCd) {
+		this.sendFailCd = sendFailCd;
+	}
+	
+	public String getResultCd() {
+		return resultCd;
+	}
+	public void setResultCd(String resultCd) {
+		this.resultCd = resultCd;
+	}
+	
+	public String getReportCd() {
+		return reportCd;
+	}
+	public void setReportCd(String reportCd) {
+		this.reportCd = reportCd;
+	}
+	
+	public String getAcmdInfoCrtYn() {
+		return acmdInfoCrtYn;
+	}
+	public void setAcmdInfoCrtYn(String acmdInfoCrtYn) {
+		this.acmdInfoCrtYn = acmdInfoCrtYn;
+	}
+	
+	public String getAcmdInfoCrtFailCd() {
+		return acmdInfoCrtFailCd;
+	}
+	public void setAcmdInfoCrtFailCd(String acmdInfoCrtFailCd) {
+		this.acmdInfoCrtFailCd = acmdInfoCrtFailCd;
+	}
+	
+	//------------------------------------------------- 생성자/수정자 -------------------------------------------------
+	
+	
+	private String crtr;
+	private String amdr;
+	
+	public String getCrtr() {
+		return crtr;
+	}
+	public void setCrtr(String crtr) {
+		this.crtr = crtr;
+	}
+	
+	public String getAmdr() {
+		return amdr;
+	}
+	public void setAmdr(String amdr) {
+		this.amdr = amdr;
+	}
+
+}

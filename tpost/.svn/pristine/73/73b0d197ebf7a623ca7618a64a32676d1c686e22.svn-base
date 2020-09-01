@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.msgRcve.dao.guAcmdCerfDao">   
+<select id="guAcmdCerfMListSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* guAcmdCerfMListSelect */
+	A.oganCd AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001',A.oganCd) AS oganNm
+	,A.tmpltCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = A.tmpltCd AND OGAN_CD = A.oganCd GROUP BY TMPLT_NM) AS tmpltNm
+	,DATE_FORMAT(STR_TO_DATE(A.sndnDate, '%Y%m%d%s'), '%Y-%m-%d') AS sndnDate
+FROM (
+	SELECT
+		M.SNDN_OGAN  		AS oganCd
+		,M.TMPLT_CD			AS tmpltCd
+		,M.SNDN_DATE		AS sndnDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM 
+		tpost.TB_ELCT_DOC_SNRC_LST M
+		,tpost.TB_ELCT_DOC_SNRC_DETL D
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE 
+		D.ELCT_DOC_SNRC_PK =  M.ELCT_DOC_SNRC_PK
+	AND D.CI_NUM = #{ciNum}
+	AND SNDN_DATE BETWEEN #{inputRcveStDt} AND #{inputRcveClosDt}
+	<if test="!inputOganCd.equals('')">
+	AND M.SNDN_OGAN = #{inputOganCd}
+	</if>
+	ORDER BY M.SNDN_DATE DESC
+	) A
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="guAcmdCerfMListCountSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="java.lang.Integer">
+SELECT /* guAcmdCerfMListCountSelect */ 
+	COUNT(pk)
+FROM (
+	SELECT
+		D.ELCT_DOC_SNRC_PK 	AS pk
+	FROM 
+		tpost.TB_ELCT_DOC_SNRC_LST M
+		,tpost.TB_ELCT_DOC_SNRC_DETL D
+	WHERE 
+		D.ELCT_DOC_SNRC_PK =  M.ELCT_DOC_SNRC_PK
+	AND D.CI_NUM = #{ciNum}
+	AND SNDN_DATE BETWEEN #{inputRcveStDt} AND #{inputRcveClosDt}
+	<if test="!inputOganCd.equals('')">
+	AND M.SNDN_OGAN = #{inputOganCd}
+	</if>
+	) A
+</select>
+<select id="guAcmdCerfSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* guAcmdCerfSelect */
+	M.ACMD_CERF_MGNT_PK 	AS pk
+	,DATE_FORMAT(STR_TO_DATE(M.APCT_DATE, '%Y%m%d%s'), '%Y-%m-%d') 			AS apctDate
+	,M.NAME 				AS apctName
+	,M.ISS_CLS 				AS issCls
+	,IFNULL(M.DWLD_URL, ' ') AS dwldUrl
+FROM
+	tpost.TB_ACMD_CERF_MGNT M
+WHERE
+	M.LST_HIST_YN = 'Y'
+AND M.APCT_CLS = '1'
+AND M.CI_NUM = #{ciNum}
+AND M.OGAN_CD = #{oganCd}
+AND M.TMPLT_CD = #{tmpltCd}
+AND M.TRANS_DT = #{sndnDate} 
+</select>
+<select id="rdngListSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* rdngListSelect */
+	A.HIST_SEQ + 1 AS histSeq
+	,DATE_FORMAT(A.RDNG_DATE, '%Y-%m-%d %h:%i:%s') AS rdngDate
+FROM 
+	tpost.TB_SNDN_RDNG_MGNT A
+	,tpost.TB_OFAP_ELCT_ADDR B
+WHERE 
+	A.OGAN_CD = #{oganCd}
+AND A.TMPLT_CD = #{tmpltCd}
+AND A.TRANS_DT = #{sndnDate}
+AND B.CI_NUM = #{ciNum}
+AND B.OFAP_ELCT_ADDR  = A.OFAP_ELCT_ADDR
+</select>
+</mapper>

@@ -1,0 +1,115 @@
+package tpost.common.service;
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.commUtil.commUtil;
+import tpost.common.dao.codeMgntDao;
+import tpost.common.vo.codeMgntVO;
+import tpost.egovcomm.EgovUserDetailsHelper;
+
+@Service
+public class codeMgntService {
+	
+	@Autowired
+	codeMgntDao dao;
+	
+	public List<codeMgntVO> codeMgntCfcdStdrSelect(codeMgntVO codeMgntVO){
+		return dao.codeMgntCfcdStdrSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> codeMgntBascdStdrSelect(codeMgntVO codeMgntVO){
+		return dao.codeMgntBascdStdrSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> cfcdToBascSelect(codeMgntVO codeMgntVO){
+		return dao.cfcdToBascSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> bascToDtcdSelect(codeMgntVO codeMgntVO){
+		return dao.bascToDtcdSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> cfcdSelect(codeMgntVO codeMgntVO){
+		return dao.cfcdSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> bascSelect(codeMgntVO codeMgntVO){
+		return dao.bascSelect(codeMgntVO);
+	}
+	
+	public List<codeMgntVO> dtcdSelect(codeMgntVO codeMgntVO){
+		return dao.dtcdSelect(codeMgntVO);
+	}
+	
+
+	
+	public void cfcdInsert(codeMgntVO codeMgntVO) {
+		dao.cfcdInsert(codeMgntVO);
+	}
+	
+	public void bascInsert(codeMgntVO codeMgntVO) {
+		dao.bascInsert(codeMgntVO);
+	}
+	
+	public void dtcdInsert(codeMgntVO codeMgntVO) {
+		dao.dtcdInsert(codeMgntVO);
+	}
+	
+	@Transactional
+	public void bascUpdate(codeMgntVO codeMgntVO) {
+		
+		codeMgntVO tempVO = new codeMgntVO();
+		tempVO.setDetlPk(codeMgntVO.getDetlPk());
+		tempVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		
+		dao.bascUpdate(tempVO);
+		
+		//////////////////////////////////////////////////////////////////////////////
+		
+		codeMgntVO.setDetlPk(dao.maxDetlPk());
+		codeMgntVO.setBascApplStDt(commUtil.dateToText(codeMgntVO.getBascApplStDt()));
+		codeMgntVO.setBascApplClosDt(commUtil.dateToText(codeMgntVO.getBascApplClosDt()));
+		codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		codeMgntVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		dao.bascInsert(codeMgntVO);
+		
+		//////////////////////////////////////////////////////////////////////////////
+		
+		List<codeMgntVO> tempListVO = dao.bascToDtcdSelect(codeMgntVO);
+		
+		for(int i = 0; i < tempListVO.size(); i++) {
+			codeMgntVO.setDetlPk(tempListVO.get(i).getDetlPk());
+			codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+			dao.bascChildUpdate(codeMgntVO);
+		}
+	}
+	
+	@Transactional
+	public void dtcdUpdate(codeMgntVO codeMgntVO) {		
+		codeMgntVO tempVO = new codeMgntVO();
+		tempVO.setDetlPk(codeMgntVO.getDetlPk());
+		tempVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		
+		dao.dtcdUpdate(tempVO);
+		
+		//////////////////////////////////////////////////////////////////////////////
+		
+		codeMgntVO.setDetlPk(dao.maxDetlPk()); 
+		codeMgntVO.setDtcdApplStDt(commUtil.dateToText(codeMgntVO.getDtcdApplStDt()));
+		codeMgntVO.setDtcdApplClosDt(commUtil.dateToText(codeMgntVO.getDtcdApplClosDt()));
+		codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		codeMgntVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		dao.dtcdInsert(codeMgntVO);
+	}
+	
+	public String maxDetlPk() {
+		return dao.maxDetlPk();
+	}
+}

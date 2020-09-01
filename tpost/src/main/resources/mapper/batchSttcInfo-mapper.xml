@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.batchSttcInfoDao">   
+
+<select id="sndnSuccMsgSel" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" resultType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO">
+/*통계정보 입력을 위한 모바일 성공 메세지 합쿼리 */
+SELECT /* sndnSuccMsgSel */
+       A.OGAN_CD  AS oganCd
+     , A.TRANS_DT  AS transDt
+     , A.TMPLT_CD   AS tmpltCd
+     , COUNT(*) AS succCnt
+     , B.MSG_TYPE    AS sndnCd
+FROM tpost.TB_SNDN_SUCC_MSG A
+  , tpost.TB_ELCT_DOC_SNDN_MGNT B
+WHERE A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:00'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+ AND A.OGAN_CD = B.OGAN_CD 
+ AND A.TRANS_DT = B.TRANS_DT 
+ AND A.TMPLT_CD = B.TMPLT_CD
+GROUP BY A.OGAN_CD, A.TRANS_DT, A.TMPLT_CD, B.MSG_TYPE 
+</select>
+<insert id="sndnSuccMsgIns" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" >
+/*성공건수 insert */
+INSERT /*sndnSuccMsgIns*/ 
+  INTO tpost.TB_STTC_INFO
+( OGAN_CD
+, TRANS_DT
+, TMPLT_CD
+, CRT_DATE
+, MDF_DATE
+, AMDR
+, CRTR
+, SUCC_CNT
+, SNDN_CD
+)
+VALUES
+(
+       #{oganCd}
+     , #{transDt}
+     , #{tmpltCd}
+     , NOW()
+     , NOW()
+     , 'tpost'
+     , 'tpost'
+     , #{succCnt}
+     , #{sndnCd}
+)
+ON DUPLICATE KEY UPDATE
+SUCC_CNT = #{succCnt} 
+ , MDF_DATE = NOW()
+ , AMDR = 'tpost'
+</insert>
+
+<select id="sndnFailMsgSel" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" resultType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO">
+/*통계정보 입력을 위한 모바일 실패 메세지 합쿼리 */
+SELECT /*sndnFailMsgSel*/
+       A.OGAN_CD   AS oganCd
+     , A.TRANS_DT  AS transDt
+     , A.TMPLT_CD  AS tmpltCd
+     , COUNT(*) AS failCnt
+     , B.MSG_TYPE    AS sndnCd
+FROM tpost.TB_SNDN_FAIL_MSG A
+  , tpost.TB_ELCT_DOC_SNDN_MGNT B
+WHERE A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:00'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+ AND A.OGAN_CD = B.OGAN_CD 
+ AND A.TRANS_DT = B.TRANS_DT 
+ AND A.TMPLT_CD = B.TMPLT_CD
+GROUP BY A.OGAN_CD, A.TRANS_DT, A.TMPLT_CD, B.MSG_TYPE
+</select>
+<insert id="sndnFailMsgIns" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" >
+/*실패건수 insert */
+INSERT /*sndnFailMsgIns*/ 
+  INTO tpost.TB_STTC_INFO
+( OGAN_CD
+, TRANS_DT
+, TMPLT_CD
+, CRT_DATE
+, MDF_DATE
+, AMDR
+, CRTR
+, FAIL_CNT
+, SNDN_CD
+)
+VALUES
+(
+       #{oganCd}
+     , #{transDt}
+     , #{tmpltCd}
+     , NOW()
+     , NOW()
+     , 'tpost'
+     , 'tpost'
+     , #{failCnt}
+      , #{sndnCd}
+)
+ON DUPLICATE KEY UPDATE
+FAIL_CNT = #{failCnt} 
+ , MDF_DATE = NOW()
+ , AMDR = 'tpost'
+</insert>
+
+<select id="sndnRdngSel" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" resultType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO">
+/*통계정보 입력을 위한 열람건수 합쿼리 */
+SELECT /*sndnRdngSel*/
+       A.OGAN_CD AS oganCd
+     , A.TRANS_DT AS transDt
+     , A.TMPLT_CD AS tmpltCd
+     , COUNT(*) AS rdngCnt
+     , B.MSG_TYPE    AS sndnCd
+  FROM tpost.TB_SNDN_RDNG_MGNT A
+    , tpost.TB_ELCT_DOC_SNDN_MGNT B
+ WHERE 1=1
+  AND  A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:00'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+  AND A.HIST_SEQ = 0
+   AND A.OGAN_CD = B.OGAN_CD 
+  AND A.TRANS_DT = B.TRANS_DT 
+  AND A.TMPLT_CD = B.TMPLT_CD
+ GROUP BY A.OGAN_CD, A.TRANS_DT , A.TMPLT_CD , B.MSG_TYPE 
+</select>
+
+<insert id="sndnRdngIns" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" >
+/*열람건수 insert */
+INSERT /*sndnRdngIns*/ 
+  INTO tpost.TB_STTC_INFO
+( OGAN_CD
+, TRANS_DT
+, TMPLT_CD
+, CRT_DATE
+, MDF_DATE
+, AMDR
+, CRTR
+, RDNG_CNT
+, SNDN_CD
+)
+VALUES
+(
+       #{oganCd}
+     , #{transDt}
+     , #{tmpltCd}
+     , NOW()
+     , NOW()
+     , 'tpost'
+     , 'tpost'
+     , #{rdngCnt}
+     , #{sndnCd}
+)
+ON DUPLICATE KEY UPDATE
+RDNG_CNT = #{rdngCnt} 
+ , MDF_DATE = NOW()
+ , AMDR = 'tpost'
+
+</insert>
+
+<select id="sndnCsntSel" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" resultType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO">
+/*통계정보 입력을 위한 동의건수 합쿼리 */
+SELECT /*sndnCsntSel*/
+       A.OGAN_CD   AS oganCd
+     , A.TRANS_DT  AS transDt
+     , A.TMPLT_CD  AS tmpltCd
+     , COUNT(*) AS failCnt
+     , B.MSG_TYPE    AS sndnCd
+FROM tpost.TB_SNDN_SUCC_MSG A
+  , tpost.TB_ELCT_DOC_SNDN_MGNT B
+WHERE A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:00'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+  AND A.OGAN_CD = B.OGAN_CD 
+  AND A.TRANS_DT = B.TRANS_DT 
+  AND A.TMPLT_CD = B.TMPLT_CD
+GROUP BY A.OGAN_CD, A.TRANS_DT, A.TMPLT_CD, B.MSG_TYPE
+</select>
+
+
+<select id="sndnRfslSel" parameterType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO" resultType="tpost.batch.batchSttcInfo.vo.sttcInfoBatVO">
+/*통계정보 입력을 위한 거부건수 합쿼리 */
+SELECT /*sndnRfslSel*/
+       A.OGAN_CD   AS oganCd
+     , A.TRANS_DT  AS transDt
+     , A.TMPLT_CD  AS tmpltCd
+     , COUNT(*) AS failCnt
+     , B.SNDN_CD    AS sndnCd
+      , B.MSG_TYPE    AS sndnCd
+FROM tpost.TB_SNDN_SUCC_MSG A
+    , tpost.TB_ELCT_DOC_SNDN_MGNT B
+WHERE A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:00'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+  AND A.OGAN_CD = B.OGAN_CD 
+  AND A.TRANS_DT = B.TRANS_DT 
+  AND A.TMPLT_CD = B.TMPLT_CD
+GROUP BY OGAN_CD, TRANS_DT, TMPLT_CD, B.MSG_TYPE
+</select>
+
+</mapper>

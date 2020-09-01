@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.codeMgntDao">   
+<select id="cfcdToBascSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* cfcdToBascSelect */ 
+	TBDC.BASCD 		AS basc
+	,TBDC.BASCD_NM 	AS bascNm
+	,TBDC.BASCD_DESC AS bascDesc
+	,TBDC.BASCD_APPL_ST_DT AS bascApplStDt
+	,TBDC.BASCD_APPL_CLOS_DT AS bascApplClosDt
+	,TBDC.BASCD_LST_HIST_YN AS bascLstHistYn
+	,TBDC.TB_BZNS_DETL_CD_PK AS detlPk
+FROM 
+	tpost.TB_BZNS_CD TBC
+	,tpost.TB_BZNS_DETL_CD TBDC
+WHERE 
+	TBC.CFCD = #{inputCfcd}
+AND TBDC.CFCD = TBC.CFCD
+AND TBDC.BASCD_LST_HIST_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN TBDC.BASCD_APPL_ST_DT AND TBDC.BASCD_APPL_CLOS_DT
+AND IFNULL(TBDC.DTCD, "") = "" 
+ORDER BY TBDC.BASCD
+</select>
+<select id="bascToDtcdSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* bascToDtcdSelect */ 
+	DTCD 		AS dtcd
+	,DTCD_NM 	AS dtcdNm
+	,DTCD_DESC 	AS dtcdDesc
+	,DTCD_APPL_ST_DT 	AS dtcdApplStDt
+	,DTCD_APPL_CLOS_DT	AS dtcdApplClosDt
+	,DTCD_LST_HIST_YN 	AS dtcdLstHistYn
+	,TB_BZNS_DETL_CD_PK AS detlPk 
+FROM
+	tpost.TB_BZNS_DETL_CD TBDC
+WHERE 
+	(SELECT BASCD FROM tpost.TB_BZNS_DETL_CD WHERE TB_BZNS_DETL_CD_PK = #{detlPk}) = BASCD
+AND (SELECT CFCD FROM tpost.TB_BZNS_DETL_CD WHERE TB_BZNS_DETL_CD_PK = #{detlPk}) = CFCD
+AND DTCD_LST_HIST_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DTCD_APPL_ST_DT AND DTCD_APPL_CLOS_DT
+AND DTCD IS NOT NULL
+ORDER BY DTCD
+</select> 
+<select id="cfcdSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT  /* cfcdSelect */ 
+	CFCD 		AS cfcd
+	,CFCD_NM 	AS cfcdNm
+	,CFCD_DESC 	AS cfcdDesc
+	,' ' 		AS basc
+	,' ' 		AS bascNm
+	,' ' 		AS bascDesc
+	,' ' 		AS bascApplStDt
+	,' ' 		AS bascApplClosDt
+	,' ' 		AS bascLstHistYn
+	,' ' 		AS dtcd
+	,' ' 		AS dtcdNm
+	,' ' 		AS dtcdDesc
+	,' ' 		AS dtcdApplStDt
+	,' ' 		AS dtcdApplClosDt
+	,' ' 		AS dtcdLstHistYn
+FROM tpost.TB_BZNS_CD
+WHERE
+	CFCD = #{inputCfcd}
+</select>
+<select id="bascSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* bascSelect */ 
+	TBC.CFCD 					AS cfcd
+	,TBC.CFCD_NM 				AS cfcdNm
+	,TBC.CFCD_DESC 				AS cfcdDesc
+	,TBDC.BASCD 				AS basc
+	,TBDC.BASCD_NM 				AS bascNm
+	,TBDC.BASCD_DESC 			AS bascDesc
+	,TBDC.BASCD_APPL_ST_DT 		AS bascApplStDt
+	,TBDC.BASCD_APPL_CLOS_DT 	AS bascApplClosDt
+	,TBDC.BASCD_LST_HIST_YN 	AS bascLstHistYn
+	,' ' 						AS dtcd
+	,' ' 						AS dtcdNm
+	,' ' 						AS dtcdDesc
+	,' ' 						AS dtcdApplStDt
+	,' ' 						AS dtcdApplClosDt
+	,' ' 						AS dtcdLstHistYn
+FROM tpost.TB_BZNS_DETL_CD TBDC
+	,tpost.TB_BZNS_CD TBC
+WHERE 
+	TBDC.CFCD = TBC.CFCD
+AND	TBDC.TB_BZNS_DETL_CD_PK = #{detlPk}
+</select>
+<select id="dtcdSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* dtcdSelect */ 
+	TBC.CFCD 					AS cfcd
+	,TBC.CFCD_NM 				AS cfcdNm
+	,TBC.CFCD_DESC 				AS cfcdDesc
+	,TBDC.BASCD 				AS basc
+	,TBDC.BASCD_NM 				AS bascNm
+	,TBDC.BASCD_DESC 			AS bascDesc
+	,TBDC.BASCD_APPL_ST_DT 		AS bascApplStDt
+	,TBDC.BASCD_APPL_CLOS_DT 	AS bascApplClosDt
+	,TBDC.BASCD_LST_HIST_YN 	AS bascLstHistYn
+	,TBDC.DTCD 					AS dtcd
+	,TBDC.DTCD_NM 				AS dtcdNm
+	,TBDC.DTCD_DESC 			AS dtcdDesc
+	,TBDC.DTCD_APPL_ST_DT 		AS dtcdApplStDt
+	,TBDC.DTCD_APPL_CLOS_DT 	AS dtcdApplClosDt
+	,TBDC.DTCD_LST_HIST_YN 		AS dtcdLstHistYn
+FROM tpost.TB_BZNS_DETL_CD TBDC
+	,tpost.TB_BZNS_CD TBC
+WHERE 
+	TBDC.CFCD = TBC.CFCD
+AND	TBDC.TB_BZNS_DETL_CD_PK = #{detlPk}
+</select>
+<select id="codeMgntCfcdStdrSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* codeMgntCfcdStdrSelect */ 
+	CFCD 		AS cfcd
+	,CFCD_NM 	AS cfcdNm
+	,CFCD_DESC 	as cfcdDesc
+FROM tpost.TB_BZNS_CD
+WHERE 1=1
+<if test="!inputCfcd.equals('')">
+AND CFCD LIKE CONCAT('%', #{inputCfcd}, '%')
+</if>
+<if test="!inputCfcdNm.equals('')">
+AND CFCD_NM LIKE CONCAT('%', #{inputCfcdNm}, '%')
+</if>
+</select>
+<select id="codeMgntBascdStdrSelect" parameterType="tpost.common.vo.codeMgntVO" resultType="tpost.common.vo.codeMgntVO">
+SELECT /* codeMgntBascdStdrSelect */ 
+	TBC.CFCD AS cfcd
+	,TBC.CFCD_NM AS cfcdNm
+	,TBC.CFCD_DESC AS cfcdDesc
+	,TBDC.BASCD AS basc
+	,TBDC.BASCD_NM AS bascNm
+	,TBDC.BASCD_DESC AS bascDesc
+	,TBDC.BASCD_APPL_ST_DT AS bascApplStDt
+	,TBDC.BASCD_APPL_CLOS_DT AS bascApplClosDt
+	,TBDC.BASCD_LST_HIST_YN AS bascLstHistYn
+	,TBDC.TB_BZNS_DETL_CD_PK AS detlPk
+FROM (
+	SELECT
+		CFCD AS CFCD
+		,BASCD AS BASCD
+		,BASCD_NM AS BASCD_NM
+		,BASCD_DESC AS BASCD_DESC
+		,BASCD_APPL_ST_DT AS BASCD_APPL_ST_DT
+		,BASCD_APPL_CLOS_DT AS BASCD_APPL_CLOS_DT
+		,BASCD_LST_HIST_YN AS BASCD_LST_HIST_YN
+		,TB_BZNS_DETL_CD_PK AS TB_BZNS_DETL_CD_PK
+	FROM tpost.TB_BZNS_DETL_CD
+	WHERE 
+	 	BASCD_LST_HIST_YN = 'Y'
+	<if test="!inputBasc.equals('')"> 	
+	AND	BASCD LIKE CONCAT('%', #{inputBasc}, '%')
+	</if>
+	<if test="!inputBascNm.equals('')"> 
+	AND	BASCD_NM LIKE CONCAT('%', #{inputBascNm}, '%')
+	</if>
+	AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN BASCD_APPL_ST_DT AND BASCD_APPL_CLOS_DT
+	AND IFNULL(DTCD, "") = "" 
+	) TBDC
+	, tpost.TB_BZNS_CD TBC
+WHERE
+	TBDC.CFCD = TBC.CFCD
+<if test="!inputCfcd.equals('')">
+AND TBC.CFCD LIKE CONCAT('%', #{inputCfcd}, '%')
+</if>
+<if test="!inputCfcdNm.equals('')">
+AND TBC.CFCD_NM LIKE CONCAT('%', #{inputCfcdNm}, '%')
+</if>
+ORDER BY CFCD, BASCD
+</select>
+<insert id="cfcdInsert" parameterType="tpost.common.vo.codeMgntVO">
+INSERT  /* cfcdInsert */ 
+INTO tpost.TB_BZNS_CD
+VALUES (
+	#{cfcd}				<!-- CFCD 		-->
+	,#{cfcdNm}			<!-- CFCD_NM 	-->
+	,#{cfcdDesc}		<!-- CFCD_DESC 	-->
+	,NOW()			<!-- CRT_DATE 	-->
+	,NOW()			<!-- MDF_DATE	-->
+	,#{crtr}				<!-- CRTR 		-->
+	,#{amdr}				<!-- AMDR 		-->
+)
+</insert>
+<insert id="bascInsert" parameterType="tpost.common.vo.codeMgntVO">
+INSERT  /* bascInsert */ 
+INTO tpost.TB_BZNS_DETL_CD
+VALUES (
+	#{detlPk}						<!-- TB_BZNS_DETL_CD_PK -->
+	,#{cfcd}						<!-- CFCD 				-->
+	,#{basc}						<!-- BASCD 				-->
+	,#{bascNm}						<!-- BASCD_NM 			-->
+	,#{bascDesc}					<!-- BASCD_DESC 		-->	
+	,#{bascApplStDt}				<!-- BASCD_APPL_ST_DT 	-->
+	,#{bascApplClosDt}				<!-- BASCD_APPL_CLOS_DT -->
+	,#{bascLstHistYn}				<!-- BASCD_LST_HIST_YN 	-->
+	,''								<!-- DTCD 				-->
+	,''								<!-- DTCD_NM 			-->
+	,''								<!-- DTCD_DESC 			-->	
+	,''								<!-- DTCD_APPL_ST_DT 	-->
+	,''								<!-- DTCD_APPL_CLOS_DT	-->
+	,''								<!-- DTCD_LST_HIST_YN 	-->
+	,NOW()						<!-- CRT_DATE 			-->
+	,NOW()						<!-- MDF_DATE			-->
+	,#{crtr}				<!-- CRTR 		-->
+	,#{amdr}				<!-- AMDR 		-->
+)
+</insert>
+<insert id="dtcdInsert" parameterType="tpost.common.vo.codeMgntVO">
+INSERT /* bascInsert */ 
+INTO tpost.TB_BZNS_DETL_CD 
+VALUES (
+	 #{detlPk} 						<!-- TB_BZNS_DETL_CD_PK -->
+	,#{cfcd}						<!-- CFCD 				-->
+	,#{basc}						<!-- BASCD 				-->
+	,#{bascNm}						<!-- BASCD_NM 			-->
+	,#{bascDesc}					<!-- BASCD_DESC 		-->	
+	,#{bascApplStDt}				<!-- BASCD_APPL_ST_DT 	-->
+	,#{bascApplClosDt}				<!-- BASCD_APPL_CLOS_DT -->
+	,#{bascLstHistYn}				<!-- BASCD_LST_HIST_YN 	-->
+	,#{dtcd}						<!-- DTCD 				-->
+	,#{dtcdNm}						<!-- DTCD_NM 			-->
+	,#{dtcdDesc}					<!-- DTCD_DESC 			-->	
+	,#{dtcdApplStDt}				<!-- DTCD_APPL_ST_DT 	-->
+	,#{dtcdApplClosDt}				<!-- DTCD_APPL_CLOS_DT	-->
+	,#{dtcdLstHistYn}				<!-- DTCD_LST_HIST_YN 	-->
+	,NOW()						<!-- CRT_DATE 			-->
+	,NOW()						<!-- MDF_DATE			-->
+	,#{crtr}				<!-- CRTR 		-->
+	,#{amdr}				<!-- AMDR 		-->
+)
+</insert>
+<update id="bascUpdate" parameterType="tpost.common.vo.codeMgntVO">
+UPDATE /* bascUpdate */ 
+	tpost.TB_BZNS_DETL_CD 
+SET 
+	BASCD_APPL_CLOS_DT = (SELECT DATE_FORMAT(NOW()-INTERVAL 1 DAY, '%Y%m%d') FROM DUAL)
+	,BASCD_LST_HIST_YN = 'N'
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE TB_BZNS_DETL_CD_PK = #{detlPk}
+</update>
+<update id="dtcdUpdate" parameterType="tpost.common.vo.codeMgntVO">
+UPDATE /* dtcdUpdate */ 
+	tpost.TB_BZNS_DETL_CD 
+SET 
+	DTCD_APPL_CLOS_DT = (SELECT DATE_FORMAT(NOW()-INTERVAL 1 DAY, '%Y%m%d') FROM DUAL)
+	,DTCD_LST_HIST_YN = 'N'
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE TB_BZNS_DETL_CD_PK = #{detlPk}
+</update>
+<update id="bascChildUpdate" parameterType="tpost.common.vo.codeMgntVO">
+UPDATE /* bascChildUpdate */ 
+	tpost.TB_BZNS_DETL_CD
+SET
+	BASCD = #{basc}
+	,BASCD_NM = #{bascNm}
+	,BASCD_DESC = #{bascDesc}
+	,BASCD_APPL_ST_DT = #{bascApplStDt}
+	,BASCD_APPL_CLOS_DT = #{bascApplClosDt}
+	,BASCD_LST_HIST_YN = #{bascLstHistYn}
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE 
+TB_BZNS_DETL_CD_PK  = #{detlPk};
+</update>
+<select id="getYesterday" resultType="java.lang.String">
+SELECT /* getYesterday */ 
+	DATE_FORMAT(NOW()-INTERVAL 1 DAY, '%Y%m%d') AS yesterday 
+FROM 
+	DUAL
+</select>
+<select id="maxDetlPk" resultType="java.lang.String">
+SELECT /* maxDetlPk */
+	MAX(TB_BZNS_DETL_CD_PK) + 1 AS detlPk
+FROM 
+	tpost.TB_BZNS_DETL_CD
+</select>
+
+</mapper>

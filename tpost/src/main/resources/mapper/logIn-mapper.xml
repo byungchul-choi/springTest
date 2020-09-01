@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.logIn.dao.logInDao">
+                   
+  <!-- 로그인 확인 -->
+  <select id="logInAction" parameterType="tpost.logIn.vo.logInVO" resultType="tpost.logIn.vo.logInVO">
+    SELECT /* logInAction */ 
+         A.CUST_ID  AS  custID
+      , A.OGAN_CD     AS  oganCd
+      , A.CUST_NUM    AS  custNum
+      , A.CUST_NM     AS  custNm
+      , A.DEPT_NM     AS  deptNm
+      , A.USE_YN      AS  useYn
+      , A.TEL_NUM     AS  telNum
+      , A.CELP_NUM    AS  celpNum
+      , A.EMAI_ID     AS  emaiId
+      , B.PASS_WORD   AS passWord
+      , SHA2(  CONCAT( AES_DECRYPT(UNHEX(A.CELP_NUM) ,  #{aesKey } ), 'T1')     ,'512')    AS  celpNumSha2
+      , SHA2(#{newPassWord } , '512') AS newPassWord
+      , B.PASSWORD_FAIL_CNT AS passwordFailCnt
+      , A.ATH_LEV   AS athLev
+      , TIMESTAMPDIFF(DAY ,   B.mdf_date  , NOW())  AS mdfDays
+   FROM TB_CUST_INFO A
+      , TB_PW_MGNT B
+ WHERE A.CUST_ID = B.CUST_ID
+   AND B.CUST_ID = #{custId}
+   AND B.PASS_WORD =  SHA2(#{passWord},'512')    
+   AND B.PASS_WORD_USE_YN = 'Y'
+  </select>
+  
+  <!-- 로그인 정보 확인 -->
+  <select id="tbCustInfo" parameterType="tpost.logIn.vo.logInVO" resultType="tpost.logIn.vo.logInVO">
+    SELECT /* tbCustInfo */ 
+         A.CUST_ID  AS  custID
+      , A.OGAN_CD     AS  oganCd
+      , A.CUST_NUM    AS  custNum
+      , A.CUST_NM     AS  custNm
+      , A.DEPT_NM     AS  deptNm
+      , A.USE_YN      AS  useYn
+      , A.TEL_NUM     AS  telNum
+      , AES_DECRYPT(UNHEX(A.CELP_NUM) ,  #{aesKey } )    AS  celpNum
+      , A.EMAI_ID     AS  emaiId
+      , A.ATH_LEV   AS athLev
+   FROM TB_CUST_INFO A
+ WHERE A.CUST_ID = #{custId}
+  </select>
+  
+  <!-- 인증정보 확인 -->
+  <select id="tbCtifCfrmSel" parameterType="tpost.logIn.vo.logInVO" resultType="tpost.logIn.vo.logInVO">
+   SELECT /* tbCtifCfrmSel */ 
+          CUST_ID
+  FROM  tpost.TB_CTIF_CFRM
+ WHERE CUST_ID = #{custId}
+   AND CTIF_NO = #{ctifNo}
+   AND TIMESTAMPDIFF(MINUTE,    CTIF_TIME , NOW())	<![CDATA[  <  ]]> 3
+  
+  </select>
+  
+  <!-- 기존인증번호 update -->
+  <update id="tbCtifCfrmReqUpdate" parameterType="tpost.logIn.vo.logInVO" >
+   UPDATE /* tbCtifCfrmReqUpdate */ 
+         tpost.TB_CTIF_CFRM
+     SET CTIF_CFRM_YN = 'N'
+   WHERE CUST_ID = #{custId}
+  </update>
+  
+  <!-- 인증번호 요청 -->
+  <insert id="tbCtifCfrmReq" parameterType="tpost.logIn.vo.logInVO" >
+INSERT /* tbCtifCfrmReq */ 
+  INTO tpost.TB_CTIF_CFRM
+SELECT 
+       B.CTIF_CFRM_SEQ
+     , #{ctifKncd}  /*인증종류*/
+  	 , #{custId}
+  	 , #{mvTscoClcd}
+  	 , #{celpNum}
+  	 , #{ctifNo}
+  	 , NOW()
+  	 , 'Y'
+  	 , 'N' /*ctifSuccYn 인증번호 확인여부*/
+  	 , NOW()
+  	 , NOW()
+  	 , #{crtr}
+  	 , #{amdr}
+FROM ( select 'A' 
+      ) A
+   , ( SELECT IFNULL(MAX(CTIF_CFRM_SEQ +1), 0) AS CTIF_CFRM_SEQ 
+		 FROM tpost.TB_CTIF_CFRM 
+	 ) B
+   
+  </insert>
+  
+  <!-- 로그인 시도횟수  확인 -->
+  <select id="logInActionCnt" parameterType="tpost.logIn.vo.logInVO" resultType="int">
+    SELECT /* logInActionCnt */ 
+         IFNULL( MAX(B.PASSWORD_FAIL_CNT), '-1') 
+   FROM TB_PW_MGNT B
+ WHERE CUST_ID = #{custId}
+   AND B.PASS_WORD_USE_YN = 'Y'
+  </select>
+  
+  <!-- 최종 비밀번호 변경  날자  확인 -->
+  <select id="logInActionDate" parameterType="tpost.logIn.vo.logInVO" resultType="String">
+    SELECT /* logInActionDate */
+           CASE WHEN  DATEDIFF(now(), MDF_DATE ) <![CDATA[      < ]]> 90 
+                   THEN 'Y'
+              ELSE 'N'
+           END  lastPwChgYn    
+   FROM TB_PW_MGNT B
+ WHERE CUST_ID = #{custId}
+   AND B.PASS_WORD_USE_YN = 'Y'
+  </select>
+  
+  <!-- 로그인 시도횟수 업데이트 -->
+  <select id="logInActionCntUpdate" parameterType="tpost.logIn.vo.logInVO" resultType="int">
+    UPDATE /* logInActionCntUpdate */
+          tpost.TB_PW_MGNT
+     SET PASSWORD_FAIL_CNT = #{passwordFailCnt}
+   WHERE CUST_ID = #{custId}
+     AND PASS_WORD_USE_YN = 'Y'
+  </select>
+
+  <!-- 패스워드 변경전 조회 -->
+  <select id="passWordHistSelect" parameterType="tpost.logIn.vo.logInVO" resultType="String">
+  SELECT /* passWordHistSelect */
+	    PASS_WORD
+  FROM (
+		SELECT PASS_WORD 
+		     , CRT_DATE 
+		     , RN
+  		FROM (
+				SELECT
+						PASS_WORD 
+					,	CRT_DATE 
+					,	@ROWNUM:=@ROWNUM+1 AS RN
+				FROM
+					TB_PW_MGNT B
+				,(SELECT @ROWNUM:=0) TMP
+				WHERE CUST_ID = #{custId}
+				ORDER BY
+					CRT_DATE DESC
+			) A
+		<![CDATA[     WHERE RN < 6 ]]>
+		) AA
+WHERE PASS_WORD = SHA2(#{newPassWord},'512')
+  </select>
+  
+  <!-- 패스워드 변경 -->
+  <update  id="passWordChgInsert" parameterType="tpost.common.vo.custInfMgntVO">
+	INSERT /* passWordChgInsert */ 
+	 INTO tpost.TB_PW_MGNT
+( CUST_ID,	PASS_WORD	,CRT_DATE	,MDF_DATE	,CRTR	,AMDR	,PASSWORD_FAIL_CNT	,PASS_WORD_SEQ	,PASS_WORD_USE_YN
+   , CUST_NUM 
+)
+SELECT     #{custId}
+	     , SHA2(#{newPassWord},'512')   
+	     , NOW() 
+	     , NOW() 
+	     , #{crtr      }
+	     , #{amdr      }
+	     ,'0' 
+	     , MAX(A.PASS_WORD_SEQ) + 1
+	     , 'Y' 
+	     , #{custId}
+	FROM tpost.TB_PW_MGNT A
+	WHERE A.CUST_ID =  #{custId}
+	</update>
+	
+  <update  id="passWordChgUpdate" parameterType="tpost.common.vo.custInfMgntVO">
+	UPDATE /* passWordChgUpdate */ 
+	       tpost.TB_PW_MGNT
+       SET PASS_WORD_USE_YN = 'N'
+         , MDF_DATE = NOW()
+         , AMDR    = #{crtr      }
+     WHERE CUST_ID = #{custId}
+	</update>
+  
+</mapper>
+
+

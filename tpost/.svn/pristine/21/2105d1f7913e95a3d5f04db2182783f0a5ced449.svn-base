@@ -1,0 +1,105 @@
+package tpost.batch.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.acmdCerf.vo.ofapElctAddrVO;
+import tpost.batch.vo.fileTestVO;
+import tpost.batch.vo.tbMoblSndnMsgVO;
+import tpost.commCode.controller.commCdMgntController;
+
+@Repository
+public class fileTestDao {
+	
+  @Autowired
+  SqlSession sqlSessionTemplate;
+
+  /*로그설정 입니다. */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	public void fileTestInsert(List<fileTestVO> listFileTestVO) {
+		
+		log.debug("listFileTestVO ==> " + listFileTestVO.size() );
+		  sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.batchFileTestInsert", listFileTestVO);
+		
+	}
+
+	/*발송 목록정보 select Insert*/
+	public void fileTestSelectInsert(fileTestVO fileTestVO) {
+		// TODO Auto-generated method stub  tbSndnInfoLstUpload
+		log.debug("fileTestSelectInsert ==> " );
+//		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbSndnInfoLstUpload", fileTestVO);
+		
+		/*발송수신정보목록 INSERT */
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbSndnSnrcInfoLstUpload", fileTestVO);
+		
+		/*발송송신정보목록 INSERT*/
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbSndnTrnsInfoLstUpload", fileTestVO);
+	}
+	
+	/*발송 목록정보 select Insert*/
+	public void tbBatchFileUpldTempTruncate(fileTestVO fileTestVO) {
+		// TODO Auto-generated method stub  tbSndnInfoLstUpload
+		log.debug("tbBatchFileUpldTempTruncate ==> " );
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbBatchFileUpldTempTruncate", fileTestVO);
+	}
+
+
+	/*템플릿 리스크로 가져오기*/
+	public  List<fileTestVO>  fileTestTempSel(fileTestVO fileTestVO_tempSel) {
+		// TODO Auto-generated method stub
+		return  sqlSessionTemplate.selectList("tpost.batch.dao.fileTestDao.tbSndnInfoLstSelect", fileTestVO_tempSel);
+	}
+
+	/*발송항목 실패 리스트*/
+	public void Chk_fileTestSelectInsert_Fail(fileTestVO listFileTestVO) {
+		// TODO Auto-generated method stub
+		
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.batchFileTestInsert_Fail", listFileTestVO);
+	}
+
+	/*최종 mms 파일 업로드*/
+	public void tbMoblSndnMsg_upload(String transDt) {
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbMoblSndnMsg_upload" , transDt);
+		
+	}
+
+	
+	public List<fileTestVO> elecAddrSel(fileTestVO fileTestVO) {
+		// TODO Auto-generated method stub
+		return sqlSessionTemplate.selectList("tpost.batch.dao.fileTestDao.elecAddrSel", fileTestVO);
+	}
+
+	public fileTestVO elecAddrInputSeq(fileTestVO fileTestVO) {
+		// TODO Auto-generated method stub
+		return sqlSessionTemplate.selectOne("tpost.batch.dao.fileTestDao.elecAddrInputSeq", fileTestVO);
+	}
+
+	public void ofapElctAddrListInsert_bat(Map<String, Object> paramMap) {
+		// TODO Auto-generated method stub
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.ofapElctAddrListInsert_bat", paramMap);
+	}
+
+	public void ofapElctAddrHisListInsert_bat(int inputPk) {
+		// TODO Auto-generated method stub
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.ofapElctAddrHisListInsert_bat", inputPk);
+	}
+
+	public List<tbMoblSndnMsgVO> tbMoblSndnMsgSendList(String transDt) {
+		// TODO Auto-generated method stub
+		return sqlSessionTemplate.selectList("tpost.batch.dao.fileTestDao.tbMoblSndnMsgSendList", transDt);
+	}
+
+	public void tbMoblSndnMsgtInsert(Map<String, Object> paramMap) {
+		// TODO Auto-generated method stub
+		sqlSessionTemplate.insert("tpost.batch.dao.fileTestDao.tbMoblSndnMsgtInsert", paramMap);
+	}
+	
+
+}

@@ -1,0 +1,75 @@
+@charset "utf-8";
+/* CSS Document */
+
+* {font-family:HelveticaNeue-Light,AppleSDGothicNeo-Light,sans-serif;}
+html,body {margin:0; padding:0; width:100%; height:100%; font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif; background:#fff; font-size:15px; color:#000; line-height:1.5;}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td,legend,em,span,b,strong {margin:0; padding:0; font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;} 
+table {border-spacing:0; border-collapse:collapse; font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;}
+th, td {word-break:break-all;}
+form,fieldset {display:block;}
+form,fieldset,img {border:none;} 
+address,caption,cite,code,dfn,em,th,var {font-style:normal; font-weight:normal;} 
+ol,ul,li {list-style:none;} 
+/*h1,h2,h3,h4,h5,h6 {font-size:100%; font-weight:normal;}*/
+abbr,acronym {border:none;} 
+hr {display:none;}
+a {text-decoration:none; color:#000; cursor:pointer; font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;}
+a:link,a:visited {text-decoration:none;}
+a:hover,a:active,a:focus {text-decoration:none;}
+textarea {overflow:auto;} 
+option {padding-right:6px;} /* firefox fix */
+legend {position:absolute; top:0; left:0; width:0; height:0; overflow:hidden; visibility:hidden; font-size:0; line-height:0;} /* for screen reader */ 
+pre {word-wrap:break-word;}
+label {font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;}
+select {font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;}
+button {font-family:"나눔바른고딕",NanumBarunGothic,"돋움",Dotum,"굴림",Gulim,Helvetica,sans-serif;}
+article, aside, figcaption, figure, footer, header, main, nav, section{display: block;clear:both;}
+input + input, input + button, button + input, input + select, select + input, input + span, span + input, input + textarea, textarea + input, button + button, button + select, select + button, button + span, span + button, button + textarea, textarea + button, select + select, select + span, span + select, select + textarea, textarea + select, span + textarea, textarea + span, textarea + textarea{
+    margin-left:3px !important;
+}
+button{outline:none;cursor:pointer;text-align:center;text-decoration:none;background:none;vertical-align:middle ;  border:none;line-height:normal;-webkit-appearance:none;}
+
+/*
+clear:both; display, position(top,left), float, overflow
+(min-width, width), (min-height, height) (margin,padding)
+font(text-indent, text-align, font-weight, font-size, line-height, font-family, color)
+border, background
+cursor, z-index, zoom
+*/
+
+@font-face {
+ font-family: 'NanumBarunGothic';
+ font-weight: 400;
+ src: url(../fonts/NanumBarunGothicSubset.eot);
+ src: url(../fonts/NanumBarunGothicSubset.eot?#iefix) format('embedded-opentype'),
+      url(../fonts/NanumBarunGothicSubset.woff2) format('woff2'),
+      url(../fonts/NanumBarunGothicSubset.woff) format('woff'),
+      url(../fonts/NanumBarunGothicSubset.ttf) format('truetype');
+}
+@font-face {
+ font-family: 'NanumBarunGothic';
+ font-weight: 700;
+ src: url(../fonts/NanumBarunGothicBoldSubset.eot);
+ src: url(../fonts/NanumBarunGothicBoldSubset.eot?#iefix) format('embedded-opentype'),
+      url(../fonts/NanumBarunGothicBoldSubset.woff2) format('woff2'),
+      url(../fonts/NanumBarunGothicBoldSubset.woff) format('woff'),
+      url(../fonts/NanumBarunGothicBoldSubset.ttf) format('truetype');
+}
+@font-face {
+ font-family: 'NanumBarunGothic';
+ font-weight: 300;
+ src: url(../fonts/NanumBarunGothicLightSubset.eot);
+ src: url(../fonts/NanumBarunGothicLightSubset.eot?#iefix) format('embedded-opentype'),
+      url(../fonts/NanumBarunGothicLightSubset.woff2) format('woff2'),
+      url(../fonts/NanumBarunGothicLightSubset.woff) format('woff'),
+      url(../fonts/NanumBarunGothicLightSubset.ttf) format('truetype');
+}
+@font-face {
+ font-family: 'NanumBarunGothic';
+ font-weight: 200;
+ src: url(../fonts/NanumBarunGothicUltraLightSubset.eot);
+ src: url(../fonts/NanumBarunGothicUltraLightSubset.eot?#iefix) format('embedded-opentype'),
+      url(../fonts/NanumBarunGothicUltraLightSubset.woff2) format('woff2'),
+      url(../fonts/NanumBarunGothicUltraLightSubset.woff) format('woff'),
+      url(../fonts/NanumBarunGothicUltraLightSubset.ttf) format('truetype');
+}

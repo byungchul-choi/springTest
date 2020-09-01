@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.suppCenter.dao.faqDao">   
+<select id="faqListSelect" parameterType="tpost.suppCenter.vo.faqVO" resultType="tpost.suppCenter.vo.faqVO">
+SELECT /*faqListSelect*/
+	A.wrtgNum 				AS wrtgNum
+	,A.faqCd				AS faqsCd
+	,IFNULL(tpost.FN_GET_BASCD_NM('00014',A.faqCd), '전체')	AS faqNm
+	,A.wrtgTtl				AS wrtgTtl
+	,DATE_FORMAT(A.wrtDt, '%Y-%m-%d') AS wrtDt
+FROM(
+	SELECT
+		M.WRTG_NUM 			AS wrtgNum
+		,M.FAQ_CD 			AS faqCd
+		,M.WRTG_TTL 		AS wrtgTtl
+		,M.WRT_DATE 		AS wrtDt
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM
+		tpost.TB_FAQ_MGNT M
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		M.USE_YN = 'Y'
+	AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+	<if test="!inputFaqCd.equals('')">
+	AND M.FAQ_CD = #{inputFaqCd}
+	</if>
+	<if test="!inputWrtgTtl.equals('')">
+	AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+	</if>
+	ORDER BY M.WRTG_NUM DESC
+) A
+WHERE
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="faqListCountSelect" parameterType="tpost.suppCenter.vo.faqVO" resultType="java.lang.Integer">
+SELECT /*faqListCountSelect*/
+	COUNT(*)
+FROM
+	tpost.TB_FAQ_MGNT M
+WHERE
+	M.USE_YN = 'Y'
+AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+<if test="!inputFaqCd.equals('')">
+AND M.FAQ_CD = #{inputFaqCd}
+</if>
+<if test="!inputWrtgTtl.equals('')">
+AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+</if>
+</select>
+<select id="faqDetlSelect" parameterType="tpost.suppCenter.vo.faqVO" resultType="tpost.suppCenter.vo.faqVO">
+SELECT /*faqDetlSelect*/
+	M.WRTG_NUM 			AS wrtgNum
+	,M.FAQ_CD 			AS faqCd
+	,M.WRTG_TTL 		AS wrtgTtl
+	,M.WRTG_CNTS		AS wrtgCnts
+	,DATE_FORMAT(M.WRT_DATE, '%Y-%m-%d') 		AS wrtDt
+FROM
+	tpost.TB_FAQ_MGNT M
+WHERE
+	M.WRTG_NUM = #{wrtgNum}
+</select>
+<insert id="faqInsert" parameterType="tpost.suppCenter.vo.faqVO">
+INSERT /* faqInsert */  
+INTO tpost.TB_FAQ_MGNT ( 
+	WRTG_NUM
+	,CRTR
+	,AMDR
+	,CRT_DATE
+	,MDF_DATE
+	,FAQ_CD
+	,WRTG_TTL
+	,WRTG_CNTS
+	,WRT_DATE
+	,USE_YN
+)
+VALUES
+(
+	#{wrtgNum}
+	,#{crtr}
+	,#{amdr}
+	,NOW()
+	,NOW()
+	,#{faqCd}
+	,#{wrtgTtl}
+	,#{wrtgCnts}
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,'Y'
+)
+</insert> 
+<update id="faqUpdate">
+UPDATE /*faqUpdate*/
+	tpost.TB_FAQ_MGNT
+SET
+	AMDR = #{amdr}
+	,MDF_DATE = NOW()
+	,USE_YN = 'N'
+WHERE
+	WRTG_NUM = #{wrtgNum}
+</update>
+<select id="getMaxWrtgNum" parameterType="tpost.suppCenter.vo.faqVO" resultType="java.lang.Integer">
+SELECT /*getMaxWrtgNum*/
+	IFNULL(MAX(WRTG_NUM) + 1, 1) AS wrtgNum
+FROM tpost.TB_FAQ_MGNT
+</select> 
+</mapper>

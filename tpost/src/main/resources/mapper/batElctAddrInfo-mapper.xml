@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.batchElctAddrInfo.dao.batFileUploadTempDao">
+
+
+<!--공인전자 주소 조회  -->
+<select id="elecAddrSel" parameterType="tpost.batch.batchElctAddrInfo.vo.batElctAddrInfoVO" resultType="tpost.batch.batchElctAddrInfo.vo.batElctAddrInfoVO">
+SELECT /* elecAddrSel */
+       A.NAME	AS name
+	 , '0'	    AS ofapElctAddr
+	 , CI_NUM	AS ciNum
+	 ,#{bsrpCls}	    AS bsrpCls
+	 ,'Y'	    AS regnYn
+	 , A.SEX_CLCD AS sexClcd
+	 , A.SSNO_FRON_BRDT AS ssnoFronBrdt
+  FROM tpost.TB_BATCH_FILE_UPLD_TEMP A
+WHERE NOT EXISTS (
+  			SELECT B.CI_NUM
+  			  FROM tpost.TB_RCVE_CI_INFO B
+  			WHERE A.CI_NUM = B.CI_NUM
+--  			  AND B.STTS_CLCD != '500' /* 100:발급  200:신철   300:등록   400:등록실패    500: 탈퇴 */
+         )
+</select>
+
+
+<!--입력시퀀스 확인  -->
+<select id="elecAddrInputSeq" parameterType="tpost.batch.batchElctAddrInfo.vo.batElctAddrInfoVO" resultType="tpost.batch.batchElctAddrInfo.vo.batElctAddrInfoVO">
+ SELECT /* elecAddrInputSeq */
+         IFNULL( MAX(AA.SEQ) , 0) +1 AS  inputOfapElctAddr
+   FROM (
+			SELECT SUBSTR( OFAP_ELCT_ADDR , 1,  3) AS inputBsrpCls
+			     , SUBSTR( OFAP_ELCT_ADDR , 4,  2) AS YE
+			     , SUBSTR( OFAP_ELCT_ADDR , 6,  8) AS SEQ
+		     FROM tpost.TB_OFAP_ELCT_ADDR
+		 ) AA
+	WHERE AA.inputBsrpCls =#{inputBsrpCls}	 
+	  AND AA.YE = #{ye}
+</select>
+
+
+
+<!-- 공인전자주소 입력 -->
+<insert id="ofapElctAddrListInsert_bat" parameterType="java.util.HashMap">
+INSERT /* ofapElctAddrListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR (
+	 OFAP_ELCT_ADDR
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,STTS_CLCD
+	,STTS_DT
+	,CI_NUM
+)
+VALUES
+<foreach collection="tempList" item="item" separator="," >
+(
+	#{item.inputOfapElctAddr}
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+	,'100'
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,#{item.ciNum}
+)
+</foreach>
+</insert>
+
+
+<!-- 공인전자주소 이력입력 -->
+<insert id="ofapElctAddrHisListInsert_bat" parameterType="java.lang.Integer">
+INSERT /* ofapElctAddrHisListInsert */
+INTO tpost.TB_OFAP_ELCT_ADDR_HIS (
+     HIST_SEQ
+	,OFAP_ELCT_ADDR
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,STTS_CLCD
+	,STTS_DT
+	,CI_NUM
+)
+SELECT 
+      ( select IFNULL(MAX( HIST_SEQ )  , 0) + 1 from tpost.TB_OFAP_ELCT_ADDR_HIS B where A.OFAP_ELCT_ADDR = B.OFAP_ELCT_ADDR ) AS HIST_SEQ
+	, OFAP_ELCT_ADDR
+	, CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+	, STTS_CLCD
+	, STTS_DT
+	, CI_NUM
+FROM 
+	tpost.TB_OFAP_ELCT_ADDR  A
+WHERE  
+	 DATE_FORMAT(A.CRT_DATE , '%Y%m%d')  = DATE_FORMAT(NOW(), '%Y%m%d') 
+</insert>
+
+<!-- 수신메시지 고객정보 -->
+<insert id="tbRcveCiInfoInsert_bat" parameterType="java.lang.Integer">
+INSERT /* tbRcveCiInfoInsert_bat  */
+INTO tpost.TB_RCVE_CI_INFO (
+     CI_NUM
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,BSRP_CLS
+	,NAME
+	,SSNO_FRON_BRDT
+	,SEX_CLCD
+	,CELP_NUM
+	,INFW_CLCD  /* 0 */
+	,CI_STTS_CLCD /* 0 */
+)
+VALUES
+<foreach collection="tempList" item="item" separator="," >
+(
+	#{item.ciNum}
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+	,'100'
+	,#{item.name} 
+	,#{item.ssnoFronBrdt}
+	,#{item.sexClcd}
+	,#{item.celpNum}
+	,'0'
+	,'0'
+	
+)
+</foreach>
+</insert>
+
+</mapper>

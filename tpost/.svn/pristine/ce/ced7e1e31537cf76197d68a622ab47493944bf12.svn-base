@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.aoMgntDao">
+
+  
+  <select id="aoMgntSelect" parameterType="tpost.common.vo.aoMgntVO" resultType="tpost.common.vo.aoMgntVO">
+    SELECT /* aoMgntSelect */
+		A.*
+  FROM (
+		SELECT
+			    A.AO_ID      AS aoId
+			,	A.AO_NM      AS aoNm
+			,	A.PATH_NM    AS pathNm
+			,	A.AO_PARAM   AS aoParam
+			,	A.AO_DESC    AS aoDesc
+			,	A.USE_YN     AS useYn
+			,	A.CRT_DATE   AS crtDate
+			,	A.CRTR       AS crtr
+			,	A.MDF_DATE   AS mdfDate
+			,	A.AMDR       AS amdr
+ 		 FROM tpost.TB_AO_MGNT A
+ 		WHERE A.AO_ID LIKE CONCAT( '%' , #{aoIdSel} , '%' ) 
+ 		  AND A.AO_NM LIKE CONCAT( '%' , #{aoNmSel} , '%' ) 
+ 		ORDER BY A.AO_ID	 
+  		) A
+ 
+  </select>
+  
+  <select id="aoMgntSelectCnt" parameterType="tpost.common.vo.aoMgntVO" resultType="int">
+    SELECT /* aoMgntSelectCnt */
+			count(*) 
+    FROM tpost.TB_AO_MGNT
+    WHERE AO_ID LIKE CONCAT( '%' , #{aoIdSel} , '%' ) 
+      AND AO_NM LIKE CONCAT( '%' , #{aoNmSel} , '%' ) 	 
+   
+  </select>
+  <select id="aoMgntExCnt" parameterType="tpost.common.vo.aoMgntVO" resultType="int">
+    SELECT /* aoMgntExCnt */
+			count(*) 
+    FROM tpost.TB_AO_MGNT
+    WHERE AO_ID =  #{aoId} 
+  </select>
+
+ <select id="aoMgntSelectPopu" parameterType="tpost.common.vo.aoMgntVO" resultType="tpost.common.vo.aoMgntVO">
+    
+		SELECT /* aoMgntSelectPopu */
+			    A.AO_ID      AS aoId
+			,	A.AO_NM      AS aoNm
+			,	A.PATH_NM    AS pathNm
+			,	A.AO_PARAM   AS aoParam
+			,	A.AO_DESC    AS aoDesc
+			,	A.USE_YN     AS useYn
+			,	CASE WHEN B.GRP_YN = 'Y' THEN '-' 
+	     			 ELSE B.UPR_MENU_NM
+				END AS grpNm 
+			,   B.DISP_NO    AS dispNo	
+			,	A.CRT_DATE   AS crtDate
+			,	A.CRTR       AS crtr
+			,	A.MDF_DATE   AS mdfDate
+			,	A.AMDR       AS amdr
+ 		 FROM tpost.TB_AO_MGNT A
+ 		  LEFT OUTER JOIN tpost.TB_MENU_MAIN_MGNT B  
+  		   ON A.AO_ID  = B.AO_ID 
+ 		WHERE A.AO_ID LIKE CONCAT ( '%' , #{aoIdSel} , '%' ) 
+ 		  AND A.AO_NM LIKE CONCAT ( '%' , #{aoNmSel} , '%' )
+ 		ORDER BY A.AO_ID	 
+  	 
+  </select>
+ <select id="aoMgntSelectPopuMenuMain" parameterType="tpost.common.vo.aoMgntVO" resultType="tpost.common.vo.aoMgntVO">
+    
+		SELECT /* aoMgntSelectPopu */
+			    A.AO_ID      AS aoId
+			,	A.AO_NM      AS aoNm
+			,	A.PATH_NM    AS pathNm
+			,	A.AO_PARAM   AS aoParam
+			,	A.AO_DESC    AS aoDesc
+			,	A.USE_YN     AS useYn
+			,   B.DISP_NO    AS dispNo	
+			,	A.CRT_DATE   AS crtDate
+			,	A.CRTR       AS crtr
+			,	A.MDF_DATE   AS mdfDate
+			,	A.AMDR       AS amdr
+ 		 FROM tpost.TB_AO_MGNT A
+ 		WHERE A.AO_ID LIKE CONCAT ( '%' , #{aoIdSel} , '%' ) 
+ 		  AND A.AO_NM LIKE CONCAT ( '%' , #{aoNmSel} , '%' )
+ 		ORDER BY A.AO_ID	 
+  	 
+  </select>
+
+
+	<insert  id="aoMgntInsert" parameterType="tpost.common.vo.aoMgntVO">
+INSERT /* aoMgntInsert */ 
+ INTO tpost.TB_AO_MGNT
+	VALUES (
+		#{ aoId      }
+	,	#{ aoNm      }
+	,	#{ pathNm    }
+	,	#{ aoParam   }
+	,	#{ aoDesc    }
+	,	#{ useYn     }
+	,	NOW()
+	,	NOW()
+	,	#{ crtr      }
+	,	#{ amdr      }
+	)
+	</insert>
+	
+	<delete  id="aoMgntDelete" parameterType="tpost.common.vo.aoMgntVO">
+	DELETE /* aoMgntDelete */
+	  FROM  tpost.TB_AO_MGNT
+	WHERE AO_ID IN
+	(
+	 <foreach collection="tempList" item="item" separator="," >
+		 	  #{item.aoId  }
+		 	</foreach>
+	
+	) 
+	</delete>
+	
+	<update  id="aoMgntUpdate" parameterType="tpost.common.vo.aoMgntVO">
+	UPDATE /* aoMgntUpdate */ 
+	  tpost.TB_AO_MGNT
+	   SET AO_NM =  #{aoNm  }
+	     , PATH_NM = #{pathNm}
+	     , AO_PARAM = #{aoParam}
+	     , AO_DESC = #{aoDesc	}
+		, USE_YN = #{useYn}	     
+		, MDF_DATE = NOW()
+		, AMDR = #{ amdr      }
+	WHERE AO_ID = #{aoId	}
+	
+	</update>
+
+</mapper>
+
+

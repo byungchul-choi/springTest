@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>공공알림문자 로그인</title>
+<link rel="stylesheet" type="text/css" href="resources/css/login.css">
+<script src="resources/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+	<!-- loginWrap -->
+	<div class="loginWrap">
+        <form class="loginForm">
+        	<fieldset>
+        		<legend>로그인</legend>
+                <p class="inputBox">
+                    <label>이메일주소</label>
+                    <input type="text" placeholder="USER ID">
+                </p>
+                <p class="inputBox">
+                    <label>패스워드</label>
+                    <input type="password" placeholder="PASSWORD">
+                </p>
+				<button type="button" class="login">로그인</button>
+				<ul>
+					<li><input type="checkbox" id="saveId"><label for="saveId"></label><label for="saveId">아이디 저장</label></li>
+					<li><button type="button" class="initPw">비밀번호 초기화</button></li>
+				</ul>
+            </fieldset>
+        </form>
+		<ul class="guide">
+			<li>접속 장애시 연락처 : 02-1234-5678</li>
+			<li>최초 사용자 비밀번호는 ID와 동일하며 로그인후 즉시 비밀번호 변경을 해야 합니다.</li>
+			<li>비밀번호 분실 시 비밀번호 초기화를 요청할 수 있으며 초기화가 완료되면 비밀번호는 ID로 변경됩니다. 초기화 후에는 반드시 비밀번호 변경을 하셔야 합니다.</li>
+		</ul>
+	</div>
+    <!-- //loginWrap -->
+</body>
+</html>

@@ -1,0 +1,637 @@
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui" %>  <!-- 전자정부태그라이브러리 -->
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>  <!-- jstl펑션 -->
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- CSS  STYLE -->
+<link rel="stylesheet" href="/tpost/resource/css/common.css">
+
+<!--     JS     -->
+<script src="/tpost/resource/js/jquery.min.js"></script>
+<script src="/tpost/resource/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="/tpost/resource/js/comm.js"></script>
+<!-- ---------- -->
+    	
+<script>
+
+$( document ).ready(function() {
+
+	/*그리드 클릭시 이벤트 전달하는것*/
+	$("#resultListTable tr").click(function(event) { // 실행하고자 하는 jQuery 코드
+			// 현재 클릭된 Row(<tr>)
+			var tr = $(this);
+			resultList(tr);		
+	});
+	
+	$("button").click(function(){
+		
+		var btnId = $(this).attr('id'); 
+		$("button").removeClass("state-highlight");
+		jQuery("#"+btnId).addClass("state-highlight");
+	});
+	
+	menu_new(true);
+	
+	jQuery(".close, .state-submit").click(function () {
+		jQuery(".layerBox").hide();
+	});
+});
+
+
+/*엔터키시 조회*/
+function enterSerch(){
+	if(window.event.keyCode == 13){
+		menu_sel();
+	}
+}
+
+
+/*row 이벤트 처리 */
+function resultList(tr){
+		var str = ""
+		var tdArr = new Array();	// 배열 선언
+		var td = tr.children();
+		
+		// tr.text()는 클릭된 Row 즉 tr에 있는 모든 값을 가져온다.
+		console.log("클릭한 Row의 모든 데이터 : "+tr.text());
+		
+		// 반복문을 이용해서 배열에 값을 담아 사용할 수 도 있다.
+		td.each(function(i){
+			tdArr.push(td.eq(i).text());
+		});
+		
+		console.log("배열에 담긴 값 : "+tdArr);
+
+		// td.eq(index)를 통해 값을 가져올 수도 있다.
+		
+		var menuNm     = td.eq(0).text();     // menuNm}       </td> --%>   
+		var menuId     = td.eq(1).text();   	// menuId}       </td> --%>   
+		var dispNo     = td.eq(2).text();    	// dispNo}       </td> --%>   
+// 		var aoNm       = td.eq(3).text();     	// aoNm}       </td> --%>
+// 		var aoId       = td.eq(4).text();      	// aoId}</td> --%>           
+		
+		var uprMenuId  = td.eq(3).text();    // uprMenuId}    </td> --%>   
+		var uprMenuNm  = td.eq(4).text();    // uprMenuNm}    </td> --%>   
+		var pathNm     = td.eq(5).text();     // grpYn} </td> --%>          
+		var grpYn      = td.eq(6).text();     // grpYn} </td> --%>          
+		var menuDept   = td.eq(7).text();   // menuDept}</td> --%>        
+		
+		menuNm = menuNm.replace("└>","");
+		$('#menuId').val(menuId); 
+		$('#menuNm').val(menuNm); 
+		$('#uprMenuId').val(uprMenuId); 
+		$('#uprMenuNm').val(uprMenuNm); 
+		$('#dispNo').val(dispNo); 
+		$('#grpYn').val(grpYn); 
+		
+//		$('#aoNm').val(aoNm); 
+// 		$('#aoId').val(aoId); 
+// 		$('#aoNm').val(aoNm); 
+		$('#menuDept').val(menuDept); 
+		$('#pathNm').val(pathNm); 
+		
+		if(grpYn == 'Y'){
+			jQuery("#radio_yes").attr('checked', true);
+
+		}else{
+			jQuery("#radio_no").attr('checked', true);
+		}
+		
+		$('#menuId').prop('readonly', true);
+		$('#menuNm').prop('readonly', true);
+		
+		/*수정가능하게 활성화*/ 
+		$('#uprMenuId').prop('readonly', false);
+		$('#uprMenuNm').prop('readonly', false);
+		$('#dispNo').prop('readonly', false);
+// 		$('#aoId').prop('readonly', false);
+// 		$('#aoNm').prop('readonly', false);
+		$('#grpYn').prop('readonly', false);
+		$('#pathNm').prop('readonly', false);
+		$('#menuDept').prop('readonly', false);
+}
+
+
+/* 메뉴조회 */
+function menu_sel(){
+	  
+	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+	  var menu_sel = document.getElementById("menu_sel");
+	  menu_sel.action = "menuMainMgntSel";
+	  
+	  menu_sel.method = "post";
+	  menu_sel.submit();
+	  
+}
+
+/* 메뉴저장 */
+function menu_insert(){
+	
+	/*필수값 체크가 false면 return;*/  
+	if(!fn_input_chk()){ 
+		return ;
+	}
+	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+
+	  /**********************************************/
+	  var parameters = $("#menu_sel").serialize();
+		$.ajax({
+			type:"post", 
+			dataType:"json",
+			async:false,
+			url:'menuMainMgnt-insert.ajax',
+			data:parameters ,
+			success:function(data){
+				alert(data.errmsg);
+				menu_sel();
+			}
+		});
+}
+
+function fn_input_chk(){
+	
+	/*공백체크*/
+	if( reqValCheck( "menuId" , "메뉴ID") ){return false;}
+//	if( reqValCheck( "uprMenuId" , "상위메뉴ID") ){return false;}
+// 	if( reqValCheck( "aoId" , "AOID") ){return false;}
+	if( reqValCheck( "menuNm" , "메뉴이름") ){return false;}
+	//if( reqValCheck( "uprMenuNm" , "상위메뉴명") ){return false;}
+	if( reqValCheck( "dispNo" , "표시순서") ){return false;}
+	if( reqValCheck( "menuDept" , "메뉴뎁스") ){return false;}
+	
+	return true;
+	
+}
+
+/* 밑 입력항목 활성화 */
+function menu_new(chk){
+	
+	$('#insert').prop('disabled', chk);  /*등록버튼 활성화*/
+	
+	$('#menuId').prop('readonly', chk);
+	$('#menuNm').prop('readonly', chk);
+	$('#uprMenuId').prop('readonly', chk);
+	$('#uprMenuNm').prop('readonly', chk);
+	$('#dispNo').prop('readonly', chk);
+// 	$('#aoId').prop('readonly', chk);
+// 	$('#aoNm').prop('readonly', chk);
+	$('#grpYn').prop('readonly', chk);
+	$('#menuDept').prop('readonly', chk);
+	$('#pathNm').prop('readonly', chk);
+	jQuery("#radio_no").prop('readonly', chk);
+	
+}
+
+/* 메뉴수정 */
+function menu_update(){
+	  
+	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+
+	  var parameters = $("#menu_sel").serialize();
+		$.ajax({
+			type:"post", 
+			dataType:"json",
+			async:false,
+			url:'menuMainMgnt-update.ajax',
+			data:parameters ,
+			success:function(data){
+				alert(data.errmsg);
+				menu_sel();
+			},
+			error: function(request, status, error){  
+			} 
+		});
+	  
+}
+
+/* 메뉴삭제 */
+function menu_delete(){
+	  
+	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+
+	  var parameters = $("#menu_sel").serialize();
+		$.ajax({
+			type:"post", 
+			dataType:"json",
+			async:false,
+			url:'menuMainMgnt-delete.ajax',
+			data:parameters ,
+			success:function(data){
+				alert(data.errmsg);
+				menu_sel();
+			},
+			error: function(request, status, error){  
+			} 
+		});
+	  
+}
+
+/*다음페이지*/
+ function linkPage(pageNo){
+	  
+	  if(pageIndex == ""){
+		  pageIndex = 1;
+	  }
+	  
+	$('#pageIndex').val(pageNo);
+
+	var menu_selForm = document.getElementById("menu_sel");
+	menu_selForm.action = "menuMainMgntSel";
+	menu_selForm.method = "post";
+	menu_selForm.submit();
+		
+}	
+
+function radioChk(val){
+	
+	$('#grpYn').val(val);
+}
+
+
+function init(){
+	
+	$('#menuId').val("");
+	$('#menuNm').val("");
+	$('#uprMenuId').val("");
+	$('#uprMenuNm').val("");
+	$('#dispNo').val("");
+// 	$('#aoId').val("");
+// 	$('#aoNm').val("");
+	$('#grpYn').val("");
+	$('#pathNm').val("");
+	$('#menuDept').val("");
+	jQuery("#radio_no").attr('checked', true);
+}
+
+
+
+/***************************************************************************************************/
+ /* AO  팝업*/
+/*매핑 AO정보 추가 */
+/*row 이벤트 처리 */
+function aoMgntInfPopuList(tr){
+	
+		var str = ""
+		var tdArr = new Array();	// 배열 선언
+		var td = tr.children();
+		
+		// tr.text()는 클릭된 Row 즉 tr에 있는 모든 값을 가져온다.
+		console.log("클릭한 Row의 모든 데이터 : "+tr.text());
+		
+		// 반복문을 이용해서 배열에 값을 담아 사용할 수 도 있다.
+		td.each(function(i){
+			tdArr.push(td.eq(i).text());
+		});
+		
+		console.log("배열에 담긴 값 : "+tdArr);
+
+		// td.eq(index)를 통해 값을 가져올 수도 있다.
+		var aoId       = td.eq(0).text();      	// aoId}</td> --%>           
+		var aoNm       = td.eq(1).text();     	// aoNm}       </td> --%>
+				
+		alert(aoNm + " 을 선택하였습니다. ");
+		$('#menu_sel #aoId').val(aoId); 
+		$('#menu_sel #aoNm').val(aoNm); 
+		
+		jQuery(".layerBox").hide();
+}
+
+
+function ao_add_pop(athGrpIdLink){
+	
+	var parameters = "athGrpIdLink=" + athGrpIdLink ;
+	jQuery("#aoMgntInfPopu1").show();
+	jQuery("#aoMgntInfPopu #athGrpIdLink").val(athGrpIdLink);
+    
+}
+
+
+
+/*ao insert*/
+ function ao_confirm(){
+
+	alert("ao_confirm");
+	 var queryString = $("form[name=aoMgntInfPopu]").serialize() ;
+}
+ 
+ /*고객정보확인목록 취소*/
+ function ao_cancel(){
+ 	
+ 	jQuery(".layerBox").hide();
+ }
+
+ /* 메뉴조회 */
+ function ao_select(){
+ 	
+  	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+   	  var url = "aoMgntSel-popu";
+  	  
+  
+ 	var parameters = $("#aoMgntInfPopu").serialize();
+ 	$.ajax({
+ 		type:"post", 
+ 		dataType:"json",
+ 		async:false,
+ 		url:url,
+ 		data:parameters ,
+ 		success:function(data){
+ 			
+ 			$("#aoMgntInfPopu #aoMgntInfPopuTable").html(''); //테이블 초기화
+ 			
+ 			if(data.result == "N" ) {
+ 				alert(data.errorMessage);
+ 			}else{
+  	 			if(data.athGrpMgntAOList.length != 0){
+  	 				var athGrpMgntAOList ="";
+  	 				var aoResultListTable="";
+  	 				for(var i = 0; i < data.athGrpMgntAOList.length; i++){
+  	 					var athGrpMgntAOList = data.athGrpMgntAOList[i];
+ 	 						aoResultListTable +=	'<tr>' ;
+//  	 						aoResultListTable +=	'	<td scope="row">' ;
+//  	 						aoResultListTable +=	'       <input type="checkbox" id="aoMgntInfPopuTable' + i + '" name="aoMgntInfPopuTableChk"> ' ;
+//  	 						aoResultListTable +=    '       <label for="aoMgntInfPopuTable' + i + '" ></label></td>' ;
+ 	 						aoResultListTable +=	'	<td>'+athGrpMgntAOList.aoId+'</td>' ;
+ 	 						aoResultListTable +=	'	<td>'+athGrpMgntAOList.aoNm+'</td>' ;
+ 	 						aoResultListTable +=	'	<td>'+athGrpMgntAOList.aoDesc+'</td>' ;
+ 	 						aoResultListTable +=	'</tr> ' ;
+  	 				}
+  	 			}
+  	 		}
+  	 		$("#aoMgntInfPopu #aoMgntInfPopuTable").append(aoResultListTable);
+  	 		
+  	 		/*그리드 클릭시 이벤트 전달하는것*/
+  	 		$("#aoMgntInfPopuTable tr").click(function(event) { // 실행하고자 하는 jQuery 코드
+  	 				// 현재 클릭된 Row(<tr>)
+  	 	 			var tr = $(this);
+  	 	 			aoMgntInfPopuList(tr);		
+  	 		});
+
+  	 		
+ 			}
+ 		
+ 		});
+ 	  
+ }
+ 
+</script>	
+
+</head>
+<body>
+<form id="menu_sel">		
+    <!-- wrap -->
+    <div id="wrap">
+        <!-- contents -->
+        <div id="contents">
+            <!-- section -->
+            <div class="section">
+                <!-- caption-pnl -->
+                <div class="caption-pnl">
+                    <h2>메뉴관리</h2>
+                    <div class="buttonset">
+                        <button type="button" id="insert"   onclick="menu_insert();" >등록</button>
+                        <button type="button" id="new"      onclick="menu_new(false);"  >신규</button>
+                        <button type="button" id="update"   onclick="menu_update();" >수정</button>
+                        <button type="button" id="delete"   onclick="menu_delete();" >삭제</button>
+                    </div>
+                </div>
+                <!-- //caption-pnl -->
+                <!-- search-pnl -->
+                <div class="search-pnl">
+                    <table>
+                        <colgroup>
+                            <col width="100px">
+                            <col width="200px">
+                            <col width="100px">
+                            <col width="200px">
+                            <col width="*">
+                            <col width="200px">
+                        </colgroup>
+                        <tr>
+                            <th>메뉴명</th>
+                            <td><input type="text" size="8" id="menuNmSer" name="menuNmSer"  value="${menuNmSer}" onKeyDown="enterSerch();" ></td>
+                            <th>메뉴ID</th>
+                            <td><input type="text"  id="menuIdSer" name="menuIdSer" value="${menuIdSer}" onKeyDown="enterSerch();" ></td>
+                            <td></td>
+                            <td class="buttonset"><button type="button" onclick="menu_sel();" >조회</button></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- //search-pnl -->
+                <div class="caption-pnl">
+                	<h3>메뉴목록</h3>
+                </div>
+                <!-- grid-pnl -->
+                <div class="grid-pnl" style="overflow-x:hidden; overflow-y:auto; height:300px;"  >
+                    <!-- table -->
+                    <table class="align-center" >
+                        <colgroup> <!-- 위에 5개 20 -->
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="20%">  <!-- 20 -->
+                            <col width="20%">  <!-- 20 -->
+                            <col width="10%">
+                            <col width="10%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">메뉴명</th>
+                                <th scope="col">메뉴ID</th>
+                                <th scope="col">표시순서</th>
+                                <th scope="col">상위메뉴ID</th>
+                                <th scope="col">상위메뉴명</th>
+                                <th scope="col">경로</th>
+                                <th scope="col">그룹여부</th>
+                                <th scope="col">메뉴뎁스</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultListTable" name="resultListTable" >
+                        	<c:forEach var="resultList" items="${resultList}">
+                            <tr>
+								<td style="text-align:left">${resultList.menuNm}</td>
+								<td>${resultList.menuId}</td>
+								<td>${resultList.dispNo}</td>
+								<td>${resultList.uprMenuId}</td>
+								<td>${resultList.uprMenuNm}</td>
+								<td>${resultList.pathNm}</td>
+								<td>${resultList.grpYn}</td>
+								<td>${resultList.menuDept}</td>
+							</tr>
+							</c:forEach>
+                        </tbody>
+                    </table>
+                    <!-- //table -->
+                </div>
+                <!-- //grid-pnl -->
+
+                <!-- caption-pnl -->
+            	<div class="caption-pnl">
+                	<h3>메뉴상세</h3>
+					<div class="buttonset">
+					<button type="button" onclick="init();" >초기화</button>
+					</div>
+                </div>
+                <!-- //caption-pnl -->
+                <div class="colgroup-wrap">
+                    <div class="colgroup-1-2">
+                        <!-- table-pnl -->
+                        <div class="table-pnl">
+                            <!-- table -->
+                            <table class="vtable">
+                                <colgroup><col width="120px"><col width="*"></colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>메뉴ID<span style="color: #fea338;">*</span></th>
+                                    <td><input type="text" id="menuId" name="menuId" ></td>
+                                </tr>
+                                <tr>
+                                    <th>상위메뉴ID</th>
+                                    <td><input type="text" id="uprMenuId" name="uprMenuId" ></td>
+                                </tr>
+                                <tr>
+                                    <th>그룹여부
+	                                    <input type="hidden"  id="grpYn" name="grpYn"  value="N" >
+                                    </th>
+                                    <td><div class="select_group">
+                                        <span><input type="radio" name="grpYnRadio" id="radio_yes" onclick="radioChk('Y');" ><label for="radio_yes"></label><label for="radio_yes">예</label></span>
+                                        <span><input type="radio" name="grpYnRadio" id="radio_no" onclick="radioChk('N');" checked="checked" ><label for="radio_no"></label><label for="radio_no">아니오</label></span>
+                                    </div></td>
+                                </tr>
+                                <tr>
+<!--                                     <th>AOID<span style="color: #fea338;">*</span></th> -->
+<!--                                     <td><input type="text" size="20" id="aoId" name="aoId" > -->
+<!--                                         <input type="text" id="aoNm" name="aoNm"  > -->
+<!--                                         <button type="button" class="icon-search" onclick="ao_add_pop();"> -->
+<!--                                         </button> -->
+<!--                                     </td> -->
+                                    <th>메뉴경로<span style="color: #fea338;">*</span></th>
+                                    <td><input type="text" name="pathNm" id="pathNm"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <!-- //table -->
+                        </div>
+                        <!-- //table-pnl -->
+                    </div>
+                    <div class="colgroup-1-2">
+                        <!-- table-pnl -->
+                        <div class="table-pnl">
+                            <!-- table -->
+                            <table class="vtable">
+                                <colgroup><col width="130px"><col width="*"></colgroup>
+                                <tbody>
+                                <tr>
+                                    <th>메뉴명<span style="color: #fea338;">*</span></th>
+                                    <td><input type="text" id="menuNm" name="menuNm" > </td>
+                                </tr>
+                                <tr>
+                                    <th>상위메뉴명</th>
+                                    <td><input type="text" id="uprMenuNm" name="uprMenuNm" ></td>
+                                </tr>
+                                <tr>
+                                    <th>표시순서<span style="color: #fea338;">*</span></th>
+                                    <td><input type="text" id="dispNo" name="dispNo" onkeypress="onlyNumber()"  maxlength="3"  oninput="maxLengthCheck(this)" ></td>
+                                </tr>
+                                <tr>
+                                    <th>메뉴뎁스<span style="color: #fea338;">*</span></th>
+                                    <td><input type="text" id="menuDept" name="menuDept" onkeypress="onlyNumber()" maxlength="3"  oninput="maxLengthCheck(this)" ></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <!-- //table -->
+                        </div>
+                        <!-- //table-pnl -->
+                    </div>
+                </div>
+            </div>
+            <!--// section -->
+        </div>
+        <!-- //contents -->
+
+    </div>
+    <!-- //wrap -->
+    </form>
+    
+    <!-- AO조회 팝업 -->
+     <!--AO조회 팝업  -->
+    <!-- layerBox Message -->
+	<div class="layerBox" id="aoMgntInfPopu1" name="aoMgntInfPopu1" class="layerBox pwchange" style="display:none;" >
+	 <form name="aoMgntInfPopu" id="aoMgntInfPopu">
+	
+	 <input type="hidden" id="athGrpIdLink" name="athGrpIdLink" value="${athGrpIdLink}"/>
+	 <input type="hidden" id="aoId" name="aoId" value=""/>
+	 
+		<div class="layer">
+			<div class="topBox">
+				<h3>AO조회</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox" >
+				<div class="section">
+					<div class="search-pnl">
+
+						<table>
+							<colgroup>
+								<col width="90px"
+								><col width="*">
+								<col width="90px">
+								<col width="*">
+								<col width="200px">
+							</colgroup>
+							<tbody><tr>
+								<th>AOID</th>
+								<td><input type="text" id="aoIdSel" name="aoIdSel" value="${aoIdSel}" ></td>
+								<th>AO명</th>
+								<td><input type="text" id="aoNmSel" name="aoNmSel" value="${aoNmSel}" ></td>
+								<td class="buttonset"><button type="button" onclick="ao_select();" >조회</button></td>
+							</tr>
+						</tbody></table>
+					</div>
+
+					<div class="grid-pnl" style="overflow-x:hidden; overflow-y:auto; height:300px;" >
+						<!-- table -->
+						<table class="align-center">
+							<colgroup>
+								<col width="25%">
+								<col width="25%">
+								<col width="*">
+							</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">AOID</th>
+								<th scope="col">AO명</th>
+								<th scope="col">AO설명</th>
+							</tr>
+						</thead>
+						<tbody id="aoMgntInfPopuTable" name='aoMgntInfPopuTable' >  <!-- ao 팝업  -->
+							
+						</tbody>
+						</table>
+						<!-- //table -->
+					</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-highlight" onclick="ao_confirm();">등록</button>
+						<button type="button" class="state-submit" onclick="ao_cancel();">닫기</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			</div>
+			<!-- //contBox -->
+		</div>
+		</form>
+	</div>
+	<!-- //layerBox Message -->
+    
+</body>
+
+</html>

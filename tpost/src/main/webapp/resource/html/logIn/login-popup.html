@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="viewport"
+		content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>공공알림문자 로그인</title>
+	<link rel="stylesheet" type="text/css" href="resources/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/login.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/popup.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/main.css">
+	<script src="resources/jquery-3.4.1.min.js"></script>
+	<script>
+		jQuery(document).ready(function () {
+			// 팝업 띄우기 (임시)
+			jQuery("#popupView").change(function () {
+				jQuery("#" + this.value).show();
+			});
+
+
+
+			// 팝업닫기
+			jQuery(".close, .state-submit").click(function () {
+				jQuery(".layerBox").hide();
+			});
+		});
+
+	</script>
+</head>
+
+<body>
+	<select id="popupView">
+		<option value=""></option>
+		<option value="loginpop">알림</option>
+		<option value="loginpop1">알림1</option>
+		<option value="loginpw">비밀번호 변경</option>
+		<option value="loginpwinit">비밀번호 초기화</option>
+		<option value="loginauth">2-Factor Auth</option>
+	</select>
+
+	<!-- layerBox Message -->
+	<div id="loginpop" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>알림</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="article">
+					<p>비밀번호를 변경하신 지 3개월이 지났습니다.</p>
+					<p>비밀번호를 변경하여 주시기 바랍니다.</p>
+				</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit">확인</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox Message -->
+	<!-- layerBox Message -->
+	<div id="loginpop1" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>알림</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="article">
+					<p>비밀번호를 5회 연속 틀렸습니다.</p>
+					<p>비밀번호 초기화하시기 바랍니다.</p>
+				</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit">확인</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox Message -->
+
+	<!-- layerBox pwchange -->
+	<div id="loginpw" class="layerBox pwchange" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>비밀번호 변경</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<!-- table-pnl -->
+					<div class="table-pnl">
+						<!-- table -->
+						<table>
+							<colgroup>
+								<col width="140px">
+								<col width="*">
+							</colgroup>
+							<tr>
+								<th>로그인 ID</th>
+								<td><input type="text"></td>
+							</tr>
+							<tr>
+								<th>현재 비밀번호</th>
+								<td><input type="password"></td>
+							</tr>
+							<tr>
+								<th>현재 비밀번호</th>
+								<td><input type="password"></td>
+							</tr>
+							<tr>
+								<th>현재 비밀번호</th>
+								<td><input type="password"></td>
+							</tr>
+							<tr>
+								<th class="text-r"><em>안내</em></th>
+								<td>
+									<ul>
+										<li>비밀번호는 영문, 숫자 혼합하여 9자 이상입니다.</li>
+										<li>직전에 사용한 비밀번호는 다시 사용할 수 없습니다.</li>
+									</ul>
+								</td>
+							</tr>
+						</table>
+						<!-- //table -->
+					</div>
+					<!-- //table-pnl -->
+				</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit">확인</button>
+						<button type="button">취소</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox pwchange -->
+
+	<!-- layerBox pwinit -->
+	<div id="loginpwinit" class="layerBox pwchange" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>비밀번호 초기화</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<!-- table-pnl -->
+					<div class="table-pnl">
+						<!-- table -->
+						<table>
+							<colgroup>
+								<col width="170px">
+								<col width="*">
+							</colgroup>
+							<tr>
+								<th>로그인 ID</th>
+								<td><input type="text"></td>
+							</tr>
+							<tr>
+								<th>현재 비밀번호</th>
+								<td><input type="password"></td>
+							</tr>
+							<tr>
+								<th>휴대전화번호</th>
+								<td>
+									<select>
+										<option>010</option>
+									</select>
+									<input type="tel">
+								</td>
+							</tr>
+							<tr>
+								<th>인증번호</th>
+								<td><input type="number"><button type="button">인증요청</button><span>00:00</span></td>
+							</tr>
+							<tr>
+								<th>신규 비밀번호</th>
+								<td><input type="password"></td>
+							</tr>
+							<tr>
+								<th>신규 비밀번호 확인</th>
+								<td><input type="password"></td>
+							</tr>
+						</table>
+						<!-- //table -->
+					</div>
+					<!-- //table-pnl -->
+				</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit">확인</button>
+						<button type="button">취소</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox pwinit -->
+	<!-- layerBox pwinit -->
+	<div id="loginauth" class="layerBox pwchange" >
+		<div class="layer">
+			<div class="topBox">
+				<h3>2-Factor Auth</h3>
+				<a class="close" href="#">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<!-- table-pnl -->
+					<div class="table-pnl">
+						<!-- table -->
+						<table>
+							<colgroup>
+								<col width="170px">
+								<col width="*">
+							</colgroup>
+							<tr>
+								<th>로그인 ID</th>
+								<td><input type="text" readonly></td>
+							</tr>
+							<tr>
+								<th>통신사</th>
+								<td><select>
+									<option>선택</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<th>휴대전화번호</th>
+								<td>
+									<select>
+										<option>010</option>
+									</select>
+									<input type="tel">
+								</td>
+							</tr>
+							<tr>
+								<th>인증번호</th>
+								<td><input type="number"><button type="button">인증요청</button><span>00:00</span></td>
+							</tr>
+						</table>
+						<!-- //table -->
+					</div>
+					<!-- //table-pnl -->
+				</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit">확인</button>
+						<button type="button">취소</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox pwinit -->
+
+	<!-- loginWrap -->
+	<div class="loginWrap">
+
+	</div>
+	<!-- //loginWrap -->
+</body>
+
+</html>

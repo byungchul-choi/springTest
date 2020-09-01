@@ -1,0 +1,51 @@
+package tpost.msgRcve.service;
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tpost.commCode.controller.commCdMgntController;
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.msgRcve.dao.guAcmdCerfDao;
+import tpost.msgRcve.vo.guAcmdCerfVO;
+
+@Service
+public class guAcmdCerfService{
+	@Autowired
+	guAcmdCerfDao dao;
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	public List<guAcmdCerfVO> guAcmdCerfMListSelect(guAcmdCerfVO guAcmdCerfVO){
+		return dao.guAcmdCerfMListSelect(guAcmdCerfVO);
+	}
+	
+	public int guAcmdCerfMListCountSelect(guAcmdCerfVO guAcmdCerfVO){
+		return dao.guAcmdCerfMListCountSelect(guAcmdCerfVO);
+	}
+	
+	public guAcmdCerfVO guAcmdCerfSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return dao.guAcmdCerfSelect(guAcmdCerfVO);
+	}
+	
+	public List<guAcmdCerfVO> rdngListSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return dao.rdngListSelect(guAcmdCerfVO);
+	}
+	
+	@Transactional
+	public void guAcmdCerfInsert(guAcmdCerfVO guAcmdCerfVO) {
+		guAcmdCerfVO.setIssCls("100");
+		guAcmdCerfVO.setAcmdCerfSeq(Integer.toString(dao.getMaxSeq(guAcmdCerfVO)));
+		
+		guAcmdCerfVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		guAcmdCerfVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		dao.guAcmdCerfInsert(guAcmdCerfVO);
+		dao.guAcmdCerfHisInsert(guAcmdCerfVO);
+	}
+
+}

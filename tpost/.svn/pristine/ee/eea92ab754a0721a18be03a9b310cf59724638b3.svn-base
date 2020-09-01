@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.elctDocSnrcDao">
+
+<select id="sndnMsgLstSelect" parameterType="tpost.batch.vo.elctDocSnrcVO" resultType="tpost.batch.vo.elctDocSnrcVO">
+SELECT /* sndnMsgLstSelect */
+	A.OGAN_CD 							AS oganCd		/* 발송기관 */
+	,A.MSG_TYPE 						AS sndnPtrn		/* 발송유형 */
+	,A.TMPLT_CD 						AS tmpltCd		/* 템플릿코드 */
+	,DATE_FORMAT(A.SNDN_DTM, '%Y%m%d')  AS sndnDate		/* 발송일자 */
+	,DATE_FORMAT(A.TRANS_DT, '%Y%m%d')	AS transDt		/* 요청일자 */
+	,COUNT(*) 							AS allSndnNum	/* 전체발송건수 */
+FROM 
+	tpost.TB_ELCT_DOC_SNDN_MGNT A
+	,tpost.TB_MOBL_SNDN_MSG S
+WHERE
+	A.OGAN_CD = S.SVC_ORG_CD 
+AND A.TMPLT_CD = S.TMPLT_CD
+AND A.SNDN_DTM = S.SNDN_DTM 
+AND A.TRANS_DT = S.TRANS_DT
+AND DATE_FORMAT(A.SNDN_DTM, '%Y%m%d') = #{sndnDate}
+GROUP BY oganCd, sndnPtrn, tmpltCd, sndnDate, transDt
+</select>
+<select id="sndnMsgSuccCountSelect" parameterType="tpost.batch.vo.elctDocSnrcVO" resultType="int">
+SELECT /* sndnMsgSuccCountSelect */
+	COUNT(*) AS succNum 	/* 발송성공건수 */
+FROM 
+	tpost.TB_MOBL_SNDN_MSG S
+	,tpost.TB_MOBL_RCVE_MSG R
+WHERE 
+	S.SVC_ORG_CD = #{oganCd}
+AND S.TMPLT_CD = #{tmpltCd}
+AND S.TRANS_DT = #{transDt}
+AND DATE_FORMAT(S.SNDN_DTM, '%Y%m%d') = #{sndnDate}
+AND S.SEQ_NO = R.SEQ_NO 
+AND R.DATA_GBN_CD = '5'
+AND R.REPORT_CD = '0'
+</select>
+<select id="sndnMsgDtlLstSelect" parameterType="tpost.batch.vo.elctDocSnrcVO" resultType="tpost.batch.vo.elctDocSnrcVO">
+SELECT /* sndnMsgDtlLstSelect */
+	AA.OFAP_ELCT_ADDR		AS ofapElctAddr /*공인전자주소*/
+	,AA.CI_NUM				AS ciNum		/*연계정보*/
+	,BB.NAME				AS name			/*고객명*/
+	,MAX(AA.REQ_DATE)		AS trnsDate		/*발송일시*/
+	,MAX(AA.REPORT_DATE)	AS rcveDate		/*수신일시*/
+	,IFNULL(IF(IFNULL(MAX(AA.REQ_DATE), 0) = '0', (SELECT MAX(ERROR_CD) FROM tpost.TB_SNDN_ERR_RECR WHERE SEQ_NO = AA.SEQ_NO), MAX(AA.RESULT_CD)), '')	AS resultCd /*발송실패코드*/
+	,IFNULL(MAX(AA.REPORT_CD), '')		AS reportCd	/*수신실패코드*/
+	,AA.ANOC_INFO_URL	AS sendUrl /*발송 URL*/
+FROM (
+	SELECT
+		S.OFAP_ELCT_ADDR 	AS OFAP_ELCT_ADDR 
+		,S.IPIN_CI 			AS CI_NUM
+		,S.ANOC_INFO_URL 	AS ANOC_INFO_URL 
+		,S.SEQ_NO 			AS SEQ_NO 
+		,R.REQ_DATE		 	AS REQ_DATE
+		,R.RESULT_CD		AS RESULT_CD
+		,R.REPORT_DATE		AS REPORT_DATE
+		,R.REPORT_CD		AS REPORT_CD
+	FROM 
+		tpost.TB_MOBL_SNDN_MSG S
+		LEFT OUTER JOIN tpost.TB_MOBL_RCVE_MSG R
+		ON S.SEQ_NO = R.SEQ_NO
+	WHERE 
+		S.SVC_ORG_CD = #{oganCd}
+	AND S.TMPLT_CD = #{tmpltCd}
+	AND S.TRANS_DT = #{transDt}
+	AND DATE_FORMAT(S.SNDN_DTM, '%Y%m%d') = #{sndnDate}
+	) AA
+	,tpost.TB_OFAP_ELCT_ADDR BB
+WHERE 
+	AA.OFAP_ELCT_ADDR = BB.OFAP_ELCT_ADDR 
+GROUP BY AA.OFAP_ELCT_ADDR, AA.ANOC_INFO_URL, AA.SEQ_NO, BB.NAME 
+</select>
+<insert id="elctDocSnrcInsert" parameterType="tpost.batch.vo.elctDocSnrcVO">
+INSERT /* elctDocSnrcInsert */
+INTO tpost.TB_ELCT_DOC_SNRC_LST(
+	ELCT_DOC_SNRC_PK 
+	,SNDN_OGAN 
+	,SNDN_PTRN
+	,TMPLT_CD
+	,TRANS_DT
+	,SNDN_DATE
+	,ALL_SNDN_NUM
+	,SUCC_NUM
+	,FAIL_NUM
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+<foreach collection="masterList" item="item" separator="," >
+(
+	#{item.elctDocSndnPk}
+	,#{item.oganCd}
+	,#{item.sndnPtrn}
+	,#{item.tmpltCd}
+	,#{item.transDt}
+	,#{item.sndnDate}
+	,#{item.allSndnNum}
+	,#{item.succNum}
+	,#{item.failNum}
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+)
+</foreach>
+</insert>
+<insert id="elctDocSnrcDtlInsert" parameterType="tpost.batch.vo.elctDocSnrcVO">
+INSERT /* elctDocSnrcDtlInsert */
+INTO tpost.TB_ELCT_DOC_SNRC_DETL(
+	ELCT_DOC_SNRC_PK 
+	,DETL_IDX
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,NAME
+	,TRNS_DATE
+	,RCVE_DATE
+	,ACMD_INFO_CRT_DATE 
+	,SEND_URL
+	,SEND_YN
+	,SEND_FAIL_CD
+	,ACMD_INFO_CRT_YN
+	,ACMD_INFO_CRT_FAIL_CD
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+<foreach collection="detailList" item="item" separator="," >
+(
+	#{item.elctDocSnrcPk}
+	,#{item.detlIdx}
+	,#{item.ofapElctAddr}
+	,#{item.ciNum}
+	,#{item.name}
+	,#{item.trnsDate}
+	,#{item.rcveDate}
+	,NULL
+	,#{item.sendUrl}
+	,#{item.sendYn}
+	,#{item.sendFailCd}
+	,''
+	,''
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+)
+</foreach>
+</insert>
+<select id="maxPkSelect" resultType="int">
+SELECT 
+	IFNULL(MAX(ELCT_DOC_SNRC_PK) + 1, 0) AS elctDocSndnPk
+FROM TB_ELCT_DOC_SNRC_LST
+</select>
+</mapper>

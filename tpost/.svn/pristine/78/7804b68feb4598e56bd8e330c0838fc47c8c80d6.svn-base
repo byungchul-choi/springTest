@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.oganRcrfMgntDao">
+
+<select id="moblMsgLstSelect" parameterType="tpost.batch.vo.oganRcrfMgntVO" resultType="tpost.batch.vo.oganRcrfMgntVO">
+SELECT /* moblMsgLstSelect */
+	S.SVC_ORG_CD AS oganCd
+	,S.OFAP_ELCT_ADDR AS ofapElctAddr
+FROM
+	tpost.TB_MOBL_SNDN_MSG S
+	,tpost.TB_MOBL_RCVE_MSG R
+WHERE 
+	R.SEQ_NO  = S.SEQ_NO 	
+AND R.DATA_GBN_CD = '4'
+AND R.TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d')
+AND S.BALSONG_GBN IN ('0002', '0003')
+ORDER BY oganCd
+</select>
+<select id="oganRcveRfListSelect" parameterType="tpost.batch.vo.oganRcrfMgntVO" resultType="tpost.batch.vo.oganRcrfMgntVO">
+SELECT /* oganRcveRfListSelect */
+	OGAN_CD AS oganCd
+	,OFAP_ELCT_ADDR AS ofapElctAddr
+	,BFCS_SNDN_YN AS bfcsSndnYn
+FROM 
+	tpost.TB_OGAN_RCVE_RF_MGNT
+WHERE 
+	OGAN_CD = #{oganCd}
+</select>
+<insert id="oganRcveRfInsert" parameterType="tpost.batch.vo.oganRcrfMgntVO">
+INSERT /* oganRcveRfInsert */
+INTO tpost.TB_OGAN_RCVE_RF_MGNT (
+	OFAP_ELCT_ADDR 
+	,OGAN_CD 
+	,BFCS_SNDN_YN
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+<foreach collection="iList" item="item" separator="," >
+(
+	#{item.ofapElctAddr}
+	,#{item.oganCd}
+	,'Y'
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+)
+</foreach>
+</insert>
+<insert id="oganRcveRfDtlInsert" parameterType="tpost.batch.vo.oganRcrfMgntVO">
+INSERT /* oganRcveRfDtlInsert */
+INTO tpost.TB_OGAN_RCVE_RF_DTL(
+	OFAP_ELCT_ADDR 
+	,OGAN_CD 
+	,SEQ_NO
+	,RCVE_RF_CLCD
+	,RCVE_RF_DATE
+	,LST_HIST_YN
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+<foreach collection="iList" item="item" separator="," >
+(
+	#{item.ofapElctAddr}
+	,#{item.oganCd}
+	,'0'
+	,'1'
+	,DATE_FORMAT(NOW(), '%Y%m%d')
+	,'1'
+	,NOW()
+	,NOW()
+	,#{item.crtr}
+	,#{item.amdr}
+)
+</foreach>
+</insert>
+<update id="oganRcveRfUpdate" parameterType="tpost.batch.vo.oganRcrfMgntVO">
+UPDATE /* oganRcveRfUpdate */
+	tpost.TB_OGAN_RCVE_RF_MGNT
+SET
+	BFCS_SNDN_YN = 'Y'
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE
+	OGAN_CD = #{oganCd}
+AND OFAP_ELCT_ADDR = #{ofapElctAddr}
+</update>
+</mapper>

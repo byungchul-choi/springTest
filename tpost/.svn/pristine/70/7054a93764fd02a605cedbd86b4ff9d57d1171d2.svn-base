@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.custInfMgntDao">
+  
+  <select id="custInfMgntSelect" parameterType="tpost.common.vo.custInfMgntVO" resultType="tpost.common.vo.custInfMgntVO">
+    SELECT /* custInfMgntSelect */
+		AA.*
+  FROM (
+		SELECT
+			    A.CUST_ID     AS	custId
+			,	A.OGAN_CD		AS	oganCd
+			,	A.CUST_NUM	AS	custNum
+			,	tpost.FN_GET_BASCD_NM('00001',A.OGAN_CD)  AS oganNm
+			,	A.CUST_NM		AS	custNm
+			,	A.DEPT_NM		AS	deptNm
+			,	A.USE_YN		AS	useYn
+			,	A.TEL_NUM		AS	telNum
+			,   AES_DECRYPT(UNHEX(A.CELP_NUM) ,  #{aesKey } )   AS	celpNum
+			,	A.EMAI_ID		AS	emaiId	
+			,	A.ATH_LEV		AS	athLev	
+			,	CASE WHEN A.ATH_LEV = '00' THEN '관리자'
+			   	     ELSE '일반사용자'
+			   	END      AS	athLevNm	
+			,	A.CRT_DATE	AS	crtDate
+			,	A.CRTR		AS	crtr
+			,	A.MDF_DATE	AS	mdfDate
+			,	A.AMDR		AS	amdr
+		    ,	@ROWNUM:=@ROWNUM+1  AS rnum
+ 		 FROM tpost.TB_CUST_INFO A
+ 		    ,(SELECT @ROWNUM := 0) TMP  
+ 		WHERE A.OGAN_CD LIKE CONCAT( '%' , #{oganCdSel} , '%' ) 
+ 		  AND A.CUST_NM LIKE CONCAT( '%' , #{custNmSel} , '%' ) 
+ 		ORDER BY A.CUST_ID	 
+  		) AA
+  </select>
+  
+  <select id="custInfMgntSelectCnt" parameterType="tpost.common.vo.custInfMgntVO" resultType="int">
+    SELECT /* custInfMgntSelectCnt */
+			count(*) 
+    FROM tpost.TB_CUST_INFO
+    WHERE OGAN_CD LIKE '%' || #{oganCdSel} || '%' 
+      AND CUST_NM LIKE '%' || #{custNmSel} || '%' 	 
+   
+  </select>
+<!-- 페이징 테스트 ed -->
+
+ <select id="custInfMgntSelectPopu" parameterType="tpost.common.vo.custInfMgntVO" resultType="tpost.common.vo.custInfMgntVO">
+    	SELECT /* custInfMgntSelectPopu */
+			    A.CUST_ID     AS	custId
+			,	A.OGAN_CD		AS	oganCd
+			,	A.CUST_NUM	AS	custNum
+			,	FN_GET_BASCD_NM('00001',A.OGAN_CD)		AS	oganNm
+			,	A.CUST_NM		AS	custNm
+			,	A.DEPT_NM		AS	deptNm
+			,	A.USE_YN		AS	useYn
+			,  CONCAT(LEFT(A.TEL_NUM, 3), '-', MID(A.TEL_NUM, 4, 3), '-', RIGHT(A.TEL_NUM, 4)) AS	telNum
+			,  CONCAT(LEFT(A.CELP_NUM, 3), '-', MID(A.CELP_NUM, 4, 4), '-', RIGHT(A.CELP_NUM, 4)) AS	celpNum
+			,	A.ATH_LEV		AS	athLev
+			,	A.EMAI_ID		AS	emaiId	
+			,	A.CRT_DATE	AS	crtDate
+			,	A.CRTR		AS	crtr
+			,	A.MDF_DATE	AS	mdfDate
+			,	A.AMDR		AS	amdr
+		 FROM tpost.TB_CUST_INFO A
+ 		WHERE A.OGAN_CD LIKE CONCAT('%' , #{oganCdSel} , '%' ) 
+ 		  AND A.CUST_NM LIKE CONCAT('%' , #{custNmSel} , '%' ) 
+ 		ORDER BY A.CUST_ID	 
+  </select>
+  
+ <select id="custInfMgntCustIdSeq" parameterType="tpost.common.vo.custInfMgntVO" resultType="String">
+    	 SELECT /* custInfMgntCustIdSeq */
+    	        CONCAT(  RPAD( #{ oganCd      } , 4, '0' ) , LPAD( IFNULL( MAX( CAST( A.CUST_MAX  as unsigned )   ) , 0) + 1 , 4, '0')) 
+	   	     FROM (  
+		   	     SELECT SUBSTR( CUST_NUM , 4 , 4) AS CUST_MAX 
+			    FROM tpost.TB_CUST_INFO 
+		   	   WHERE OGAN_CD = #{ oganCd      }
+	   	   ) A
+  </select>
+
+
+	<insert  id="custInfMgntInsert" parameterType="tpost.common.vo.custInfMgntVO">
+		INSERT /* custInfMgntInsert */ 
+		  INTO tpost.TB_CUST_INFO
+			(
+			  CUST_ID
+			, OGAN_CD
+			, CUST_NUM
+			, CUST_NM
+			, DEPT_NM
+			, USE_YN
+			, TEL_NUM
+			, CELP_NUM
+			, EMAI_ID
+			, ATH_LEV
+			, CRT_DATE
+			, MDF_DATE
+			, CRTR
+			, AMDR
+			)		  
+		VALUES (
+		
+				#{ custId      } 
+			,	#{ oganCd      }
+			,	#{ custId      } 
+			,	#{ custNm    }
+			,	#{ deptNm     }
+			,	#{ useYn     }
+			,	#{ telNum     }
+			,	HEX(AES_ENCRYPT(#{celpNum }, #{aesKey }) )
+			,	#{ emaiId     }
+			,    #{athLev  }	
+			,	NOW()
+			,	NOW()
+			,	#{ crtr      }
+			,	#{ amdr      }
+			)
+ 	</insert>
+	
+	<insert  id="custInfPassWordInsert" parameterType="tpost.common.vo.custInfMgntVO">
+INSERT /* custInfPassWordInsert */ 
+  INTO tpost.TB_PW_MGNT
+ ( CUST_ID,	PASS_WORD	,	PASSWORD_FAIL_CNT	,PASS_WORD_SEQ	,PASS_WORD_USE_YN, CRT_DATE,	MDF_DATE	,CRTR	,AMDR
+   , CUST_NUM
+ )VALUES
+(
+   #{ custId      }
+ , SHA2( CONCAT( #{ celpNum     }  ,'T1')            ,'512'   ) 
+ , 0
+ , '1'
+ , 'Y'
+ , NOW()
+ , NOW()
+ ,	#{ crtr      }
+ ,	#{ amdr      }
+ ,  #{ custId      }
+)
+		
+	
+	</insert>
+	
+	<delete  id="PassWordMgntDelete" parameterType="tpost.common.vo.custInfMgntVO">
+	DELETE /* PassWordMgntDelete */ 
+	 FROM  tpost.TB_PW_MGNT
+	WHERE CUST_NUM IN
+	 (	 <foreach collection="tempList" item="item" separator="," >
+				#{item.custNum	}
+		 	</foreach>
+	 )
+	 
+	</delete>
+	
+	
+	<delete  id="custInfMgntDelete" parameterType="tpost.common.vo.custInfMgntVO">
+	DELETE /* custInfMgntDelete */ 
+	 FROM  tpost.TB_CUST_INFO
+	WHERE CUST_NUM IN
+	 (	 <foreach collection="tempList" item="item" separator="," >
+				#{item.custNum	}
+		 	</foreach>
+	 )
+	 
+	</delete>
+	
+	<update  id="custInfMgntUpdate" parameterType="tpost.common.vo.custInfMgntVO">
+	UPDATE /* custInfMgntUpdate */
+	       tpost.TB_CUST_INFO
+	   SET 
+	   		OGAN_CD		=	#{oganCd  }
+		,	CUST_NUM	=	#{custNum } 
+		,	CUST_NM		=	#{custNm  }
+		,	DEPT_NM		=	#{deptNm  }
+		,	USE_YN		=	#{useYn   }
+		,	TEL_NUM		=	#{telNum  }
+		,	CELP_NUM	=	#{celpNum }
+		,	EMAI_ID		=	#{emaiId  }	 
+		,	ATH_LEV		=   #{athLev  }	
+		, MDF_DATE = NOW()
+		, AMDR = #{ amdr      }
+	WHERE CUST_NUM = #{custNum	}
+	
+	</update>
+	
+	<update  id="custInfMgntPwInit" parameterType="tpost.common.vo.custInfMgntVO">
+	UPDATE /* custInfMgntPwInit */ 
+	       tpost.TB_PW_MGNT A
+       SET A.PASS_WORD = (  SELECT SHA2(CONCAT( AES_DECRYPT(UNHEX(B.CELP_NUM) ,   #{aesKey } ) , 'T1' ), '512')
+					         FROM tpost.TB_CUST_INFO B
+					         WHERE B.CUST_ID = A.CUST_ID 
+                          ) 
+           , A.MDF_DATE = NOW()
+		   , A.AMDR = #{ amdr      }           
+     WHERE A.CUST_NUM = #{custNum	}
+        AND A.PASS_WORD_USE_YN = 'Y'
+	
+	</update>
+
+</mapper>
+
+

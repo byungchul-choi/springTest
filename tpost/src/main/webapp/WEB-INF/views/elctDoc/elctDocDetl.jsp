@@ -1,0 +1,487 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui" %>  <!-- 전자정부태그라이브러리 -->
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>  <!-- jstl펑션 -->
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>전자문서 송/수신상세</title>
+    
+	<!-- CSS  STYLE -->
+	<link rel="stylesheet" href="/tpost/resource/css/common.css">
+	<!-- ---------- -->
+	<style>
+		#acmdCerfFailPopu .layer{width:1200px;}
+		#elctDocFailPopu .layer{width:800px;}
+	</style>	
+	<!--     JS     -->
+	<script src="/tpost/resource/js/jquery.min.js"></script>
+	<script src="/tpost/resource/js/jquery-migrate-1.2.1.min.js"></script>
+	<script src="/tpost/resource/js/jquery-ui.min.js"></script>
+	<script src="/tpost/resource/js/comm.js"></script>
+	<!-- ---------- -->
+	<script type="text/javascript">
+		$('document').ready(function(){	
+			$('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+			
+			//전송여부 초깃값 세팅
+			setSendYnInit();
+		})
+	
+		function enterSerch(){
+	    	if(window.event.keyCode == 13){
+	    		elctDocDetlSelect();
+	    	}
+	    }
+
+		//전송여부 초깃값 세팅
+		function setSendYnInit(){
+			var value = '${inputSendYn}';
+	
+			var size = $("#inputSendYn option").size();
+			for(var i = 0; i < size; i++){
+				var selector = $("#inputSendYn option:eq(" + i + ")");
+				if(selector.val() == value){
+					selector.attr("selected", "selected");
+				}
+			}
+		}
+	
+		//상단 조회 버튼 클릭 시
+		function elctDocDetlSelect(){
+			$('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+			var elctDocListForm = document.getElementById("elecDocDetl");
+			elctDocListForm.action = "elctDocDetlInit";
+			elctDocListForm.method = "post";
+			elctDocListForm.submit();
+		}
+	
+		//elctDocFailPopu(전자문서 송신실패 내역) 팝업 오픈
+		function goElctDocFailPopu(){
+			var parameters = {
+					mOganCd 	: $('#mOganCd').val(),
+					mTmpltCd 	: $('#mTmpltCd').val(),
+					mSndnDate 	: $('#mSndnDate').val(),
+				};
+			jQuery("#elctDocFailPopu").show();
+
+			$.ajax({
+				type : "post",
+				dataType : "json",
+				async : false,
+				url : "goElctDocFailPopu.ajax",
+				data : parameters,
+				success : function(data) {
+					$("#elctDocFailPopu .empty-pnl").html("");
+					$("#elctDocFailPopu #elctDocDetlFailList").html("");
+					
+					var inner ='';
+					inner += '<em>'+ data.allCount +'건</em>';
+					$("#elctDocFailPopu .empty-pnl").append(inner);
+					
+					if(data.elctDocDetlFailList.length != 0){
+						inner ='';
+						for(var i = 0; i < data.elctDocDetlFailList.length; i++){
+							var elctDocDetlFailList = data.elctDocDetlFailList[i];
+							
+							inner += '<tr>';
+							inner += '<td>' + elctDocDetlFailList.popuSendFailCd + '</td>';
+							inner += '<td class="text-l">' + elctDocDetlFailList.popuSendFailDesc + '</td>';
+							inner += '<td class="text-r" style="padding-right:65px;">' + elctDocDetlFailList.popuSendFailCount + '</td>';
+							inner += '</tr>';
+						}
+						
+						$("#elctDocFailPopu #elctDocDetlFailList").append(inner);
+					}
+				},complete : function(data) {
+					
+				}
+			});
+		}
+	
+		//acmdCerfFailPopu(유통증명 송신실패 내역) 팝업 오픈
+		function goAcmdCerfFailPopu(){
+			var parameters = {
+				elctDocPk 	: $('#elctDocPk').val()
+			};
+			
+			jQuery("#acmdCerfFailPopu").show();
+			
+			$.ajax({
+				type : "post",
+				dataType : "json",
+				async : false,
+				url : "goAcmdCerfFailPopu.ajax",
+				data : parameters,
+				success : function(data) {
+					$("#acmdCerfFailPopu #acmdCerfFailList").html("");
+					
+					var inner = '';
+					/*
+					if(data.acmdCerfFailList.length != 0){
+						inner = '';
+						for(var i = 0; i < data.acmdCerfFailList.length; i++){
+							var acmdCerfFailList = data.acmdCerfFailList[i];
+							
+							inner += '<tr>';
+							inner += '<th scope="row"><input type="checkbox" id="designcheck_'+ (i + 1) +'" name="chk_info"><label for="designcheck_'+ (i + 1) +'"></th>';
+							inner += '<td>' + acmdCerfFailList.name + '</td>';
+							inner += '<td>' + acmdCerfFailList.ofapElctAddr + '</td>';
+							inner += '<td>' + acmdCerfFailList.ciNum + '</td>';
+							inner += '<td>' + acmdCerfFailList.trnsDate + '</td>';
+							inner += '<td>' + acmdCerfFailList.rcveDate + '</td>';
+							inner += '<td>' + acmdCerfFailList.rdngDate + '</td>';
+							inner += '<td>' + acmdCerfFailList.acmdInfoCrtDate + '</td>';
+							inner += '<td>실패</td>';
+							inner += '</tr>';
+						}
+						$("#acmdCerfFailPopu #acmdCerfFailList").append(inner);
+					}
+					*/
+				},complete : function(data) {
+					
+				}
+			});
+		}
+	
+		//다음페이지
+		function linkPage(pageNo){
+			if(pageIndex == ""){
+				pageIndex = 1;
+			}
+				  
+			$('#pageIndex').val(pageNo);
+				
+			var elctDocListForm = document.getElementById("elecDocDetl");
+			elctDocListForm.action = "elctDocDetlInit";
+			elctDocListForm.method = "post";
+			elctDocListForm.submit();
+		}
+		
+		function reSend(){
+			alert("KISA 연동 후 구현 예정");
+		}
+		
+		function goElctDocList(){
+			console.log($('#pOganCd').val());
+			console.log($('#pSndnCd').val());
+			console.log($('#pTmpltCd').val());
+			console.log($('#pStDt').val());
+			console.log($('#pLastDt').val());
+			console.log($('#pCi').val());
+			console.log($('#pPgIndex').val());
+			
+			var elctDocListForm = document.getElementById("elecDocDetl");
+			elctDocListForm.action = "goElctDocList";
+			elctDocListForm.method = "post";
+			elctDocListForm.submit();
+		}
+		
+		//팝업 닫기
+        function closePopu(){
+        	jQuery(".layerBox").hide();
+        }
+	</script>
+</head>
+
+<body>
+<form id="elecDocDetl">
+<input type="hidden" id="pageIndex" name="pageIndex" value="${searchVO.pageIndex}"/>
+
+<input type="hidden" id="mOganCd" name="mOganCd" value="${mOganCd}"/>
+<input type="hidden" id="mSndnDate" name="mSndnDate" value="${mSndnDate}"/>
+<input type="hidden" id="mTmpltCd" name="mTmpltCd" value="${mTmpltCd}"/>
+
+<input type="hidden" id="pOganCd" name="pOganCd" value="${pOganCd}"/>
+<input type="hidden" id="pSndnCd" name="pSndnCd" value="${pSndnCd}"/>
+<input type="hidden" id="pTmpltCd" name="pTmpltCd" value="${pTmpltCd}"/>
+<input type="hidden" id="pStDt" name="pStDt" value="${pStDt}"/>
+<input type="hidden" id="pLastDt" name="pLastDt" value="${pLastDt}"/>
+<input type="hidden" id="pCi" name="pCi" value="${pCi}"/>
+<input type="hidden" id="pPgIndex" name="pPgIndex" value="${pPgIndex}"/>
+
+    <!-- wrap -->
+    <div id="wrap">
+        <!-- contents -->
+        <div id="contents">
+            <!-- section -->
+            <div class="section">
+                <!-- caption-pnl -->
+                <div class="caption-pnl">
+                    <h2 id="title" name="title">${title}</h2>
+                    <div class="buttonset">
+                        <button type="button" onclick="goElctDocList()">목록으로</button>
+                    </div>
+                </div>
+                <!-- //caption-pnl -->
+                <!-- search-pnl -->
+                <div class="search-pnl">
+                    <table>
+                        <colgroup>
+                            <col width="110px" />
+                            <col width="*" />
+                            <col width="140px" />
+                            <col width="*" />
+                            <col width="100px" />
+                            <col width="*" />
+                            <col width="50px" />
+                            <col width="200px" />
+                        </colgroup>
+                        <tr>
+                            <th>전송여부</th>
+                            <td>
+                            	<select id="inputSendYn" name="inputSendYn">
+                                	<option value="">전체</option>
+						            <option value="Y">성공</option>
+						          	<option value="N">실패</option>
+                                </select>
+                            </td>
+                            <th>연계정보(CI)</th>
+                            <td><input type="text" id="inputCiNum" name="inputCiNum" value="${inputCiNum}" onKeyDown="enterSerch()"></td>
+                            <th>고객명</th>
+                            <td><input type="text" id="inputName" name="inputName" value="${inputName}" onKeyDown="enterSerch()"></td>
+                            <td></td>
+                            <td class="buttonset" rowspan="2"><button type="button" onclick="elctDocDetlSelect()">조회</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- //search-pnl -->
+                <div class="table-pnl">
+                	<!-- table -->
+                	<table class="vtable">
+                        <colgroup>
+                            <col width="13%">
+                            <col width="13%">
+                            <col width="13%">
+                            <col width="13%">
+                            <col width="12%">
+                            <col width="12%">
+                            <col width="12%">
+                            <col width="*">
+                        </colgroup>
+						<thead>
+	                    	<tr>
+	                        	<th rowspan="2">전체발송건수</th>
+	                        	<th colspan="3">전송건수</th>
+	                        	<th colspan="2">열람건수</th>
+	                        	<th colspan="2">유통정보생성현황</th>
+	                        </tr>
+	                    	<tr>
+	                        	<th>성공</th>
+	                        	<th>실패</th>
+	                        	<th>성공율(%)</th>
+	                        	<th>전체열람건수</th>
+	                        	<th>성공율(%)</th>
+	                        	<th>성공건수</th>
+	                        	<th>실패건수</th>
+	                        </tr>
+						</thead>
+						<tbody d="detlTopTable">
+							<tr>
+								<td class="text-r">${allCount}</td>
+								<td class="text-r">${succCount}</td>
+								<td class="text-r" style="text-decoration:underline;color:#fea43a;font-weight:bold;cursor:pointer;" onclick="goElctDocFailPopu()">${failCount}</td>
+								<td class="text-r">${succProb}</td>
+								<td class="text-r">${allRdngCount}</td>
+								<td class="text-r">${rdngProb}</td>
+								<td class="text-r">${succAcmdInfoCrtCount}</td>
+								<td class="text-r" style="text-decoration:underline;color:#fea43a;font-weight:bold;cursor:pointer;" onclick="goAcmdCerfFailPopu()">${failAcmdInfoCrtCount}</td>
+	                        </tr>
+						</tbody>
+                    </table>
+                    <!-- //table -->
+                </div>
+                <!-- grid-pnl -->
+                <div class="grid-pnl">
+                    <!-- table -->
+                    <table class="align-center">
+                        <colgroup>
+                            <col width="12%">
+                            <col width="10%">
+                            <col width="10%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="*">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">공인전자주소</th>
+                                <th scope="col">고객명</th>
+                                <th scope="col">전송여부</th>
+                                <th scope="col">송신일시</th>
+                                <th scope="col">수신일시</th>
+                                <th scope="col">열람일시</th>
+                                <th scope="col">유통정보생성일시</th>
+                                <th scope="col">발송내용</th>
+                            </tr>
+                        </thead>
+                        <tbody id="elctDocDetlListTable">
+                        	<c:forEach var="elctDocDetlList" items="${elctDocDetlList}">
+					          	<c:if test="${elctDocDetlList.sendYn == 'Y'}">
+					          		<tr>
+										<td style="cursor:pointer;" onclick="ofapElctAddrToCi('${elctDocDetlList.ciNum}')">${elctDocDetlList.ofapElctAddr}</td>
+										<td>${elctDocDetlList.name}</td>
+										<td>성공</td>
+										<td>${elctDocDetlList.trnsDate}</td>
+										<td>${elctDocDetlList.rcveDate}</td>
+										<td>${elctDocDetlList.rdngDate}</td>
+										<td>${elctDocDetlList.acmdInfoCrtDate}</td>
+										<td onclick="window.open('${elctDocDetlList.sendUrl}')"><button type="button" class="icon-search"></button></td>
+									</tr>
+								</c:if>
+								<c:if test="${elctDocDetlList.sendYn == 'N'}">
+					          		<tr class="text-point">
+										<td style="cursor:pointer;" onclick="ofapElctAddrToCi('${elctDocDetlList.ciNum}')">${elctDocDetlList.ofapElctAddr}</td>
+										<td>${elctDocDetlList.name}</td>
+										<td>실패</td>
+										<td>${elctDocDetlList.trnsDate}</td>
+										<td>${elctDocDetlList.rcveDate}</td>
+										<td>${elctDocDetlList.rdngDate}</td>
+										<td>${elctDocDetlList.acmdInfoCrtDate}</td>
+										<td onclick="window.open('${elctDocDetlList.sendUrl}')"><button type="button" class="icon-search"></button></td>
+									</tr>
+								</c:if>
+					 		</c:forEach>
+                        </tbody>
+                    </table>
+                    <!-- //table -->
+                </div>
+                <!-- //grid-pnl -->
+            </div>
+            <!--// section -->
+            <!-- paging -->
+            <div class="paging">
+                <c:if test="${fn:length(elctDocDetlList) ne 0 }">  
+					<ul>
+						<ui:pagination paginationInfo="${paginationInfo}" type="text" jsFunction="linkPage" />
+					</ul>
+				</c:if>
+            </div>
+            <!-- //pageing -->
+        </div>
+        <!-- //contents -->
+
+    </div>
+    <!-- //wrap -->
+     
+    <!-- layerBox Message -->
+	<div id="elctDocFailPopu" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+				<h3>전자문서 송신실패 내역</h3>
+				<a class="close" onclick="closePopu()">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<div class="empty-pnl"></div>
+
+					<div class="grid-pnl" style="overflow-x:hidden; overflow-y:auto; height:300px;">
+						<!-- table -->
+						<table class="align-center">
+							<colgroup>
+								<col width="20%">
+								<col width="*">
+								<col width="20%">
+							</colgroup>
+						<thead>
+							<tr>
+								<th scope="col">오류코드</th>
+								<th scope="col">실패사유</th>
+								<th scope="col">건수</th>
+							</tr>
+						</thead>
+						<tbody id="elctDocDetlFailList">
+						</tbody>
+						</table>
+						<!-- //table -->
+					</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit" onclick="closePopu()">닫기</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox Message -->
+	
+	
+	<!-- layerBox Message -->
+	<div id="acmdCerfFailPopu" class="layerBox" style="display:none;">
+		<div class="layer">
+			<div class="topBox">
+			<h3>유통정보 생성실패 내역</h3>
+				<a class="close" onclick="closePopu()">&#10005;</a>
+			</div>
+			<div class="contBox">
+				<div class="section">
+					<div class="caption-pnl">
+					<div class="buttonset">
+					<button type="button" onclick="reSend()">재전송</button>
+					</div>
+					</div>
+					<div class="grid-pnl" style="overflow-x:hidden; overflow-y:auto; height:280px;">
+						<!-- table -->
+						<table class="align-center">
+							<colgroup>
+								<col width="50px">
+								<col width="10%">
+								<col width="15%">
+								<col width="*">
+								<col width="*">
+								<col width="*">
+								<col width="*">
+								<col width="10%">
+							</colgroup>
+						<thead>
+							<tr>
+								<th scope="col"><input type="checkbox" onclick="chkBoxMgnt('acmdCerfFailList', $(this))" id="designcheck"><label for="designcheck"></label></th>
+								<th scope="col">고객명</th>
+								<th scope="col">공인전자주소</th>
+								<th scope="col">송신일시</th>
+								<th scope="col">수신일시</th>
+								<th scope="col">열람일시</th>
+								<th scope="col">유통정보 생성일시</th>
+								<th scope="col">전송여부</th>
+							</tr>
+						</thead>
+						<tbody id="acmdCerfFailList">
+						</tbody>
+						</table>
+						<!-- //table -->
+					</div>
+				<!-- footer -->
+				<div class="footer">
+					<div class="buttonset">
+						<button type="button" class="state-submit" onclick="closePopu()">닫기</button>
+					</div>
+				</div>
+				<!-- //footer -->
+			</div>
+			</div>
+			<!-- //contBox -->
+		</div>
+		<div class="fade"></div>
+	</div>
+	<!-- //layerBox Message -->
+	
+	<!-- layerBox Message -->
+	<div id="ofapElctAddrToCi" class="layerBox" style="display:none;"></div>
+	<!-- //layerBox Message -->
+</form>
+</body>
+</html>

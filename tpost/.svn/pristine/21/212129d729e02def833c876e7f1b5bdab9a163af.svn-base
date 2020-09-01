@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>공공알림문자</title>
+
+    <link rel="stylesheet" type="text/css" href="resources/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/main.css">
+    <script src="resources/jquery-3.4.1.min.js"></script>
+
+    <script>
+        // 메뉴데이터
+        var menuData = {
+            "mnu-docu": [{"srcId":"docu1", "title": "전자문서 송/수신목록"}, {"srcId":"docu2", "title": "전자문서 송/수신상세"}],
+            "mnu-certi": [{"srcId":"", "title": "공인전자주소관리"}, {"srcId":"", "title": "유동증명서현황관리"}],
+            "mnu-login": [{"srcId":"", "title": ""}, {"srcId":"", "title": ""}],
+            "mnu-system": [{"srcId":"system1", "title": "코드관리"}, {"srcId":"system2", "title": "코드관리등록팝업"}, {"srcId":"system3", "title": "AO관리"}, {"srcId":"system4", "title": "권한관리"}, {"srcId":"system5", "title": "고객정보등록"}, {"srcId":"system6", "title": "메뉴관리"}, {"srcId":"system7", "title": "템플릿목록"}, {"srcId":"system8", "title": "템플릿스키마등록"}],
+
+        };
+
+        // 메뉴데이터에 맞게 메뉴리스트 구성 및 이벤트 등록
+        var loadMenu = function(aMenuInfo) {
+            // 메뉴 목록 제거
+            jQuery(".gnb li").remove();
+
+            // 메뉴 목록 생성
+            jQuery.each(menuData[aMenuInfo], function(i, v) {
+                jQuery(".gnb ul").append("<li><a href='#' id=" + v.srcId + ">"+ v.title+"</a></li>");
+            });
+
+            // 첫번째 메뉴 활성화
+            jQuery(".gnb li:first-child a").addClass("state-current");
+
+            // 메뉴 클릭 시 이벤트 처리
+            jQuery(".gnb li a").click(function(){
+                var path = "/page/"+jQuery(this).attr("id")+".html";
+                jQuery(parent.document).find("#page").attr("src", path);
+            });
+
+            // 첫번째 메뉴 선택
+            jQuery(".gnb li:first-child a").click();
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <!-- wrap -->
+    <div id="wrap">
+        <!-- header -->
+        <div id="header">
+            <ul class="userInfo">
+                <li class="info_pw"><a href="#">비밀번호 변경</a></li>
+                <li class="info_logout"><a href="#">로그아웃</a></li>
+                <li class="info_user"><span>티시스 관리자님</span></li>
+            </ul>
+            <div class="gnb">
+                <ul class="nav">
+                    <li><a class="state-current" href="#">코드관리</a></li>
+                    <li><a href="#">코드관리등록팝업</a></li>
+                    <li><a href="#">AO관리</a></li>
+                    <li><a href="#">권한관리</a></li>
+                    <li><a href="#">고객정보등록</a></li>
+                    <li><a href="#">메뉴관리</a></li>
+                    <li><a href="#">템플릿목록</a></li>
+                    <li><a href="#">템플릿스키마등록</a></li>
+                </ul>
+            </div>
+        </div>
+        <!-- //header -->
+
+    </div>
+    <!-- //container -->
+    </div>
+    <!-- //wrap -->
+</body>
+
+</html>

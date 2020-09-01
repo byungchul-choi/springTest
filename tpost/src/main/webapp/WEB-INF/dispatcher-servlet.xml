@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+ <context:component-scan base-package="tpost">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="webBindingInitializer">
+            <bean class="tpost.egovcomm.EgovBindingInitializer"/>
+        </property>
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonConverter" />
+            </list>
+        </property>
+    </bean>
+    
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="interceptors">
+            <list>
+                <ref bean="localeChangeInterceptor" />
+            </list>
+        </property>
+    </bean>
+
+ <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1"
+	    p:viewClass="org.springframework.web.servlet.view.JstlView"
+	    p:prefix="/WEB-INF/views/" p:suffix=".jsp"
+	    p:contentType="text/html; charset=UTF-8"/>
+ 
+<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" id="viewResolver" p:order="0"/>
+
+ 
+ <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" id="apiView">
+        <property name="contentType" value="text/plain;charset=UTF-8"></property>
+    </bean>
+ 
+<mvc:resources mapping="/tpost/resource/**" location="/tpost/resource/" />
+<!-- <mvc:resources mapping="/tpost/image/**" location="/nfsdata01/tpost/" /> -->
+<!-- <mvc:resources mapping="/image/**" location="/image/" /> -->
+
+<!-- 검색엔진 노출 -->
+<mvc:resources mapping="/tpost/robots.txt" location="/tpost/robots.txt" />
+
+<!-- For Pagination Tag -->
+    <bean id="imageRenderer" class="tpost.egovcomm.EgovImgPaginationRenderer"/>
+    <bean id="paginationManager" class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+        <property name="rendererType">
+            <map>
+                <entry key="image" value-ref="imageRenderer"/>
+            </map>
+        </property>
+    </bean>
+	<!-- /For Pagination Tag -->
+    
+    <!-- 로그인처리관련설정추가 -->
+    <!-- 로그인 권한 체크 인터셉터 -->
+    
+    <bean id="jsonConverter"  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+    <!-- 쿠키를 이용한 Locale 이용시 <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/> -->
+    <bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+        <property name="paramName" value="language" />
+    </bean>
+
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler/>
+
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultErrorView" value="cmmn/egovError"/>
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.springframework.dao.DataAccessException">cmmn/dataAccessFailure</prop>
+                <prop key="org.springframework.transaction.TransactionException">cmmn/transactionFailure</prop>
+                <prop key="egovframework.rte.fdl.cmmn.exception.EgovBizException">cmmn/egovError</prop>
+                <prop key="org.springframework.security.AccessDeniedException">cmmn/egovError</prop>
+            </props>
+        </property>
+    </bean>
+    
+<mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**/*"/>
+              <mvc:exclude-mapping path="/logIn/**"/>  <!-- 로그인 화면   -->
+              <mvc:exclude-mapping path="/tpost/logIn/**"/>  <!-- 로그인 화면   -->
+              <mvc:exclude-mapping path="/commUtil/**"/> <!-- 공통코드  -->
+              <mvc:exclude-mapping path="/msgRcve/**"/> <!-- 공통코드  -->
+              <mvc:exclude-mapping path="/batch/**"/> <!-- 공통코드  -->
+<!--             <mvc:exclude-mapping path="/common/menuMainTop**"/> 상단메뉴  -->
+              <mvc:exclude-mapping path="/restComu/**"/> <!-- 공통 css 적용  -->   
+              <mvc:exclude-mapping path="/resource/**"/> <!-- 공통 css 적용  -->  
+              <mvc:exclude-mapping path="/robots*"/> <!-- 공통 css 적용  -->  
+              
+              <mvc:exclude-mapping path="/restTestServer/**"/> <!-- restTestServer 테스트  -->  
+              <bean class="tpost.egovcomm.interceptor.AuthInterceptor"></bean>
+        </mvc:interceptor>
+     </mvc:interceptors>
+    
+    <!--파일 업로드 bean  -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+    
+</beans>

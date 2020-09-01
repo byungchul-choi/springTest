@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.suppCenter.dao.noticeDao">  
+<select id="noticeListSelect" parameterType="tpost.suppCenter.vo.noticeVO" resultType="tpost.suppCenter.vo.noticeVO">
+SELECT /*noticeListSelect*/
+	A.wrtgNum 				AS wrtgNum
+	,A.oganCd				AS oganCd
+	,IFNULL(tpost.FN_GET_BASCD_NM('00001',A.oganCd), '전체')	AS oganNm
+	,A.wrtgTtl				AS wrtgTtl
+	,DATE_FORMAT(A.wrtDt, '%Y-%m-%d') AS wrtDt
+FROM(
+	SELECT
+		M.WRTG_NUM 			AS wrtgNum
+		,M.OGAN_CD 			AS oganCd
+		,M.WRTG_TTL 		AS wrtgTtl
+		,M.WRT_DATE 		AS wrtDt
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM
+		tpost.TB_NOTI_MGNT M
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		M.USE_YN = 'Y'
+	AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+	<if test="!inputOganCd.equals('')">
+	AND M.OGAN_CD = #{inputOganCd}
+	</if>
+	<if test="!inputWrtgTtl.equals('')">
+	AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+	</if>
+	ORDER BY M.WRTG_NUM DESC
+) A
+WHERE
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="noticeListCountSelect" parameterType="tpost.suppCenter.vo.noticeVO" resultType="java.lang.Integer">
+SELECT /*noticeListCountSelect*/
+	COUNT(*)
+FROM
+	tpost.TB_NOTI_MGNT M
+WHERE
+	M.USE_YN = 'Y'
+AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+<if test="!inputOganCd.equals('')">
+AND M.OGAN_CD = #{inputOganCd}
+</if>
+<if test="!inputWrtgTtl.equals('')">
+AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+</if>
+</select>
+<select id="noticeDetlSelect" parameterType="tpost.suppCenter.vo.noticeVO" resultType="tpost.suppCenter.vo.noticeVO">
+SELECT /*noticeDetlSelect*/
+	M.WRTG_NUM 			AS wrtgNum
+	,M.OGAN_CD 			AS oganCd
+	,M.WRTG_TTL 		AS wrtgTtl
+	,M.WRTG_CNTS		AS wrtgCnts
+	,DATE_FORMAT(M.WRT_DATE, '%Y-%m-%d') 		AS wrtDt
+FROM
+	tpost.TB_NOTI_MGNT M
+WHERE
+	M.WRTG_NUM = #{wrtgNum}
+</select>
+<insert id="noticeInsert" parameterType="tpost.suppCenter.vo.noticeVO">
+INSERT /* noticeInsert */  
+INTO tpost.TB_NOTI_MGNT ( 
+	WRTG_NUM
+	,CRTR
+	,AMDR
+	,CRT_DATE
+	,MDF_DATE
+	,OGAN_CD
+	,WRTG_TTL
+	,WRTG_CNTS
+	,WRT_DATE
+	,USE_YN
+)
+VALUES
+(
+	#{wrtgNum}
+	,#{crtr}
+	,#{amdr}
+	,NOW()
+	,NOW()
+	,#{oganCd}
+	,#{wrtgTtl}
+	,#{wrtgCnts}
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,'Y'
+)
+</insert> 
+<update id="noticeUpdate">
+UPDATE /*noticeUpdate*/
+	tpost.TB_NOTI_MGNT
+SET
+	AMDR = #{amdr}
+	,MDF_DATE = NOW()
+	,USE_YN = 'N'
+WHERE
+	WRTG_NUM = #{wrtgNum}
+</update>
+<select id="getMaxWrtgNum" parameterType="tpost.suppCenter.vo.noticeVO" resultType="java.lang.Integer">
+SELECT /*getMaxWrtgNum*/
+	IFNULL(MAX(WRTG_NUM) + 1, 1) AS wrtgNum
+FROM tpost.TB_NOTI_MGNT
+</select> 
+</mapper>

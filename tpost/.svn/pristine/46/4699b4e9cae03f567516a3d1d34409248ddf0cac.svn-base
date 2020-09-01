@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.sttc.dao.sttcBfrInfoDao">   
+<select id="sttcBfrInfoSelect" parameterType="tpost.sttc.vo.sttcInfoVO" resultType="tpost.sttc.vo.sttcInfoVO">
+/*통계정보 본문자 합 춰리*/
+select /* sttcBfrInfoSelect */ 
+       SUM(SUCC_CNT +  FAIL_CNT) AS allSndnCnt  /*전체발송건수*/ 
+     , SUM(SUCC_CNT )            AS allSuccCnt     /*성공건수*/ 
+     , SUM(FAIL_CNT )            AS allFailCnt     /*실패건수*/
+     , ROUND( SUM(SUCC_CNT ) / SUM(SUCC_CNT +  FAIL_CNT) * 100 , 2) AS  allSuccRate /*성공률*/
+     , SUM(CSNT_CNT )            AS allCsntCnt /*동의건수*/
+     , SUM(RFSL_CNT )            AS allRfslCnt /*거부건수*/
+     , ROUND( SUM(CSNT_CNT  ) / SUM(CSNT_CNT + RFSL_CNT) * 100  , 2) AS allCsntRate /* 동의률*/  
+from tpost.TB_STTC_INFO A
+WHERE A.OGAN_CD = #{oganCd}
+ AND A.TMPLT_CD  LIKE CONCAT('%', '00001')  /*각기관의 00001번이 사전동의 문자 템플릿임*/ 
+ AND A.TRANS_DT BETWEEN #{inputIssStDt} AND #{inputIssClosDt}  
+group by A.OGAN_CD 
+</select>
+
+<select id="sttcBfrInfoDetlSelect" parameterType="tpost.sttc.vo.sttcInfoVO" resultType="tpost.sttc.vo.sttcInfoVO">
+select /* sttcBfrInfoDetlSelect */ 
+       A.OGAN_CD                  AS oganCd
+     , A.TRANS_DT                  AS transDt
+     ,  SUM(SUCC_CNT +  FAIL_CNT) AS sndnCnt  /*전체발송건수*/ 
+     , SUM(SUCC_CNT )            AS succCnt     /*성공건수*/ 
+     , SUM(FAIL_CNT )            AS failCnt     /*실패건수*/
+     , ROUND( SUM(SUCC_CNT ) / SUM(SUCC_CNT +  FAIL_CNT) * 100 , 2) AS  succRate /*성공률*/
+     , SUM(CSNT_CNT )            AS csntCnt /*동의건수*/
+     , SUM(RFSL_CNT )            AS rfslCnt /*거부건수*/
+     , ROUND( SUM(CSNT_CNT  ) / SUM(CSNT_CNT + RFSL_CNT) * 100  , 2) AS csntRate /* 동의률*/  
+from tpost.TB_STTC_INFO A
+WHERE A.OGAN_CD = #{oganCd}
+ AND A.TMPLT_CD  LIKE CONCAT('%', '00001')  /*각기관의 00001번이 사전동의 문자 템플릿임*/
+ AND A.TRANS_DT BETWEEN #{inputIssStDt} AND #{inputIssClosDt}
+group by A.OGAN_CD , A.TRANS_DT
+</select>
+
+
+
+</mapper>

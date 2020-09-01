@@ -1,0 +1,42 @@
+package tpost.batch.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.batch.vo.elctDocSnrcVO;
+
+@Repository
+public class elctDocSnrcDao {
+	
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<elctDocSnrcVO> sndnMsgLstSelect(elctDocSnrcVO elctDocSnrcVO){
+		return sqlSessionTemplate.selectList("tpost.batch.dao.elctDocSnrcDao.sndnMsgLstSelect", elctDocSnrcVO);
+	}
+	
+	public int sndnMsgSuccCountSelect(elctDocSnrcVO elctDocSnrcVO){
+		return sqlSessionTemplate.selectOne("tpost.batch.dao.elctDocSnrcDao.sndnMsgSuccCountSelect", elctDocSnrcVO);
+	}
+	
+	public List<elctDocSnrcVO> sndnMsgDtlLstSelect(elctDocSnrcVO elctDocSnrcVO){
+		return sqlSessionTemplate.selectList("tpost.batch.dao.elctDocSnrcDao.sndnMsgDtlLstSelect", elctDocSnrcVO);
+	} 
+	
+	public void elctDocSnrcInsert(Map<String, Object> elctDocMap) {
+		sqlSessionTemplate.insert("tpost.batch.dao.elctDocSnrcDao.elctDocSnrcInsert", elctDocMap);
+	}
+	
+	public void elctDocSnrcDtlInsert(Map<String, Object> elctDocMap) {
+		sqlSessionTemplate.insert("tpost.batch.dao.elctDocSnrcDao.elctDocSnrcDtlInsert", elctDocMap);
+	}
+	
+	public int maxPkSelect() {
+		return sqlSessionTemplate.selectOne("tpost.batch.dao.elctDocSnrcDao.maxPkSelect");
+	}
+
+}

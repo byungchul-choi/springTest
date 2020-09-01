@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.restComu.restSuppCenter.dao.restNoticeDao">   
+<select id="noticeListSelect" parameterType="tpost.restComu.restSuppCenter.vo.restNoticeVO" resultType="tpost.restComu.restSuppCenter.vo.restNoticeVO">
+SELECT /*noticeListSelect*/
+	RNUM					AS seq
+	,A.wrtgNum 				AS wrtgNum
+	,A.oganCd				AS oganCd
+	,IFNULL(tpost.FN_GET_BASCD_NM('00001',A.oganCd), '전체')	AS oganNm
+	,A.wrtgTtl				AS wrtgTtl
+	,DATE_FORMAT(A.wrtDt, '%Y-%m-%d') AS wrtDt
+FROM(
+	SELECT
+		M.WRTG_NUM 			AS wrtgNum
+		,M.OGAN_CD 			AS oganCd
+		,M.WRTG_TTL 		AS wrtgTtl
+		,M.WRT_DATE 		AS wrtDt
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM
+		tpost.TB_NOTI_MGNT M
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		M.USE_YN = 'Y'
+	AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+	<if test="!inputOganCd.equals('')">
+	AND M.OGAN_CD = #{inputOganCd}
+	</if>
+	<if test="!inputWrtgTtl.equals('')">
+	AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+	</if>
+	ORDER BY M.WRTG_NUM DESC
+) A
+WHERE
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="noticeListCountSelect" parameterType="tpost.restComu.restSuppCenter.vo.restNoticeVO" resultType="java.lang.Integer">
+SELECT /*noticeListCountSelect*/
+	COUNT(*)
+FROM
+	tpost.TB_NOTI_MGNT M
+WHERE
+	M.USE_YN = 'Y'
+AND M.WRT_DATE BETWEEN #{inputWrtgStDt} AND #{inputWrtgClosDt}
+<if test="!inputOganCd.equals('')">
+AND M.OGAN_CD = #{inputOganCd}
+</if>
+<if test="!inputWrtgTtl.equals('')">
+AND M.WRTG_TTL LIKE CONCAT('%', #{inputWrtgTtl} ,'%')
+</if>
+</select>
+<select id="noticeDetlSelect" parameterType="tpost.restComu.restSuppCenter.vo.restNoticeVO" resultType="tpost.restComu.restSuppCenter.vo.restNoticeVO">
+SELECT /*noticeDetlSelect*/
+	M.WRTG_NUM 			AS wrtgNum
+	,IFNULL(tpost.FN_GET_BASCD_NM('00001',M.OGAN_CD), '전체')	AS oganNm
+	,M.WRTG_TTL 		AS wrtgTtl
+	,M.WRTG_CNTS		AS wrtgCnts
+	,DATE_FORMAT(M.WRT_DATE, '%Y-%m-%d') 		AS wrtDt
+FROM
+	tpost.TB_NOTI_MGNT M
+WHERE
+	M.WRTG_NUM = #{wrtgNum}
+</select>
+</mapper>

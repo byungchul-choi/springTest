@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.elctDoc.dao.elctDocDao">   
+<select id="elctDocListSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="tpost.elctDoc.vo.elctDocVO">
+SELECT /* elctDocListSelect */
+	oganCd	AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001',oganCd) AS oganNm
+	,tpost.FN_GET_BASCD_NM('00002',sndnCd) AS sndnCd
+	,tmpltCd	AS tmpltCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = tmpltCd AND OGAN_CD = oganCd GROUP BY TMPLT_NM) AS tmpltNm
+	,succNum + failNum AS allSndnNum
+	,succNum AS succNum
+	,failNum AS failNum
+	,DATE_FORMAT(STR_TO_DATE(sndnDate, '%Y%m%d%s'), '%Y-%m-%d') AS sndnDate
+	,RNUM AS rn
+FROM (
+	<if test="inputCi.equals('')">
+	SELECT 
+		M.OGAN_CD 				AS oganCd
+		,M.SNDN_CD				AS sndnCd
+		,M.TMPLT_CD 			AS tmpltCd
+		,IFNULL(M.SUCC_CNT, 0) 	AS succNum
+		,IFNULL(M.FAIL_CNT, 0) 	AS failNum
+		,M.TRANS_DT 			AS sndnDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */ 
+	FROM 
+		tpost.TB_STTC_INFO M
+		,(SELECT @ROWNUM:=0) TMP	
+	WHERE
+		M.TRANS_DT BETWEEN #{inputStDt} AND #{inputLastDt}
+		<if test="!inputOganCd.equals('')">
+		AND	M.OGAN_CD =  #{inputOganCd}
+		</if>
+		<if test="!inputSndnCd.equals('')">
+		AND	M.SNDN_CD =  #{inputSndnCd}
+		</if>
+		<if test="!inputTmpltCd.equals('')">
+		AND M.TMPLT_CD = #{inputTmpltCd}
+		</if>
+	ORDER BY sndnDate DESC
+	</if>
+	<if test="!inputCi.equals('')">
+	SELECT 
+		M.OGAN_CD 				AS oganCd
+		,M.SNDN_CD				AS sndnCd
+		,M.TMPLT_CD 			AS tmpltCd
+		,IFNULL(M.SUCC_CNT, 0) 	AS succNum
+		,IFNULL(M.FAIL_CNT, 0) 	AS failNum
+		,M.TRANS_DT 			AS sndnDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */ 
+	FROM 
+		tpost.TB_STTC_INFO M
+		LEFT OUTER JOIN tpost.TB_SNDN_SUCC_MSG A
+		ON M.OGAN_CD = A.OGAN_CD 
+		AND M.TMPLT_CD = A.TMPLT_CD
+		AND M.TRANS_DT = A.TRANS_DT
+		LEFT OUTER JOIN tpost.TB_SNDN_FAIL_MSG B
+		ON M.OGAN_CD = B.OGAN_CD 
+		AND M.TMPLT_CD = B.TMPLT_CD
+		AND M.TRANS_DT = B.TRANS_DT
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE 
+		A.CI_NUM = #{inputCi}
+		OR B.CI_NUM = #{inputCi}
+		AND M.TRANS_DT BETWEEN #{inputStDt} AND #{inputLastDt}
+		<if test="!inputOganCd.equals('')">
+		AND	M.OGAN_CD =  #{inputOganCd}
+		</if>
+		<if test="!inputSndnCd.equals('')">
+		AND	M.SNDN_CD =  #{inputSndnCd}
+		</if>
+		<if test="!inputTmpltCd.equals('')">
+		AND M.TMPLT_CD = #{inputTmpltCd}
+		</if>
+	ORDER BY sndnDate DESC
+	</if>
+	) AA
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="elctDocListCountSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="java.lang.Integer">
+SELECT /* elctDocListCountSelect */
+	COUNT(*)
+FROM (
+	<if test="inputCi.equals('')">
+	SELECT 
+		M.OGAN_CD 				AS oganCd
+		,M.SNDN_CD				AS sndnCd
+		,M.TMPLT_CD 			AS tmpltCd
+		,IFNULL(M.SUCC_CNT, 0) 	AS succNum
+		,IFNULL(M.FAIL_CNT, 0) 	AS failNum
+		,M.TRANS_DT 			AS sndnDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */ 
+	FROM 
+		tpost.TB_STTC_INFO M
+		,(SELECT @ROWNUM:=0) TMP	
+	WHERE
+		M.TRANS_DT BETWEEN #{inputStDt} AND #{inputLastDt}
+		<if test="!inputOganCd.equals('')">
+		AND	M.OGAN_CD =  #{inputOganCd}
+		</if>
+		<if test="!inputSndnCd.equals('')">
+		AND	M.SNDN_CD =  #{inputSndnCd}
+		</if>
+		<if test="!inputTmpltCd.equals('')">
+		AND M.TMPLT_CD = #{inputTmpltCd}
+		</if>
+	ORDER BY sndnDate DESC
+	</if>
+	<if test="!inputCi.equals('')">
+	SELECT 
+		M.OGAN_CD 				AS oganCd
+		,M.SNDN_CD				AS sndnCd
+		,M.TMPLT_CD 			AS tmpltCd
+		,IFNULL(M.SUCC_CNT, 0) 	AS succNum
+		,IFNULL(M.FAIL_CNT, 0) 	AS failNum
+		,M.TRANS_DT 			AS sndnDate
+		,@ROWNUM:=@ROWNUM+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */ 
+	FROM 
+		tpost.TB_STTC_INFO M
+		LEFT OUTER JOIN tpost.TB_SNDN_SUCC_MSG A
+		ON M.OGAN_CD = A.OGAN_CD 
+		AND M.TMPLT_CD = A.TMPLT_CD
+		AND M.TRANS_DT = A.TRANS_DT
+		LEFT OUTER JOIN tpost.TB_SNDN_FAIL_MSG B
+		ON M.OGAN_CD = B.OGAN_CD 
+		AND M.TMPLT_CD = B.TMPLT_CD
+		AND M.TRANS_DT = B.TRANS_DT
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE 
+		A.CI_NUM = #{inputCi}
+		OR B.CI_NUM = #{inputCi}
+		AND M.TRANS_DT BETWEEN #{inputStDt} AND #{inputLastDt}
+		<if test="!inputOganCd.equals('')">
+		AND	M.OGAN_CD =  #{inputOganCd}
+		</if>
+		<if test="!inputSndnCd.equals('')">
+		AND	M.SNDN_CD =  #{inputSndnCd}
+		</if>
+		<if test="!inputTmpltCd.equals('')">
+		AND M.TMPLT_CD = #{inputTmpltCd}
+		</if>
+	ORDER BY sndnDate DESC
+	</if>
+	) AA
+</select>
+<select id="elctDocDetlTitleSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="tpost.elctDoc.vo.elctDocVO">
+SELECT/* elctDocDetlTitleSelect */
+	tpost.FN_GET_BASCD_NM('00001',#{mOganCd}) AS oganNm,
+	(SELECT TMPLT_NM
+	   FROM tpost.TB_DOC_TMPLT_MGNT
+	  WHERE TMPLT_CD = #{mTmpltCd}
+		AND OGAN_CD = #{mOganCd}
+		LIMIT 1
+	)	AS tmpltNm
+	,#{mSndnDate}	AS sndnDate
+FROM DUAL
+</select>
+<select id="elctDocDetlListALLSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="tpost.elctDoc.vo.elctDocVO">
+SELECT /* elctDocDetlListALLSelect */
+	AA.sendYn AS sendYn
+	,AA.rdngDate AS rdngDate
+FROM(
+	SELECT 
+		date_format((SELECT 
+			RDNG_DATE 
+			FROM 
+				tpost.TB_SNDN_RDNG_MGNT
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+				AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate
+		,'Y'													AS sendYn
+	FROM 
+		tpost.TB_SNDN_SUCC_MSG A
+		,tpost.TB_RCVE_CI_INFO B
+	WHERE
+		A.OGAN_CD = #{mOganCd}
+	AND	A.TMPLT_CD = #{mTmpltCd}
+	AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+	AND A.CI_NUM = B.CI_NUM 
+	UNION
+	SELECT
+		date_format((SELECT 
+			RDNG_DATE 
+			FROM 
+				tpost.TB_SNDN_RDNG_MGNT
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+				AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate	
+		,'N'													AS sendYn
+	FROM 
+		tpost.TB_SNDN_FAIL_MSG A
+		,tpost.TB_RCVE_CI_INFO B
+	WHERE
+		A.OGAN_CD = #{mOganCd}
+	AND	A.TMPLT_CD = #{mTmpltCd}
+	AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+	AND A.CI_NUM = B.CI_NUM
+)AA
+</select>
+<select id="elctDocDetlListSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="tpost.elctDoc.vo.elctDocVO">
+SELECT
+	AAA.ofapElctAddr AS ofapElctAddr
+	,AAA.ciNum		AS ciNum
+	,AAA.name		AS name 
+	,AAA.trnsDate	AS trnsDate
+	,AAA.rcveDate	AS rcveDate
+	,AAA.rdngDate	AS rdngDate
+	,AAA.acmdInfoCrtDate	AS acmdInfoCrtDate
+	,AAA.sendYn				AS sendYn
+	,AAA.sendUrl 			AS sendUrl
+	,AAA.hexKey				AS hexKey
+FROM (
+	SELECT
+		AA.*
+		,@ROWNUM:=@ROWNUM+1 AS RNUM  /*이것에 관해서는 인터넷 찾아봐야함 */ 
+	FROM(
+		SELECT
+			IF(B.BSRP_CLS = '100', CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,6,8))
+								 , CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,7,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,9,5)))  		AS ofapElctAddr
+			,A.CI_NUM 												AS ciNum
+			,B.NAME 												AS name
+			,date_format(SNDN_DATE, '%Y-%m-%d %h:%i:%s') 			AS trnsDate
+			,date_format(RCVE_DATE, '%Y-%m-%d %h:%i:%s') 			AS rcveDate 
+			,date_format((SELECT 
+				RDNG_DATE 
+				FROM 
+					tpost.TB_SNDN_RDNG_MGNT
+				WHERE
+					A.OGAN_CD = OGAN_CD 
+					AND A.TRANS_DT = TRANS_DT 
+					AND A.TMPLT_CD = TMPLT_CD 
+					AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+					AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate
+			,date_format(NULL, '%Y-%m-%d %h:%i:%s') 				AS acmdInfoCrtDate
+			,'Y'													AS sendYn
+			,(SELECT
+				ANOC_INFO_URL
+				FROM 
+					tpost.TB_SNDN_SNRC_INFO_LST
+				WHERE
+					A.OGAN_CD = OGAN_CD 
+					AND A.TRANS_DT = TRANS_DT 
+					AND A.TMPLT_CD = TMPLT_CD 
+					AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR )			AS sendUrl
+			,MD5(CONCAT(A.OGAN_CD, A.OFAP_ELCT_ADDR)) AS hexKey
+		FROM 
+			tpost.TB_SNDN_SUCC_MSG A
+			,tpost.TB_RCVE_CI_INFO B
+		WHERE
+			A.OGAN_CD = #{mOganCd}
+		AND	A.TMPLT_CD = #{mTmpltCd}
+		AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+		AND A.CI_NUM = B.CI_NUM 
+		UNION
+		SELECT
+			IF(B.BSRP_CLS = '100', CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,6,8))
+								 , CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,7,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,9,5)))  		AS ofapElctAddr
+			,A.CI_NUM 												AS ciNum
+			,B.NAME 												AS name
+			,date_format(SNDN_DATE, '%Y-%m-%d %h:%i:%s') 			AS trnsDate
+			,date_format(RCVE_DATE, '%Y-%m-%d %h:%i:%s') 			AS rcveDate 
+			,date_format((SELECT 
+				RDNG_DATE 
+				FROM 
+					tpost.TB_SNDN_RDNG_MGNT
+				WHERE
+					A.OGAN_CD = OGAN_CD 
+					AND A.TRANS_DT = TRANS_DT 
+					AND A.TMPLT_CD = TMPLT_CD 
+					AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+					AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate	
+			,date_format(NULL, '%Y-%m-%d %h:%i:%s') 				AS acmdInfoCrtDate
+			,'N'													AS sendYn
+			,(SELECT
+				ANOC_INFO_URL
+				FROM 
+					tpost.TB_SNDN_SNRC_INFO_LST
+				WHERE
+					A.OGAN_CD = OGAN_CD 
+					AND A.TRANS_DT = TRANS_DT 
+					AND A.TMPLT_CD = TMPLT_CD 
+					AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR )			AS sendUrl
+			,MD5(CONCAT(A.OGAN_CD, A.OFAP_ELCT_ADDR)) 				AS hexKey
+		FROM 
+			tpost.TB_SNDN_FAIL_MSG A
+			,tpost.TB_RCVE_CI_INFO B
+		WHERE
+			A.OGAN_CD = #{mOganCd}
+		AND	A.TMPLT_CD = #{mTmpltCd}
+		AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+		AND A.CI_NUM = B.CI_NUM
+	)AA
+	,(SELECT @ROWNUM:=0) TMP
+	WHERE 1=1
+	<if test="!inputSendYn.equals('')">	
+	AND AA.sendYn = #{inputSendYn}
+	</if>
+	<if test="!inputCiNum.equals('')">	
+	AND AA.ciNum LIKE CONCAT('%', #{inputCiNum}, '%')
+	</if>
+	<if test="!inputName.equals('')">	
+	AND AA.name LIKE CONCAT('%', #{inputName}, '%')
+	</if>
+) AAA
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="elctDocDetlListCountSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="java.lang.Integer">
+SELECT /*elctDocDetlListCountSelect*/
+	COUNT(*)
+FROM(
+	SELECT
+		IF(B.BSRP_CLS = '100', CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,6,8))
+							 , CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,7,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,9,5)))  		AS ofapElctAddr
+		,A.CI_NUM 												AS ciNum
+		,B.NAME 												AS name
+		,date_format(SNDN_DATE, '%Y-%m-%d %h:%i:%s') 			AS trnsDate
+		,date_format(RCVE_DATE, '%Y-%m-%d %h:%i:%s') 			AS rcveDate 
+		,date_format((SELECT 
+			RDNG_DATE 
+			FROM 
+				tpost.TB_SNDN_RDNG_MGNT
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+				AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate
+		,date_format(NULL, '%Y-%m-%d %h:%i:%s') 				AS acmdInfoCrtDate
+		,'Y'													AS sendYn
+		,(SELECT
+			ANOC_INFO_URL
+			FROM 
+				tpost.TB_SNDN_SNRC_INFO_LST
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR )			AS sendUrl
+	FROM 
+		tpost.TB_SNDN_SUCC_MSG A
+		,tpost.TB_RCVE_CI_INFO B
+	WHERE
+		A.OGAN_CD = #{mOganCd}
+	AND	A.TMPLT_CD = #{mTmpltCd}
+	AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+	AND A.CI_NUM = B.CI_NUM 
+	UNION
+	SELECT
+		IF(B.BSRP_CLS = '100', CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,6,8))
+							 , CONCAT(SUBSTR(A.OFAP_ELCT_ADDR,1,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,4,3), '-', SUBSTR(A.OFAP_ELCT_ADDR,7,2), '-', SUBSTR(A.OFAP_ELCT_ADDR,9,5)))  		AS ofapElctAddr
+		,A.CI_NUM 												AS ciNum
+		,B.NAME 												AS name
+		,date_format(SNDN_DATE, '%Y-%m-%d %h:%i:%s') 			AS trnsDate
+		,date_format(RCVE_DATE, '%Y-%m-%d %h:%i:%s') 			AS rcveDate 
+		,date_format((SELECT 
+			RDNG_DATE 
+			FROM 
+				tpost.TB_SNDN_RDNG_MGNT
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR 
+				AND HIST_SEQ = 0), '%Y-%m-%d %h:%i:%s') 		AS rdngDate	
+		,date_format(NULL, '%Y-%m-%d %h:%i:%s') 				AS acmdInfoCrtDate
+		,'N'													AS sendYn
+		,(SELECT
+			ANOC_INFO_URL
+			FROM 
+				tpost.TB_SNDN_SNRC_INFO_LST
+			WHERE
+				A.OGAN_CD = OGAN_CD 
+				AND A.TRANS_DT = TRANS_DT 
+				AND A.TMPLT_CD = TMPLT_CD 
+				AND A.OFAP_ELCT_ADDR = OFAP_ELCT_ADDR )			AS sendUrl
+	FROM 
+		tpost.TB_SNDN_FAIL_MSG A
+		,tpost.TB_RCVE_CI_INFO B
+	WHERE
+		A.OGAN_CD = #{mOganCd}
+	AND	A.TMPLT_CD = #{mTmpltCd}
+	AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+	AND A.CI_NUM = B.CI_NUM
+)AA
+WHERE 1=1
+<if test="!inputSendYn.equals('')">	
+AND AA.sendYn = #{inputSendYn}
+</if>
+<if test="!inputCiNum.equals('')">	
+AND AA.ciNum LIKE CONCAT('%', #{inputCiNum}, '%')
+</if>
+<if test="!inputName.equals('')">	
+AND AA.name LIKE CONCAT('%', #{inputName}, '%')
+</if>
+</select>
+<select id="elctDocFailListSelect" parameterType="tpost.elctDoc.vo.elctDocVO" resultType="tpost.elctDoc.vo.elctDocVO">
+SELECT  /* elctDocFailListSelect */
+	A.ERR_CD	AS popuSendFailCd
+	,IFNULL((SELECT ERR_DESC FROM tpost.TB_ERR_CD B WHERE A.ERR_CD = B.ERR_CD), '미정의된오류코드') AS popuSendFailDesc
+	,COUNT(1)		AS popuSendFailCount
+FROM
+	tpost.TB_SNDN_FAIL_MSG A
+WHERE
+	A.OGAN_CD = #{mOganCd}
+AND	A.TMPLT_CD = #{mTmpltCd}
+AND A.TRANS_DT = DATE_FORMAT(#{mSndnDate}, '%Y%m%d')
+GROUP BY
+	popuSendFailCd, popuSendFailDesc
+ORDER BY popuSendFailCount DESC
+</select>
+</mapper>

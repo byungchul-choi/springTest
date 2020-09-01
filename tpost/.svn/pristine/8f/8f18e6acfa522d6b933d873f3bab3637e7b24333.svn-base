@@ -1,0 +1,332 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui" %>  <!-- 전자정부태그라이브러리 -->
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>  <!-- jstl펑션 -->
+	
+    
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<!-- CSS  STYLE -->
+	<link rel="stylesheet" href="/tpost/resource/css/common.css">
+	<!-- ---------- -->
+	
+	<!--     JS     -->
+	<script src="/tpost/resource/js/jquery.min.js"></script>
+	<script src="/tpost/resource/js/jquery-migrate-1.2.1.min.js"></script>
+	<script src="/tpost/resource/js/comm.js"></script>
+	<!-- ---------- -->
+	
+<script>
+
+jQuery(document).ready(function () {
+	// 좌측 메뉴 클릭 시
+	jQuery("#snb ul li").click(function () {
+		var objLI = jQuery(this);
+//		if(objLI.hasClass("state-current"))	return;
+		
+		objLI.parent().children().removeClass("state-current");
+		
+		jQuery("#gnb").prop("contentWindow").loadMenu(objLI.attr("class"));
+		objLI.addClass("state-current");
+		
+		
+	});
+
+	
+	// gnb 영역 load
+	jQuery("#gnb").attr("src", "menuGnb");
+	jQuery("#gnb").on("load", function(){
+		
+		/*좌측메뉴 첫번째 선택 */
+		jQuery("#snb ul li:first-child").click();
+		
+	});
+	
+	// 팝업닫기
+	jQuery(".close, .state-submit").click(function () {
+		jQuery(".layerBox").hide();
+	});
+	
+});
+
+/*화면링크 연결시키기*/
+function linkGbn ( linkGbn ){
+
+	var path = linkGbn;
+	var menuForm = document.getElementById("menu");
+	    menuForm.action = path;
+	 	menuForm.method = "post";
+	 	menuForm.target = "page" 
+	 	menuForm.submit();
+}
+
+/***************************************************************/
+/*비밀번호 변경 스크립트*/
+
+/*패스워드 변경하기*/
+function fn_Change() {
+	/*패스워드 체크가 성공일때 비밀번호 변경함 */
+	if ( fn_pw_check() ){
+		var parameters = $("#frm").serialize();
+		$.ajax({
+			type:"post", 
+			dataType:"json",
+			async:false,
+			url:'/tpost/logIn/passWordChg.ajax',
+			data:parameters ,
+			success:function(data){
+				if(data.result == 'Y'){
+					alert( data.errorMessage );
+					jQuery(".layerBox").hide();
+				}else{
+					alert( data.errorMessage );
+				}
+				
+			}
+		});
+		
+	}
+}
+
+/*로그아웃처리 */
+function fn_logOut(){
+	var menuForm = document.getElementById("menu");
+    menuForm.method = "post";
+    menuForm.action="/tpost/logIn/logIn"
+ 	menuForm.target = "_self" 
+ 	menuForm.submit();
+}
+
+
+/*비밀번호 정합성 체크 */
+function fn_pw_check() {
+	
+	
+ 	var pw_passed = true;  // 추후 벨리데이션 처리시에 해당 인자값 확인을 위해
+
+	var id = document.getElementById("custId").value; // 아이디
+	
+	var pw = document.getElementById("newPassWord").value; //비밀번호
+	var pw2 = document.getElementById("CfmPassWord").value; // 확인 비밀번호
+
+	pw_passed = true;
+
+	var pattern1 = /[0-9]/;
+	var pattern2 = /[a-zA-Z]/;
+	var pattern3 = /[~!@\#$%<>^&*]/;     // 원하는 특수문자 추가 제거
+	var pw_msg = "";
+
+	if(id.length == 0) {
+		alert("아이디를 입력해주세요");
+		return false;
+	} else {                //필요에따라 아이디 벨리데이션
+	}
+
+	if(pw.length == 0) {
+		alert("비밀번호를 입력해주세요");
+		return false;
+	} else {
+		if( pw  !=  pw2) {
+			alert("비밀번호가 일치하지 않습니다.");
+			return false;
+		}
+   }
+
+
+	if(!pattern1.test(pw)||!pattern2.test(pw)||!pattern3.test(pw)||pw.length<9||pw.length>50){
+		alert("영문+숫자+특수기호 9자리 이상으로 구성하여야 합니다.");
+		return false;
+
+	}          
+
+	if(pw.indexOf(id) > -1) {
+		alert("비밀번호는 ID를 포함할 수 없습니다.");
+		return false;
+	}
+
+	var SamePass_0 = 0; //동일문자 카운트
+	var SamePass_1 = 0; //연속성(+) 카운드
+	var SamePass_2 = 0; //연속성(-) 카운드
+
+	for(var i=0; i < pw.length; i++) {
+		var chr_pass_0;
+		var chr_pass_1;
+		var chr_pass_2;
+
+		if(i >= 2) {
+			chr_pass_0 = pw.charCodeAt(i-2);
+			chr_pass_1 = pw.charCodeAt(i-1);
+			chr_pass_2 = pw.charCodeAt(i);
+
+			if((chr_pass_0 == chr_pass_1) && (chr_pass_1 == chr_pass_2)) {
+				SamePass_0++;
+			}else {
+				SamePass_0 = 0;
+			}
+
+			//연속성(+) 카운드
+			if(chr_pass_0 - chr_pass_1 == 1 && chr_pass_1 - chr_pass_2 == 1) {
+				SamePass_1++;
+            }
+			else {
+				SamePass_1 = 0;
+			}
+
+			//연속성(-) 카운드
+			if(chr_pass_0 - chr_pass_1 == -1 && chr_pass_1 - chr_pass_2 == -1) {
+				SamePass_2++;
+			}else {
+				SamePass_2 = 0;
+            }  
+		}     
+
+		if(SamePass_0 > 0) {
+			alert("동일문자를 3자 이상 연속 입력할 수 없습니다.");
+			pw_passed=false;
+		}
+
+ 		if(SamePass_1 > 0 || SamePass_2 > 0 ) {
+            alert("영문, 숫자는 3자 이상 연속 입력할 수 없습니다.");
+            pw_passed=false;
+ 		} 
+
+ 		if(!pw_passed) {             
+ 			return false;
+ 			break;
+ 		}
+	}
+	
+	return true;
+ }
+
+</script>
+</head>
+ 
+<form id="menu" name="menu"> </form>
+<body>
+
+	<!-- wrap -->
+	<div id="wrap" class="bg">
+		<!-- header -->
+		<div id="header">
+			<h1><a href="#">공공알림문자서비스</a></h1>
+			
+			<div class="gnbArea">
+				<iframe id="gnb"></iframe>
+			</div>
+		</div>
+		<!-- //header -->
+		<!-- snb -->
+		<div id="snb">
+			<div id="menu">
+				<ul class="nav">
+			
+			 <c:forEach var="resultList" items="${resultList}" varStatus="status" > 
+                   <c:if test="${resultList.menuId == 'elctDoc'}" >
+                   		<li class="mnu-docu" ><a href="javascript:;">전자문서</a></li>
+                   </c:if>
+                   <c:if test="${resultList.menuId == 'acmdCerf'}" >
+						<li class="mnu-certi"><a href="javascript:;">유통증명관리</a></li>
+                   </c:if>
+                   <c:if test="${resultList.menuId == 'logIn'}" >
+<!-- 						<li class="mnu-login"><a href="javascript:;">로그인</a></li> -->
+                   </c:if>
+                   <c:if test="${resultList.menuId == 'common'}" >
+						<li class="mnu-system"><a href="javascript:;">시스템관리</a></li>
+                   </c:if>
+                   <c:if test="${resultList.menuId == 'sttc'}" >
+						<li class="mnu-sttc"><a href="javascript:;">통계</a></li>
+                   </c:if>
+                   <c:if test="${resultList.menuId == 'suppCneter'}" >
+						<li class="mnu-suppCenter"><a href="javascript:;">지원센터</a></li>
+                   </c:if>
+              </c:forEach>
+				</ul>
+			</div>
+
+			<!-- footer -->
+			<footer>
+                <P><img src="/tpost/resource/images/SK_logo_B01.png" /><br><br>
+				COPYRIGHT ⓒ<br>SK TELECOM CO., LTD.<br>ALL RIGHTS RESERVED.</p>
+			</footer>
+			<!-- //footer -->
+		</div>
+		<!-- //snb -->
+
+		<!-- container -->
+		<div id="container">
+			<iframe id="page" name="page" src=""></iframe>
+			<!-- layerBox pwchange -->
+			<div id="loginpw" class="layerBox pwchange" style="display:none;">
+				<div class="layer">
+					<div class="topBox">
+						<h3>비밀번호 변경</h3>
+						<a class="close" href="#">&#10005;</a>
+					</div>
+					<div class="contBox">
+						<div class="section">
+							<!-- table-pnl -->
+							<div class="table-pnl">
+							<form name="frm" id="frm">
+								<!-- table -->
+								<table>
+									<colgroup>
+										<col width="180px">
+										<col width="*">
+									</colgroup>
+									<tr>
+									
+										<th>로그인 ID</th>
+										<td><input type="text"  name="custId" id="custId" readonly /></td>
+									</tr>
+									<tr>
+										<th>현재 비밀번호</th>
+										<td><input type="password" name="passWord" id="passWord"></td>
+									</tr>
+									<tr>
+										<th>신규 비밀번호</th>
+										<td><input type="password" name="newPassWord" id="newPassWord" ></td>
+									</tr>
+									<tr>
+										<th>신규비밀번호확인</th>
+										<td><input type="password" name="passWordCfm" id="CfmPassWord" ></td>
+									</tr>
+									<tr>
+										<th class="text-r"><em>안내</em></th>
+										<td>
+											<ul>
+												<li>비밀번호는 영문, 숫자 혼합하여 9자 이상입니다.</li>
+												<li>직전에 사용한 비밀번호는 다시 사용할 수 없습니다.</li>
+											</ul>
+										</td>
+									</tr>
+								</table>
+							</form>
+								<!-- //table -->
+							</div>
+							<!-- //table-pnl -->
+						</div>
+						<!-- footer -->
+						<div class="footer">
+							<div class="buttonset">
+								<button type="button" onclick="fn_Change();" >확인</button>
+								<button type="button" class="close" >취소</button>
+							</div>
+						</div>
+						<!-- //footer -->
+					</div>
+					<!-- //contBox -->
+				</div>
+				<div class="fade"></div>
+			</div>
+			<!-- //layerBox pwchange -->
+		</div>
+		<!-- //container -->
+	</div>
+	<!-- //wrap -->
+</body>
+
+</html>
+

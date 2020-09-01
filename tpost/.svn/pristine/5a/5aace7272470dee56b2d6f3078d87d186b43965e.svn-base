@@ -1,0 +1,26 @@
+package tpost.batch.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.batch.vo.moblSndnRsltArgVO;
+
+@Repository
+public class moblSndnRsltArgDao {
+	
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<moblSndnRsltArgVO> moblSndnRsltArgSuccIns(moblSndnRsltArgVO moblSndnRsltArgVO){
+		return sqlSessionTemplate.selectList("tpost.batch.dao.moblSndnRsltArgDao.moblSndnRsltArgSuccIns", moblSndnRsltArgVO);
+	}
+	
+	public List<moblSndnRsltArgVO> moblSndnRsltArgFailIns(moblSndnRsltArgVO moblSndnRsltArgVO){
+		return sqlSessionTemplate.selectList("tpost.batch.dao.moblSndnRsltArgDao.moblSndnRsltArgSuccIns", moblSndnRsltArgVO);
+	}
+	
+
+}

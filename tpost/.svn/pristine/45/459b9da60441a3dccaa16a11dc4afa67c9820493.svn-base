@@ -1,0 +1,84 @@
+package tpost.elctDoc.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.elctDoc.vo.elctDocVO;
+
+@Repository
+public class elctDocDao {
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<elctDocVO> elctDocListSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.elctDocListSelect", elctDocVO);
+	}
+	
+	public int elctDocListCountSelect(elctDocVO elctDocVO) {
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocListCountSelect", elctDocVO);
+	}
+	
+	public elctDocVO elctDocDetlTitleSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocDetlTitleSelect", elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocDetlListALLSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.elctDocDetlListALLSelect", elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocDetlListSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.elctDocDetlListSelect", elctDocVO);
+	}
+
+	public elctDocVO elctDocDetlSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocDetlSelect", elctDocVO);
+	}
+	
+	public int elctDocDetlListCountSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocDetlListCountSelect", elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocFailListSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.elctDocFailListSelect", elctDocVO);
+	}
+	
+	public List<elctDocVO> acmdCerfFailListSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.acmdCerfFailListSelect", elctDocVO);
+	}
+	
+	public List<elctDocVO> elctDocSndnListSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectList("tpost.elctDoc.dao.elctDocDao.elctDocSndnListSelect", elctDocVO);
+	}
+	
+	public elctDocVO elctDocSndnDetlSelect(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocSndnDetlSelect", elctDocVO);
+	}
+	
+	public void elctDocSndnAprYnUpdate(elctDocVO elctDocVO) {
+		sqlSessionTemplate.update("tpost.elctDoc.dao.elctDocDao.elctDocSndnAprYnUpdate", elctDocVO);
+	}
+	
+	public int elctDocSndnDupCheck(elctDocVO elctDocVO){
+		return sqlSessionTemplate.selectOne("tpost.elctDoc.dao.elctDocDao.elctDocSndnDupCheck", elctDocVO);
+	}
+	
+	public void elctDocSndnInsert(elctDocVO elctDocVO){
+		sqlSessionTemplate.insert("tpost.elctDoc.dao.elctDocDao.elctDocSndnInsert", elctDocVO);
+	}
+	
+	public void elctDocSndnDtlInsert(Map<String, Object> tempMap) {
+		sqlSessionTemplate.insert("tpost.elctDoc.dao.elctDocDao.elctDocSndnDtlInsert", tempMap);
+	}
+	
+	public void elctDocSndnDtlDelete(elctDocVO elctDocVO) {
+		sqlSessionTemplate.delete("tpost.elctDoc.dao.elctDocDao.elctDocSndnDtlDelete", elctDocVO);
+	}
+	
+	public void elctDocSndnUpdate(elctDocVO elctDocVO) {
+		sqlSessionTemplate.update("tpost.elctDoc.dao.elctDocDao.elctDocSndnUpdate", elctDocVO);
+	}
+}

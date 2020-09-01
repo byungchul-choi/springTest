@@ -1,0 +1,74 @@
+package tpost.common.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.common.vo.codeMgntVO;
+
+@Repository
+public class codeMgntDao {
+
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<codeMgntVO> codeMgntCfcdStdrSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.codeMgntCfcdStdrSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> codeMgntBascdStdrSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.codeMgntBascdStdrSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> cfcdToBascSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.cfcdToBascSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> bascToDtcdSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.bascToDtcdSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> cfcdSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.cfcdSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> bascSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.bascSelect", codeMgntVO);
+	}
+	
+	public List<codeMgntVO> dtcdSelect(codeMgntVO codeMgntVO){
+		return sqlSessionTemplate.selectList("tpost.common.dao.codeMgntDao.dtcdSelect", codeMgntVO);
+	}
+	
+	
+	
+	
+	public void cfcdInsert(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.insert("tpost.common.dao.codeMgntDao.cfcdInsert", codeMgntVO);
+	}
+	public void bascInsert(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.insert("tpost.common.dao.codeMgntDao.bascInsert", codeMgntVO);
+	}
+	public void dtcdInsert(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.insert("tpost.common.dao.codeMgntDao.dtcdInsert", codeMgntVO);
+	}
+	
+	public void bascUpdate(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.update("tpost.common.dao.codeMgntDao.bascUpdate", codeMgntVO);
+	}
+	public void dtcdUpdate(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.update("tpost.common.dao.codeMgntDao.dtcdUpdate", codeMgntVO);
+	}
+	
+	public void bascChildUpdate(codeMgntVO codeMgntVO){
+		sqlSessionTemplate.update("tpost.common.dao.codeMgntDao.bascChildUpdate", codeMgntVO);
+	}
+	
+
+	
+	public String maxDetlPk(){
+		return sqlSessionTemplate.selectOne("tpost.common.dao.codeMgntDao.maxDetlPk");
+	}
+}

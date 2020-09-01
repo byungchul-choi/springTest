@@ -1,0 +1,200 @@
+package tpost.msgRcve.vo;
+
+import tpost.egovcomm.vo.PagingDefaultVO;
+
+public class guAcmdCerfVO extends PagingDefaultVO{
+	
+	private String name;
+	private String brdt;
+	private String sexCls;
+	private String tscoCd;
+	private String phoneNum;
+	private String citfNum;
+	private String ciNum;
+	
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getBrdt() {
+		return brdt;
+	}
+	public void setBrdt(String brdt) {
+		this.brdt = brdt;
+	}
+
+	public String getSexCls() {
+		return sexCls;
+	}
+	public void setSexCls(String sexCls) {
+		this.sexCls = sexCls;
+	}
+
+	public String getTscoCd() {
+		return tscoCd;
+	}
+	public void setTscoCd(String tscoCd) {
+		this.tscoCd = tscoCd;
+	}
+
+	public String getPhoneNum() {
+		return phoneNum;
+	}
+	public void setPhoneNum(String phoneNum) {
+		this.phoneNum = phoneNum;
+	}
+
+	public String getCitfNum() {
+		return citfNum;
+	}
+	public void setCitfNum(String citfNum) {
+		this.citfNum = citfNum;
+	}
+
+	public String getCiNum() {
+		return ciNum;
+	}
+	public void setCiNum(String ciNum) {
+		this.ciNum = ciNum;
+	}
+	
+
+	
+	private String inputRcveStDt;
+	private String inputRcveClosDt;
+	private String inputOganCd;
+	
+	
+	public String getInputRcveStDt() {
+		return inputRcveStDt;
+	}
+	public void setInputRcveStDt(String inputRcveStDt) {
+		this.inputRcveStDt = inputRcveStDt;
+	}
+	
+	public String getInputRcveClosDt() {
+		return inputRcveClosDt;
+	}
+	public void setInputRcveClosDt(String inputRcveClosDt) {
+		this.inputRcveClosDt = inputRcveClosDt;
+	}
+	
+	public String getInputOganCd() {
+		return inputOganCd;
+	}
+	public void setInputOganCd(String inputOganCd) {
+		this.inputOganCd = inputOganCd;
+	}
+	
+	
+	private String oganCd;
+	private String oganNm;
+	private String tmpltCd;
+	private String tmpltNm;
+	private String sndnDate;
+	private String histSeq;
+	private String rdngDate;
+	
+	private String pk;
+	private String apctYn;
+	private String apctDate;
+	private String apctName;
+	private String issCls;
+	private String dwldUrl;
+	
+
+	public String getOganCd() {
+		return oganCd;
+	}
+	public void setOganCd(String oganCd) {
+		this.oganCd = oganCd;
+	}
+
+	public String getOganNm() {
+		return oganNm;
+	}
+	public void setOganNm(String oganNm) {
+		this.oganNm = oganNm;
+	}
+
+	public String getTmpltCd() {
+		return tmpltCd;
+	}
+	public void setTmpltCd(String tmpltCd) {
+		this.tmpltCd = tmpltCd;
+	}
+
+	public String getTmpltNm() {
+		return tmpltNm;
+	}
+	public void setTmpltNm(String tmpltNm) {
+		this.tmpltNm = tmpltNm;
+	}
+	
+	public String getSndnDate() {
+		return sndnDate;
+	}
+	public void setSndnDate(String sndnDate) {
+		this.sndnDate = sndnDate;
+	}
+	
+	public String getHistSeq() {
+		return histSeq;
+	}
+	public void setHistSeq(String histSeq) {
+		this.histSeq = histSeq;
+	}
+	
+	public String getRdngDate() {
+		return rdngDate;
+	}
+	public void setRdngDate(String rdngDate) {
+		this.rdngDate = rdngDate;
+	}
+
+	public String getApctDate() {
+		return apctDate;
+	}
+	public void setApctDate(String apctDate) {
+		this.apctDate = apctDate;
+	}
+	
+	public String getPk() {
+		return pk;
+	}
+	public void setPk(String pk) {
+		this.pk = pk;
+	}
+	
+	public String getApctYn() {
+		return apctYn;
+	}
+	public void setApctYn(String apctYn) {
+		this.apctYn = apctYn;
+	}
+
+	public String getApctName() {
+		return apctName;
+	}
+	public void setApctName(String apctName) {
+		this.apctName = apctName;
+	}
+	public String getIssCls() {
+		return issCls;
+	}
+	public void setIssCls(String issCls) {
+		this.issCls = issCls;
+	}
+	public String getDwldUrl() {
+		return dwldUrl;
+	}
+	public void setDwldUrl(String dwldUrl) {
+		this.dwldUrl = dwldUrl;
+	}
+
+	
+}

@@ -1,0 +1,602 @@
+//layer popup (타켓지정)
+function layer_popup(obj){
+	
+	if($(obj).is(":hidden")){
+		
+		$(obj).show();
+		$('body').after('<div class="lock-bg"></div>'); // 검은 불투명 배경
+
+		//position > absolute에 따른 높이 제어
+		var winHeight = $(window).height()/2;
+		var objHeight = $(obj).height()/2;
+		var scrollHeight = $(document).scrollTop();
+		var winHeight2 = $(window).height();
+		var scrollHeight2 = $(window).scrollTop();
+		var popupHeight = $('.layer-popup').height()+100;	
+		
+		if(scrollHeight2 < 100 || winHeight2 < popupHeight) {
+			$('.layer-popup').animate( {'top' : '50px'}, 200);
+		}
+		else {
+			$('.layer-popup').animate( {'top' : scrollHeight+winHeight-objHeight-150}, 200);
+		}
+		
+		
+
+		//배경클릭시 닫기
+		$('.lock-bg').click(function(){
+			$(obj).hide();
+			$(this).remove();
+			
+			//애니에 따른 추가
+			$('.layer-popup').css('top', '0px');
+		});
+		
+		
+	}
+	else {
+		$(obj).hide();
+		$('.lock-bg').remove();
+		
+		//애니에 따른 추가
+		$('.layer-popup').css('top', '0px');
+	}
+	
+	//자동 닫기 추가
+	$(obj+' .close').on('click', function() {
+		$(obj).hide();
+		$('.lock-bg').remove();
+		
+		//애니에 따른 추가
+		$('.layer-popup').css('top', '0px');
+	});
+}
+
+function layer_close(obj){
+	$(obj).hide();
+	$('.lock-bg').remove();
+	
+	//애니에 따른 추가
+	$('.layer-popup').css('top', '0px');
+}
+
+
+//2020.02.20
+//공통코드조회 함수 테스트 분류코드 기본코드 내역조회하기
+//분류 기본 상세 : 분류코드로 기본코드를 조회한다. 
+//sel_id : 콤보박스명
+//codeNum : 조회할 분류값 
+function commCd_bas(sel_id, codeNum){	
+	var resultBascdMap = new Map();
+	var resultDtcdMap = new Map();
+	
+	var parameters = "cfcd="+codeNum;
+	
+	var sel_id = '#'+sel_id ;
+	
+	$.ajax({
+		type : "post",
+		dataType : "json",
+		async : false,
+		url : "/tpost/commUtil/getBascdList.ajax", 
+		data : parameters,
+		success : function(data) {
+			if(data.bascdList.length != 0){
+				var bascdListLength = data.bascdList.length - 1;
+				for(var i = bascdListLength; i > -1; i--){
+					var opt = "";
+					if(i == 0) opt = "selected";
+					
+					$(sel_id).prepend("<option " + opt + " value='"+ data.bascdList[i].bascd +"' > "+ data.bascdList[i].bascdNm +" </option>"); 
+				}
+			}
+		},
+		complete : function(data) {
+			callBack(sel_id, codeNum);
+		}
+
+	});
+}
+
+
+//2020.02.20
+//공통코드조회 함수 테스트 분류코드 기본코드의 세부코드 내역조회하기
+//분류 기본 상세 : 분류코드, 기본코드로 세부코드를 조회한다. 
+//sel_id : 콤보박스명
+//codeNum : 조회할 분류값 
+function commDetlCd_bas(sel_id, cfcd, bascd){	
+	var resultBascdMap = new Map();
+	var resultDtcdMap = new Map();
+	
+	var parameters = "cfcd="+cfcd
+					+"&bascd="+bascd;
+	
+	var sel_id = '#'+sel_id ;
+	
+	$.ajax({
+		type : "post",
+		dataType : "json",
+		async : false,
+		url : "/tpost/commUtil/getDtcdList.ajax", 
+		data : parameters,
+		success : function(data) {
+			if(data.dtcdList.length != 0){
+				var dtcdListLength = data.dtcdList.length - 1;
+				for(var i = dtcdListLength; i > -1; i--){
+					var opt = "";
+					if(i == 0) opt = "selected";
+			
+					$(sel_id).prepend("<option " + opt + " value='"+ data.dtcdList[i].dtcd +"' > "+ data.dtcdList[i].dtcdNm +" </option>"); 
+				}
+			}
+		},
+		complete : function(data) {
+			callBack(sel_id, bascd);
+		}
+
+	});
+}
+
+
+//2020.02.21
+//기관별 템플릿코드 내역조회하기
+//sel_id : 콤보박스명
+//codeNum : 조회할 분류값 
+function tmpltCd_bas(sel_id, codeNum){	
+
+	var parameters = "oganCd="+codeNum;
+	
+	var sel_id = '#'+sel_id ;
+	
+	$.ajax({
+		type : "post",
+		dataType : "json",
+		async : false,
+		url : "/tpost/commUtil/getOganTmpltList.ajax", 
+		data : parameters,
+		success : function(data) {
+			if(data.tmpltList.length != 0){
+				$(sel_id).html('');
+				var tmpltListLength = data.tmpltList.length - 1;
+				for(var i = tmpltListLength; i > -1; i--){
+					$(sel_id).prepend("<option value='"+ data.tmpltList[i].tmpltCd +"' > "+ data.tmpltList[i].tmpltNm +" </option>"); 
+				}
+				$(sel_id).prepend('<option value="" selected="true">전체</option>'); 
+			}
+		},
+		complete : function(data) {
+			callBack(sel_id, codeNum);
+		}
+
+	});
+}
+
+/*권한그룹정보 행삭제*/
+/*체크박스로 선택된 행을 삭제한다. */ 
+/*ex) 
+ * <tr>
+		<td><input type="checkbox" id="chk_info"    name="chk_info" ></td> 
+	    <td><input type="text"    id="athGrpId"    name="athGrpId" ></td>
+   <tr>
+   chk_info : (chk_info) 체크박스 id
+ */ 
+function table_row_remove(chk_info){
+//	var chk_info = "chk_info"
+	var chk_info = chk_info;
+	if ($("input[name="+chk_info+"]").is(":checked")){ 
+		if (confirm("삭제 하시겠습니까?")) { 
+			for(var i=$("[name='"+chk_info+"']:checked").length-1; i>-1; i--){ 
+				$("[name='"+chk_info+"']:checked").eq(i).closest("tr").remove(); 
+			}﻿ 
+		}﻿ 
+	} else { 
+		alert("선택된 row가 없습니다.");   
+	}﻿ 
+}
+
+//전체 체크박스 선택/해제
+//전체 체크박스는 아래와같이 사용
+//<input type="checkbox" onclick="chkBoxMgnt('tmpltSchemaList', $(this))">
+function chkBoxMgnt(tableId, pChkBox){
+	
+	var value = pChkBox.is(":checked");
+	var tableId = '#' + tableId;
+	
+	$(tableId + ' tr').each(function(){
+		$(this).find("input[name=chk_info]").attr("checked", value);
+	});
+}
+
+//전체 체크박스 선택/해제
+//Name인력받는 항목 추가 
+//<input type="checkbox" onclick="chkBoxMgnt('tmpltSchemaList', $(this) , 'name')">
+function chkBoxMgntName(tableId, pChkBox, name){
+	
+	var value = pChkBox.is(":checked");
+	var tableId = '#' + tableId;
+	
+	$(tableId + ' tr').each(function(){
+		$(this).find("input[name="+name+"]").attr("checked", value);
+	});
+}
+
+/*테이블 데이터를 초기화 한다. */
+function table_init(tableId){
+	var tbid = '#'+tableId+'>' + 'tbody'
+	 $(tbid).empty();
+}
+
+
+//오늘날짜 yyyy-mm-dd
+function getToday(input_Id){
+	
+	var today = new Date();
+	var yyyy = String(today.getFullYear());
+	var mm = String(today.getMonth()+1);
+	var dd = String(today.getDate());
+	
+	if(mm.length != 2) mm = "0" + mm;
+	if(dd.length != 2) dd = "0" + dd;
+	
+	var date = yyyy + "-" + mm + "-" + dd;
+	
+	var inputId = '#' + input_Id;
+	$(inputId).val(date);
+}
+
+//오늘날짜를 기준으로 해당년월의 첫날 구하기
+function getYYYYMMFirstDay(input_Id){
+	var today = new Date();
+	var yyyy = String(today.getFullYear());
+	var mm = String(today.getMonth()+1);
+	var dd = '1';
+	
+	if(mm.length != 2) mm = "0" + mm;
+	if(dd.length != 2) dd = "0" + dd;
+	
+	var date = yyyy + "-" + mm + "-" + dd;
+	
+	input_Id = '#' + input_Id;
+	$(input_Id).val(date);
+}
+
+//오늘 날짜를 기준으로 해당년월의 마지막날 구하기
+function getYYYYMMLastDay(input_Id){
+	var today = new Date();
+	var yyyy = String(today.getFullYear());
+	var mm = String(today.getMonth()+1);
+	var dd = String(new Date(yyyy, mm, 0).getDate());
+	
+	if(mm.length != 2) mm = "0" + mm;
+	if(dd.length != 2) dd = "0" + dd;
+	
+	var date = yyyy + "-" + mm + "-" + dd;
+	
+	input_Id = '#' + input_Id;
+	$(input_Id).val(date);
+}
+
+//해당 인풋에 onkeypress="dateFormat(this)" 넣어주면 됨.
+function dateFormat(obj){
+	var input_Id = '#' + obj.id;
+	
+	onlyNumber(); //숫자만 입력되도록
+	var RegNotNum = /[^0-9]/g;
+
+	$(input_Id).attr("maxlength", 10); // 최대길이 설정
+	
+	$(input_Id).keyup(function() {
+		var date = this.value;
+
+	    date = date.replace(RegNotNum, ''); // 숫자만 남기기
+	    
+	    if (date == "" || date == null || date.length < 5) {
+	      this.value = date;
+	      return;
+	    }
+
+	    var DataFormat;
+	    var RegPhonNum;
+
+	    // 날짜 포맷(yyyy-mm-dd) 만들기 
+	    if (date.length <= 6) {
+	      DataFormat = "$1-$2"; // 포맷을 바꾸려면 이곳을 변경
+	      RegPhonNum = /([0-9]{4})([0-9]+)/;
+	    } else if (date.length <= 8) {
+	      DataFormat = "$1-$2-$3"; // 포맷을 바꾸려면 이곳을 변경
+	      RegPhonNum = /([0-9]{4})([0-9]{2})([0-9]+)/;
+	    }
+
+	    date = date.replace(RegPhonNum, DataFormat);
+	    this.value = date;
+
+	    // 모두 입력됐을 경우 날짜 유효성 확인
+	    if (date.length == 10) {
+	    	var isVaild = true;
+	    	
+	    	// 유효 날짜 확인 여부
+	    	if (isNaN(Date.parse(date))) {
+	    		isVaild = false;
+	    	} else {
+		        // 년, 월, 일 0 이상 여부 확인
+		        var date_sp = date.split("-");
+		        date_sp.forEach(function(sp) {
+		        	if (parseInt(sp) == 0) {
+		        		isVaild = false;
+		        	}
+		        });
+	
+		        // 마지막 일 확인
+		        var last = new Date(new Date(date).getFullYear(), new Date(date).getMonth()+1, 0);
+		        
+		        // 일이 달의 마지막날을 초과했을 경우 다음달로 자동 전환되는 현상이 있음 (예-2월 30일 -> 3월 1일)
+		        if (parseInt(date_sp[1]) != last.getMonth()+1) {
+		        	var date_sp2 = date_sp.slice(0);
+					date_sp2[2] = '01';
+					var date2 = date_sp2.join("-");
+					last = new Date(new Date(date2).getFullYear(), new Date(date2).getMonth()+1, 0);
+				}
+		        
+		        if (last.getDate() < parseInt(date_sp[2])) {
+		          isVaild = false;
+		        }
+		    }
+	
+		    if (!isVaild) {
+		        alert("잘못된 날짜입니다. \n다시 입력하세요.");
+		        this.value = "";
+		        this.focus();
+		        return;
+		    }
+		}
+	});
+}
+
+
+//inputtype = 'number' => 숫자만 들어가도록
+//해당 인풋에 onkeypress="onlyNumber()" 넣어주면 됨.
+function onlyNumber(){
+    if((event.keyCode<48)||(event.keyCode>57)){
+    	event.returnValue=false;
+    }      
+}
+
+function noHangle(event){
+	var objTarget = event.srcElement || event.target;
+	
+	if(event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46) return;
+	objTarget.value = objTarget.value.replace(/[ㄱ-ㅎㅏ-ㅡ가-핳]/g,'')
+}
+
+//최대 길이 셋팅
+//해당 인풋에 maxlength="13" oninput="maxLengthCheck(this)" 넣어주면 됨.
+//maxlength 에는 지정할 최대 길이
+function maxLengthCheck(obj){
+	if(obj.value.length > obj.maxLength){
+		obj.value = obj.value.slice(0, obj.maxLength);
+	}
+}
+
+
+function _maxLengthCheck(obj, maxLength){
+	if(obj.value.length > maxLength){
+		obj.value = obj.value.slice(0, maxLength);
+	}
+}
+
+//필수값 체크
+//if(reqValCheck('cfcd', '분류코드')) return;
+function reqValCheck(id, name){
+	var id = '#' + id;
+
+	if($(id).val().trim() == '' || $(id).val() == null){
+		alert(name + " 값을 입력해주세요.");
+		$(id).focus();
+		
+		return true;
+	}
+	
+	return false;
+}
+
+/*그리드 필수값 체크 */
+function reqValCheckTable(name, msg){
+	
+	 var tabColName = $("input[name="+name+"]");
+	 
+	 for(var i=0;i<tabColName.length;i++){
+  		 if(     $("input[name="+name+"]:eq("+i+")").val().trim() == '' 
+  		    ||   $("input[name="+name+"]:eq("+i+")").val() == null
+  		    ){
+  		 	alert( (i + 1) + "번째 " +msg + " 값을 입력해주세요.");
+  		 	$("input[name="+name+"]:eq("+i+")").focus();
+  		 	
+  		 	return true;
+  		 }
+	 }
+	
+	return false;
+}
+
+/*그리드 필수값 체크 - 체크박스 체크된것만 */
+//min은 기본값으로 0 셋팅
+function reqValOnCheckTable(tableId, chkName, min, name, msg){
+	 var tableId = '#' + tableId;
+	 var max = $(tableId + ' tr').length;
+	
+	 for(var i = min; i < max; i ++){
+		 var chk_info = $("input[name="+chkName+"]:eq("+(i-min)+")");
+		 var col = $("input[name="+name+"]:eq("+i+")");
+		 
+		 if(chk_info.is(":checked")){
+			 if(col.val().trim() == "" || col.val() == null){
+				 alert((i+1) + "번째 " + msg + " 값을 입력해주세요.");
+				 col.focus();
+				 
+				 return true;
+			 }
+		 }
+	 }
+	
+	 return false;
+}
+
+//데이터피커
+function datepicker(){
+	jQuery(document).ready(function () {
+        $.datepicker.setDefaults({
+            dateFormat: 'yy-mm-dd',
+            prevText: '이전 달',
+            nextText: '다음 달',
+            monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+            monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+            dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+            dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+            dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
+            showMonthAfterYear: true,
+            yearSuffix: '년'
+        });
+        jQuery( ".dateinput" ).datepicker();
+    });
+}
+
+
+//CI보이게
+//<div id="ofapElctAddrToCi" class="layerBox" style="display:none;"></div>
+//CI 구역 정해놔야함..
+function ofapElctAddrToCi(ci){
+	jQuery("#ofapElctAddrToCi").show();
+	$("#ofapElctAddrToCi").html(''); 
+	
+	var inner = '';
+	inner += '<div class="layer">';
+	inner += '<div class="topBox">';
+	inner += '<h3>연계정보(CI) 또는 사업자번호</h3>';
+	inner += '<a class="close" onclick="ofapElctAddrToCiClose()">&#10005;</a>';
+	inner += '</div>';
+	inner += '<div class="contBox">';
+	inner += '<div class="section">' + ci;
+	inner += '</div>';
+	inner += '</div>';
+	inner += '</div>';
+	inner += '<div class="fade"></div>';
+
+	$("#ofapElctAddrToCi").append(inner);
+}
+
+//CI안보이게
+function ofapElctAddrToCiClose(){
+	jQuery("#ofapElctAddrToCi").hide();
+}
+
+
+var calByte = {
+		getByteLength : function(s) {
+
+			if (s == null || s.length == 0) {
+				return 0;
+			}
+			var size = 0;
+
+			for ( var i = 0; i < s.length; i++) {
+				size += this.charByteSize(s.charAt(i));
+			}
+
+			return size;
+		},
+			
+		cutByteLength : function(s, len) {
+
+			if (s == null || s.length == 0) {
+				return 0;
+			}
+			var size = 0;
+			var rIndex = s.length;
+
+			for ( var i = 0; i < s.length; i++) {
+				size += this.charByteSize(s.charAt(i));
+				if( size == len ) {
+					rIndex = i + 1;
+					break;
+				} else if( size > len ) {
+					rIndex = i;
+					break;
+				}
+			}
+
+			return s.substring(0, rIndex);
+		},
+
+		charByteSize : function(ch) {
+
+			if (ch == null || ch.length == 0) {
+				return 0;
+			}
+
+			var charCode = ch.charCodeAt(0);
+
+			if (charCode <= 0x00007F) {
+				return 1;
+			} else if (charCode <= 0x00FFFF) {
+				return 2;
+			} else {
+				return 0;
+			}
+		}
+	};
+
+//ajax 세션처리
+$.ajaxSetup({
+           beforeSend: function(xhr) {
+            xhr.setRequestHeader("ajax", "true");
+        },
+        error: function(request, status, err) {
+        	if(request.status == "505"){
+				alert("로그인 정보가 없습니다. 로그인 후 진행하시기 바랍니다.");
+				location.href = "/tpost";
+//				location.reload(true);
+			}else{
+				console.log("에러가 발생했습니다!");
+				console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+			}
+        }});
+  
+
+/*날짜 더하기 빼기 */
+/* s = '2020-06-07 형식'*/
+/* i = 더하고 빼고할 숫자*/
+/*일자 마이너스 처리*/
+function getMinusDt(s, i){ 
+	
+    var newDt = new Date(s);
+    newDt.setDate( newDt.getDate() - i ); 
+    return converDateString(newDt); 
+}
+ 
+/*한달전 처리 */
+function getMinusMon(s, i){ 
+	var date = new Date(s);
+	var firstDayOfMonth = new Date( date.getFullYear(), date.getMonth() -i + 1, 1 );
+	var lastMonth = new Date ( firstDayOfMonth.setDate( firstDayOfMonth.getDate() - 1 ) );
+	var lastMonth1 = new Date (lastMonth.setDate(date.getDate() )   );
+    return converDateString(lastMonth1); 
+}
+
+/*일년전 처리 */
+function getMinusYear(s, i){ 
+	var date = new Date(s);
+	var firstDayOfMonth = new Date(date.setFullYear( date.getFullYear() -i    )   );
+	
+    return converDateString(firstDayOfMonth); 
+}
+    
+
+function converDateString(dt){
+	 var yyyy = dt.getFullYear();
+	 var mm = ((dt.getMonth()+1) < 10 ? "0" + (dt.getMonth()+1) : (dt.getMonth()+1));
+	 var dd = (dt.getDate() < 10 ? "0" + dt.getDate() : dt.getDate());
+	 
+	 return "" + yyyy + "-" + mm + "-" + dd ;
+	}
+
+

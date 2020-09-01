@@ -1,0 +1,677 @@
+package tpost.batch.controller;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import tpost.batch.service.fileTestService;
+import tpost.batch.vo.fileTestVO;
+import tpost.commCode.controller.commCdMgntController;
+
+
+
+@Component
+@Controller
+@RequestMapping(value = "/batch/fileTest")
+public class fileTest {
+
+	@Autowired
+	fileTestService fileTestService;
+	
+	/*로그설정 입니다. */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+
+	String osName = System.getProperty("os.name");
+	
+	
+	 /*파일 배치 테스트 입니다.  */
+	 @ResponseBody
+	 @RequestMapping(value = "/batchTestMain1", method = RequestMethod.POST)
+	 public Map batchTestMain1(Model model , @ModelAttribute fileTestVO fileTestVO ) {
+		 
+		 log.debug("batchTestMain1");
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		 String FileNm = fileTestVO.getFileNm();
+		 String exeDt = fileTestVO.getExeDt();
+		 String oganCd = fileTestVO.getOganCd();
+		 String tmpltCd = fileTestVO.getTmpltCd();
+		 
+		 log.debug("FileNm ==> " + FileNm);
+		 /*파일 업로드 */
+//		 batchtest_Test(fileName);
+		 
+		 /*기존배치*/
+		 batchtest_Test(FileNm, exeDt, oganCd, tmpltCd);
+		
+		 /*파일 디렉토리확인 체크*/
+//		 dirChk("C:\\nfsdata01\\tpost\\file"); 
+		 
+		 /*test */
+		 resultMap.put("result", "Y");
+		 resultMap.put("status", "delete");
+		 resultMap.put("errorMessage", "");
+		 
+		 return resultMap;
+	 }
+	 
+	 public void dirChk(String source) {
+		 //String source = "C:\\nfsdata01\\tpost\\file";
+		 File dir = new File(source); 
+
+			File[] fileList = dir.listFiles(); 
+
+			try{
+				
+				String[] array = null;
+				String str= "";
+				
+				String orgnCd = "";
+				String tmpltCd = "";
+				String fileDate = "";
+				
+				for(int i = 0 ; i < fileList.length ; i++){
+
+					File file = fileList[i]; 
+
+					if(file.isFile()){
+
+						// 파일이 있다면 파일 이름 출력
+						System.out.println("\t 파일 이름 = " + file.getName());
+						str = file.getName();
+						array = str.split("_");
+						
+						orgnCd = array[0]; /*기관코드*/
+						tmpltCd = array[1]; /*템플릿코드*/
+						fileDate = array[2]; /*날짜*/
+
+						System.out.println("기관코드[" + orgnCd +"] 템플릿코드 [" +tmpltCd+"] 날짜 [" +fileDate+"]");
+						          
+						/*파일이 있는경우 자동실행 st*/
+						batchtest_Test(file.getName(), fileDate, orgnCd, tmpltCd);
+						/*파일이 있는경우 자동실행 ed*/
+						
+					}else if(file.isDirectory()){
+
+						System.out.println("디렉토리 이름 = " + file.getName());
+						
+						if(!"his".equals(file.getName())) {/*과거건 데이터는 읽지않는다*/
+							dirChk(file.getCanonicalPath().toString());
+						}
+					}
+				}
+
+			}catch(IOException e){
+				e.printStackTrace();
+				log.debug("파일 함수 호출중 에러가발생하였습니다. ");
+			}
+	 }
+
+	 /*공인전자주소채번  */
+	 @ResponseBody
+	 @RequestMapping(value = "/batchTestMain2", method = RequestMethod.POST)
+	 public Map batchTestMain2(Model model , @ModelAttribute fileTestVO fileTestVO ) {
+		 
+		 log.debug("batchTestMain2");
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		 /*파일 업로드 */
+		 batchtest_addr_Test(fileTestVO);
+		                
+		 /*test */
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("status", "delete");
+		 resultMap.put("errorMessage", "");
+		 
+		 return resultMap;
+	 }
+	 
+	
+
+	/*발송내역적재   */
+	 @ResponseBody
+	 @RequestMapping(value = "/batchTestMain3", method = RequestMethod.POST)
+	 public Map batchTestMain3(Model model , @ModelAttribute fileTestVO fileTestVO ) {
+		 
+		 log.debug("batchTestMain3");
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		  
+		 /*파일 실행일 기관코드 템플릿 코드 가져오는 곳 추후 셋팅 설정해주기*/
+	      String exeDt = "";
+	      String oganCd = "";
+	      String tmpltCd = "";
+	      
+//	      oganCd = "100";
+//	      tmpltCd = "10000005";
+	      
+	      
+	      oganCd = fileTestVO.getOganCd();
+		  tmpltCd = fileTestVO.getTmpltCd();
+	      
+	      fileTestVO.setOganCd(oganCd);
+	      fileTestVO.setTmpltCd(tmpltCd);
+	      /*-----------------------------------------------------*/
+		 
+		 
+		 /*파일 업로드 */
+		 fileTestService.fileTestSelectInsert(fileTestVO);
+		 
+		 /*test */
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("result", "Y");
+		 resultMap.put("status", "delete");
+		 resultMap.put("errorMessage", "");
+		 
+		 return resultMap;
+	 }
+	 
+	 private void batchtest_addr_Test(fileTestVO fileTestVO) {
+			// TODO Auto-generated method stub
+		 /*서비스 단에서 채번하고 입력하는 부분을 놓아둠*/
+			 fileTestService.fileTestElctAddrInsert(fileTestVO);
+			
+		}
+	 
+	 /*배치파일 최종 업로드 테스트 입니다.*/
+	 @ResponseBody
+	 @RequestMapping(value = "/batchTestMMS", method = RequestMethod.POST)
+	 public Map batchMMS_upload(Model model , @ModelAttribute fileTestVO fileTestVO ) {
+		 
+		 log.debug("전송 MMS 테스트입니다.");
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		 
+		 batchtestMMS_upload_Test(fileTestVO);
+		 
+		 resultMap.put("result", "Y");
+		 resultMap.put("status", "delete");
+		 resultMap.put("errorMessage", "");
+		 
+		 return resultMap;
+	 }
+	
+	 
+	 
+//	@Scheduled(fixedRate=1000000)
+	public void batchtest_Test(String file_nm, String exeDt, String oganCd, String tmpltCd){
+		  
+		 log.debug("파일 업로드 배치 테스트 입니다.");
+		
+//		 String file_nm = "C:\\test-de1";
+//		 String file_nm = "test-de1";
+//		 String file_nm = "test";
+//		 String file_nm = "test-han";
+		 
+		 /*파일 갯수 가져오기  */
+		 int file_cnt = temp_file_chk(oganCd, file_nm);
+		 
+		/*파일 업로드 처리 */
+		 log.debug("file_cnt => ( " + file_cnt + " ) " );
+		 
+		 String oganNm = oganCd.toLowerCase();  /*코드를 수문자로 바꾼것을 사용한다.*/
+		 
+		 
+		 if(osName.toLowerCase().startsWith("window"))  {
+			 file_nm = "C:\\nfsdata01\\tpost\\file\\" + oganNm+"\\samFile\\" + file_nm;
+		 }else {
+//			 file_nm = "/tpost/file/nhis/" + file_nm;
+			 file_nm = "/nfsdata01/tpost/file/"+oganNm+"/samFile/" + file_nm;
+		 }
+//		temp_file_upload(file_nm , file_cnt);
+		 temp_file_upload(file_nm, file_cnt , exeDt, oganCd, tmpltCd );
+	}
+	
+	 
+	private int temp_file_chk(String oganCd, String file_nm) {
+		// TODO Auto-generated method stub
+		log.debug("=================temp_file_chk=============================");
+		String command = "";
+		StringBuffer buffer = new StringBuffer();
+
+		try {
+			
+			if(osName.toLowerCase().startsWith("window"))  {   /*windows */
+				command = "findstr /R /N \"^\" " + "C:\\nfsdata01\\tpost\\file\\" +oganCd+"\\samFile\\" + file_nm + " | find /C \":\" " ;
+				buffer.append("cmd.exe ");
+				buffer.append("/c ");
+				buffer.append(command);
+			}
+			else  	//linux 환경 
+			{	
+			
+				log.debug("===========command=============================");
+				
+				command = "wc -l " + "/nfsdata01/tpost/file/"+oganCd+"/samFile/" +file_nm  ;
+				
+				buffer.append(command);
+				
+				log.debug("command  ===> " + buffer);
+			}
+			Process process = Runtime.getRuntime().exec(buffer.toString());
+			
+			BufferedReader 	bufferReader1 = new BufferedReader(new InputStreamReader(process.getErrorStream(),"EUC-KR"));
+
+			String line = null;
+
+			while ((line = bufferReader1.readLine())!= null) {
+				System.out.println(line);
+			}
+			
+			/*파일건수 가져오기 header건도 가져오기때문에 전체 건수대비 1이 큼*/
+			BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			line = null;
+			StringBuffer readBuffer = new StringBuffer();
+			
+			while((line = bufferReader.readLine()) != null){
+				
+				String[] array = line.split(" ");
+				readBuffer.append(array[0]);
+				
+			}
+			
+			return Integer.parseInt(readBuffer.toString());
+			
+		} catch (IOException e) {
+			log.debug("=================IOException=============================" + e);
+			e.printStackTrace();
+		}
+		
+		return 0;
+		
+	}
+
+//	@Scheduled(fixedRate=1000000)
+	public void batchtestMMS_upload_Test(fileTestVO fileTestVO){
+		
+		 log.debug("파일 업로드 배치 테스트 입니다.");
+		
+		/*MMS 파일 업로드 */
+		 String transDt = "";
+//		 transDt = "20200331";
+		 
+		 batchtestMMS_upload(fileTestVO);
+		
+	}
+
+	/*파일 최종 MMS 업로드 테스트입니다.*/
+	private void batchtestMMS_upload(fileTestVO fileTestVO) {
+		
+		fileTestService.tbMoblSndnMsg_upload(fileTestVO);
+	}
+
+	/*파일 업로드시 정합성 체크후 템프 테이블에 적제하는 부분*/
+	private void temp_file_upload(String file_nm, int file_cnt , String exeDt, String oganCd, String tmpltCd) {
+		try{
+			
+			log.debug("=================temp_file_upload=============================" );
+	        //파일 객체 생성
+			/** 추후 파일을 자동으로 가져오는 소스코딩 해야함**/
+			/*현재는 하드코드 , 디렉토리 구조로해서 가져오는 코딩하기 */
+	        File file = new File(file_nm);                  /*원본파일 */
+	        File file_temp = new File(file_nm+"_temp");     /*오류결과저장파일*/
+
+	        
+	        /*파일 실행일 기관코드 템플릿 코드 가져오는 곳 추후 셋팅 설정해주기*/
+//	      String exeDt = "";
+//	      String oganCd = "";
+//	      String tmpltCd = "";
+	      
+//	      oganCd = "100";
+//	      tmpltCd = "10000005";
+	      
+	      /*-----------------------------------------------------*/
+	        
+           //입력 스트림 생성
+           FileReader filereader = new FileReader(file);
+           //입력 버퍼 생성
+           BufferedReader bufReader = new BufferedReader(filereader);
+           String line = "";
+           
+           /*array list 에 파일 저장*/
+           List<fileTestVO> retStr = new ArrayList<fileTestVO>();
+           
+           /*템플릿 정보 가져오기 */
+           fileTestVO fileTestVO_tempSel = new fileTestVO();
+           fileTestVO_tempSel.setOganCd(oganCd);
+           fileTestVO_tempSel.setTmpltCd(tmpltCd);
+           List<fileTestVO> fileTestVO_temp  = fileTestService.fileTestTempSel(fileTestVO_tempSel);
+           
+           int tempSize = 0;
+           for(int i = 0 ; i < fileTestVO_temp.size() ; i++ ) {
+        	   tempSize += fileTestVO_temp.get(i).getItemLen();
+           }
+           
+           int cnt =0 ;
+           int failChk = 0;
+           fileTestVO fileTestVO = null;
+           FileWriter fw_temp = null;
+           
+           try {
+        	   /*에러난 파일을 임시파일에 담는다.*/
+        	   log.debug("=================tbBatchFileUpldTempTruncate=============================" );
+        	   fw_temp = new FileWriter(file_temp);
+
+        	   /*기존 업로드에 있던 파일을 truncate*/
+        	   /*배치 로직 =  
+        	    * 임시테이블 truncate > 임시 테이블 업로드 > MMS발송 테이블로 insert select
+        	    * 중간에 에러 발생시 파일러 처리  
+        	    * 
+        	    * */
+        	   fileTestService.tbBatchFileUpldTempTruncate(fileTestVO);
+	           
+        	   while((line = bufReader.readLine()) != null){
+	        	   
+	        	   /************************************************/
+	        	   /*파일 실행일과 기관코드 템플릿 코드 가져오는거 셋팅*/
+	        	   fileTestVO = new fileTestVO();
+	               fileTestVO.setExeDt(exeDt);
+	               fileTestVO.setOganCd(oganCd);
+	               fileTestVO.setTmpltCd(tmpltCd);
+	               /************************************************/
+	               
+	               log.debug("=================while 1 =============================" );
+	               /*헤더와 파일갯수 체크 */
+	               if(cnt == 0 ) {
+	            	   byte[] bytes1 = line.getBytes();
+	            	   
+	            	   /* String(bytes1, 6, 10 ) 
+	            	    * bytes1 은무자열
+	            	    * 6은 자를시작위치
+	            	    * 10은 몇개자를지
+	            	    * */
+	            	   int header_cnt = Integer.parseInt(new String(bytes1, 6, 10 ));
+	            	   log.debug("=================header_cnt =============================" + header_cnt );
+	            	   
+	            	   if(header_cnt == file_cnt-1 ) {
+	            		   log.debug("=================헤더와파일갯수 일치=============================" );
+	            		   cnt = cnt +1;
+	            		   continue;
+	            	   }else {
+	            		   failChk = failChk +1;
+	            		   log.debug("=================헤더갯수와 파일 갯수가 맞지 않습니다.=============================" );
+	            		   fileTestVO.setFailCnts("헤더갯수와 파일 갯수가 맞지 않습니다. ");
+	            		   fw_temp.write("헤더갯수와 파일 갯수가 맞지 않습니다. ");
+
+	            		   fileTestService.fileTestInsert_fail(fileTestVO);
+	            		   break;
+	            	   }
+	            	 
+	               }
+	               
+	               
+	               byte[] bytes = line.getBytes();
+	               
+	               /**********************************************/
+	               /*파일 압에 자리수를 비교하여 이름과 CI번호를 가져온다. */
+	               fileTestVO.setName(new String(bytes, 0, 30 ));   /*이름*/
+	               fileTestVO.setCiNum(new String(bytes, 30, 88 )); /*CI번호*/
+	               fileTestVO.setSsnoFronBrdt(new String(bytes, 30+88, 6 )); /*생년월일*/
+	               fileTestVO.setSexClcd(new String(bytes, 30+88+6, 1 )); /*성별구분코드*/
+	               fileTestVO.setAnocInfo(new String(bytes, 30+88+6+1 , line.getBytes().length -  (30+88+6+1))); /*고지정보*/
+	               /***************************************************/
+	              
+	               log.debug("================이름=============================" + new String(bytes, 0, 30 ));
+	               log.debug("=================CI번호 =============================" + new String(bytes, 30, 88 ) );
+	               log.debug("=================생년월일 ============================="  + new String(bytes, 30+88, 6 ) );
+	               log.debug("=================성별구분코드 =============================" + new String(bytes, 30+88+6, 1 ) );
+	               
+	               if( line.getBytes().length == tempSize) {
+	               
+		               retStr.add(fileTestVO);
+		               
+		               /*1000 건씩 인설트*/
+		               if(cnt % 1000  == 0 ) {
+		            	   
+		            	   fileTestService.fileTestInsert(retStr);
+		            	   retStr.clear();
+		               }
+		               cnt++;
+	               }else {
+	            	   
+	            	   log.debug("line.getBytes().length ==> " + line.getBytes().length);
+	            	   log.debug("tempSize ==> " + tempSize);
+	            	   failChk = failChk +1;
+	            	   fw_temp.write("cnt("+cnt +") "+line);
+	            	   fileTestService.fileTestInsert_fail(fileTestVO);
+	            	   
+	            	   break;
+	               }
+	           }
+	           
+	           
+	           /*1000 으로 나누어지지 않는것 인서트*/
+	           fileTestService.fileTestInsert(retStr);
+	           
+           }catch (ArrayIndexOutOfBoundsException  ex) {
+        	   failChk = failChk +1;
+        	   fileTestVO.setExeDt(exeDt);
+               fileTestVO.setOganCd(oganCd);
+               fileTestVO.setTmpltCd(tmpltCd);
+               
+               fileTestVO.setName("error");
+               fileTestVO.setCiNum("error");
+               fileTestVO.setFileCnts(line);
+               
+               fileTestVO.setSuccYn("N");
+               fileTestVO.setFailCnts("자릿수 오류발생");
+              
+               /*파일에 쓰기 */
+               fw_temp.write("자릿수 에러발생 cnt("+cnt +") "+line);
+               
+        	   fileTestService.fileTestInsert_fail(fileTestVO);
+		   }
+           
+           catch (Exception e) {
+        	   failChk = failChk +1;
+        	   fileTestVO.setExeDt(exeDt);
+               fileTestVO.setOganCd(oganCd);
+               fileTestVO.setTmpltCd(tmpltCd);
+               
+               fileTestVO.setName("error");
+               fileTestVO.setCiNum("error");
+               fileTestVO.setFileCnts(line);
+               
+               fileTestVO.setSuccYn("N");
+               fileTestVO.setFailCnts("파일 읽중 에러발생");
+               
+               /*파일에 쓰기 */
+               fw_temp.write("파일 읽는중 에러발생 cnt("+cnt +") "+line);
+               
+        	   fileTestService.fileTestInsert_fail(fileTestVO);
+           }finally{
+        	   //.readLine()은 끝에 개행문자를 읽지 않는다.            
+               filereader.close();
+               
+               /*임시 테이블 파일 처리 완료*/
+               fw_temp.close();
+	        }
+            
+           /*파일이 정상적인경우에 발송내역 테이블에 select insert*/
+//           if(failChk == 0 ) {
+//        	   log.debug("-----------정상처리시 발송목록 테이블 TB_SNDN_INFO_LST Update-----------------" );
+//        	   fileTestService.fileTestSelectInsert(fileTestVO);
+//           }
+           
+	        }catch (FileNotFoundException e) {
+	        	log.debug("-----------FileNotFoundException-----------------"+ e);
+	            e.getStackTrace();
+	        }catch(IOException e){
+	        	
+	        	log.debug("-----------IOException-----------------"+ e);
+	            e.getStackTrace();
+	        }catch(Exception e) {
+	        	log.debug("-----------Exception-----------------" + e);
+	        	e.getStackTrace();
+	        }
+		 	finally{
+	        	
+	        }
+		
+	}
+	
+	
+	//파일 업로드 테스트
+ 	@ResponseBody
+ 	@RequestMapping(value = "/fileUpload", method = RequestMethod.POST)
+ 	public Map elctDocListInit(MultipartHttpServletRequest request) {
+ 		
+ 		log.debug("/fileUpload");
+ 		
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		 String errorMessage = "";
+		 String osName = System.getProperty("os.name");
+		 String saveDir = "";
+     
+	    if(osName.toLowerCase().startsWith("window"))  {
+	    	saveDir = "C:\\imgTest" ;
+		}else {
+			saveDir = "/DATA/tpost/nhis/mmsFile/";
+		}
+	    
+	    List<MultipartFile> fileList = request.getFiles("file");
+    
+	    if(request.getFiles("file").get(0).getSize() != 0){ 
+	    	fileList = request.getFiles("file");
+	    	}
+	    File fileDir = new File("C:\\"); 
+    
+	    if (!fileDir.exists()) { 
+	    	fileDir.mkdirs(); 
+	    }
+    
+	    for (MultipartFile mf : fileList) { 
+	    	log.debug("/mf");
+	    	String originFileName = mf.getOriginalFilename(); // 원본 파일 명 
+	//    	String saveFileName = String.format("%d_%s", time, originFileName); 파일명을 바꿀경우 사용
+	    	String saveFileName = "";
+
+	    	/*파일명 확인있는경우 뒤에 1 2 3 붙여줌*/
+	    	File f = new File(saveDir+originFileName);
+	    	if(f.exists()) {
+	    	     System.out.println("파일 존재");
+	    	     for (int i=0; i < 10000 ; i++) {
+	    	    	 
+	    	    	 saveFileName = originFileName +"_"+i ;
+	    	    	 
+	    	    	 f = new File(saveDir+saveFileName);
+	    	    	 if(f.exists()) {
+	    	    		 System.out.println("파일 존재 ==> " +  saveFileName);
+	    	    	 }else {
+//	    	    		 saveFileName = originFileName;
+	    	    		 break;
+	    	    	 }
+	    	     }
+	    	} else {
+	    	      System.out.println("파일 없음");    
+	    	      saveFileName = originFileName;
+	    	}
+	    	
+	    	try { // 파일생성
+	    		   mf.transferTo(new File(saveDir, saveFileName)); 
+	    	} catch (Exception e) { 
+	    		e.printStackTrace(); 
+	    	} 
+    	}
+
+    
+		 
+		 resultMap.put("result", "Y");
+		 resultMap.put("status", "file");
+		 resultMap.put("errorMessage", errorMessage);
+		 return resultMap;
+ 	}
+ 	//파일 다운로드 테스트
+// 	@ResponseBody
+ 	@RequestMapping(value = "/fileDownload")
+ 	public void fileDownload(HttpServletResponse  response) {
+ 		
+ 		log.debug("/fileDownload");
+ 		
+ 		Map<String, Object> resultMap = new HashMap<String, Object>();
+ 		String errorMessage = "";
+ 		String osName = System.getProperty("os.name");
+ 		String saveDir = "";
+ 		
+ 		if(osName.toLowerCase().startsWith("window"))  {
+ 			saveDir = "C:\\" ;
+ 		}else {
+ 			saveDir = "/DATA/tpost/nhis/mmsFile/";
+ 		}
+ 		
+ 	// 직접 파일 정보를 변수에 저장해 놨지만, 이 부분이 db에서 읽어왔다고 가정한다.
+ 			String fileName = "downloadtest.jpg";  /*저장할 파일명*/
+ 			String saveFileName = "c:/tmp/downloadtest.jpg"; // 저장할 파일경로
+ 			String contentType = "image/jpg";
+ 			int fileLength = 8285;
+ 			
+ 		
+ 			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+ 	        response.setHeader("Content-Transfer-Encoding", "binary");
+ 	        response.setHeader("Content-Type", contentType);
+ 	        response.setHeader("Content-Length", "" + fileLength);
+ 	        response.setHeader("Pragma", "no-cache;");
+ 	        response.setHeader("Expires", "-1;");
+ 			
+ 	        log.debug("/fileDownload1");
+ 			
+ 	       try(
+ 	                FileInputStream fis = new FileInputStream(saveFileName);
+ 	                OutputStream out = response.getOutputStream();
+ 	        ){
+ 	        	    int readCount = 0;
+ 	        	    byte[] buffer = new byte[1024];
+ 	            while((readCount = fis.read(buffer)) != -1){
+ 	            	log.debug("/fileDownload2");
+ 	            		out.write(buffer,0,readCount);
+ 	            }
+ 	        }catch(Exception ex){
+ 	            throw new RuntimeException("file Save Error");
+ 	        }
+ 			
+ 			
+ 			
+ 			
+ 			
+ 			
+ 			
+ 			
+ 			//////////////////////////////////////////////////
+ 			
+ 		resultMap.put("result", "Y");
+ 		resultMap.put("status", "file");
+ 		resultMap.put("errorMessage", errorMessage);
+ 	//	return resultMap;
+ 	}
+	 
+}
+	

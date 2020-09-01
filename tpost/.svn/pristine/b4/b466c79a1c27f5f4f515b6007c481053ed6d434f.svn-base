@@ -1,0 +1,37 @@
+<?xml version="1.0" ?> 
+<project name="tpost" default="war">
+ 
+    <path id="compile.classpath">
+        <fileset dir="src/main/webapp/WEB-INF/lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+     
+    <target name="init">
+        <mkdir dir="build/classes"/>
+        <mkdir dir="dist" />
+    </target>
+     
+    <target name="compile" depends="init" >
+        <javac destdir="build/classes" debug="true" srcdir="src">
+            <classpath refid="compile.classpath"/>
+        </javac>
+    	<copy todir="build/classes" verbose="true">
+    		<fileset dir="src/main/resources"/>
+    	</copy>
+    </target>
+     
+    <target name="war" depends="compile">
+        <war destfile="dist/tpost.war" webxml="src/main/webapp/WEB-INF/web.xml">
+            <fileset dir="src/main/webapp"/>
+            <lib dir="src/main/webapp/WEB-INF/lib"/>
+            <classes dir="build/classes"/>
+        </war>
+    </target>
+     
+    <target name="clean">
+        <delete dir="dist" />
+        <delete dir="build" />
+    </target>
+     
+</project>

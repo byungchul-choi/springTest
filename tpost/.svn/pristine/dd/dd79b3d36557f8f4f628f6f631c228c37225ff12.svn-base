@@ -1,0 +1,81 @@
+package tpost.elctDoc.controller;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import egovframework.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+import tpost.commCode.controller.commCdMgntController;
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.elctDoc.service.msgTmpltService;
+import tpost.elctDoc.vo.msgTmpltVO;
+
+@Controller
+@RequestMapping(value = "/elctDoc")
+public class msgTmpltController {
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Autowired
+	msgTmpltService msgTmpltService;
+	
+	
+	@RequestMapping(value="/msgTmpltMgnt", method = RequestMethod.POST)
+	public String msgTmpltInit(Model model) {
+		log.debug("/msgTmplt/msgTmpltMgnt - msgTmpltInit :: " + EgovUserDetailsHelper.getAthLev());
+		
+		msgTmpltVO msgTmpltVO = new msgTmpltVO();
+		if(EgovUserDetailsHelper.getAthLev().equals("00")) {
+			msgTmpltVO.setInputOganCd("");
+		} else if(EgovUserDetailsHelper.getAthLev().equals("00")) {
+			msgTmpltVO.setInputOganCd(EgovUserDetailsHelper.getOganCd());
+		}
+		
+		msgTmpltVO.setInputTmpltNm("");
+		msgTmpltVO.setInputTmpltUseYn("");
+		
+		tmpltLstSelect(model, msgTmpltVO);
+		
+		return "elctDoc/msgTmpltMgnt";
+	}
+	
+	@RequestMapping(value="/tmpltLstSelect", method = RequestMethod.POST)
+	public String tmpltLstSelect(Model model, @ModelAttribute msgTmpltVO msgTmpltVO) {
+		log.debug("/msgTmplt/msgTmpltMgnt - msgTmpltInit :: " + EgovUserDetailsHelper.getAthLev());
+		
+		model.addAttribute("inputOganCd", msgTmpltVO.getInputOganCd());
+		model.addAttribute("inputTmpltNm", msgTmpltVO.getInputTmpltNm());
+		model.addAttribute("inputTmpltUseYn", msgTmpltVO.getInputTmpltUseYn());
+		model.addAttribute("athLev", EgovUserDetailsHelper.getAthLev());
+		
+		log.debug(msgTmpltVO.getInputOganCd());
+		log.debug(msgTmpltVO.getInputTmpltNm());
+		log.debug(msgTmpltVO.getInputTmpltUseYn());
+		log.debug(EgovUserDetailsHelper.getAthLev());
+		
+		PaginationInfo paginationInfo = new PaginationInfo();
+		paginationInfo.setCurrentPageNo(msgTmpltVO.getPageIndex()); //현재 페이지 번호
+		paginationInfo.setRecordCountPerPage(5);  //한 페이지에 게시되는 게시물 건수
+		paginationInfo.setPageSize(10); //페이징 리스트의 사이즈
+		
+		msgTmpltVO.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		msgTmpltVO.setLastIndex(paginationInfo.getLastRecordIndex());
+		msgTmpltVO.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+		
+
+		log.debug("==========================================");
+		
+		model.addAttribute("tmpltList", msgTmpltService.tmpltLstSelect(msgTmpltVO));
+		
+		paginationInfo.setTotalRecordCount((Integer)msgTmpltService.tmpltLstCntSelect(msgTmpltVO));
+		model.addAttribute("paginationInfo", paginationInfo);
+		
+		return "elctDoc/msgTmpltMgnt";
+	}
+	
+	
+}

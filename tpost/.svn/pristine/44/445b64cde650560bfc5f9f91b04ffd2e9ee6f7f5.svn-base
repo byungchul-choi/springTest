@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.athGrpMgntDao">
+
+<!-- 권한그룹정보 table 관련-->
+
+  <!-- 페이징 테스트 st -->
+  <select id="athGrpMgntSelect" parameterType="tpost.common.vo.athGrpMgntVO" resultType="tpost.common.vo.athGrpMgntVO">
+    SELECT /* athGrpMgntSelect */
+		A.*
+  FROM (
+		SELECT
+			    ATH_GRP_ID      AS athGrpId
+			,	ATH_GRP_NM      AS athGrpNm
+			,	ATH_GRP_DESC    AS athGrpDesc
+			,	USE_YN   AS useYn
+			,	CRTR       AS crtr
+			,	MDF_DATE   AS mdfDate
+			,	AMDR       AS amdr
+		    ,   @ROWNUM:=@ROWNUM+1  AS rnum /*이것에 관해서는 인터넷 찾아봐야함 */ 
+ 		 FROM tpost.TB_ATH_GRP_INFO
+ 		   ,(SELECT @ROWNUM := 0) TMP
+ 		WHERE ATH_GRP_ID LIKE  CONCAT ( '%' , #{athGrpIdSel} , '%' ) 
+ 		  AND IFNULL(ATH_GRP_NM, ' ') LIKE CONCAT ( '%' , #{athGrpNmSel} , '%' ) 
+ 		ORDER BY ATH_GRP_ID	 
+  		) A
+ 	
+  </select>
+  
+  <select id="athGrpMgntSelectCnt" parameterType="tpost.common.vo.athGrpMgntVO" resultType="int">
+    SELECT /* athGrpMgntSelectCnt */
+			count(*) 
+    FROM tpost.TB_ATH_GRP_INFO
+  WHERE ATH_GRP_ID LIKE  CONCAT ( '%' , #{athGrpIdSel} , '%' ) 
+ 		  AND IFNULL(ATH_GRP_NM, ' ') LIKE CONCAT ( '%' , #{athGrpNmSel} , '%' ) 
+  </select>
+<!-- 페이징 테스트 ed -->
+
+	
+	<insert  id="athGrpMgntInsert" parameterType="tpost.common.vo.athGrpMgntVO">
+		INSERT /* athGrpMgntInsert */ 
+		  INTO tpost.TB_ATH_GRP_INFO
+		 VALUES
+		 <foreach collection="tempList" item="item" separator="," >
+		 ( 
+		 	  #{item.athGrpId     }
+		 	, #{item.athGrpNm     }
+			, #{item.athGrpDesc   }
+			, 'Y'
+			, NOW()
+			, NOW()
+			, #{item.crtr         }
+			, #{item.amdr         }
+		 ) 
+		 </foreach>
+		 
+	</insert>
+	
+	<delete  id="athGrpMgntDelete" parameterType="tpost.common.vo.athGrpMgntVO">
+		DELETE /* athGrpMgntDelete */  
+		 FROM  tpost.TB_ATH_GRP_INFO
+		 WHERE ATH_GRP_ID IN 
+		 (
+
+			 <foreach collection="tempList" item="item" separator="," >
+		 	  #{item.athGrpId  }
+		 	</foreach>
+
+		 )
+	</delete>
+	
+<!-- 	<delete  id="athGrpMgntDelete" parameterType="tpost.common.vo.athGrpMgntVO"> -->
+<!-- 	DELETE FROM  tpost.ATH_GRP_INFO -->
+<!-- 	WHERE ATH_GRP_ID = #{aoId	} -->
+<!-- 	</delete> -->
+	
+	<update  id="athGrpMgntUpdate" parameterType="tpost.common.vo.athGrpMgntVO">
+	UPDATE /* athGrpMgntUpdate */ 
+	       tpost.TB_ATH_GRP_INFO
+	   SET ATH_GRP_NM =  #{athGrpNm     }
+	     , ATH_GRP_DESC = #{athGrpDesc   }
+	     , USE_YN = #{useYn}	     
+		 , MDF_DATE = NOW()
+		 , AMDR = #{amdr}
+	WHERE ATH_GRP_ID = #{athGrpNm     }
+	
+	</update>
+
+<!-- 권한그룹정보 table 관련-->
+
+<!-- 권한그룹정보 _고객 테이블 관련 -->
+<!-- 페이징 테스트 st -->
+  <select id="athGrpMgntCustSelect" parameterType="tpost.common.vo.athGrpMgntCustVO" resultType="tpost.common.vo.athGrpMgntCustVO">
+        SELECT /* athGrpMgntCustSelect */
+		A.*
+  FROM (
+		SELECT
+			    A.ATH_GRP_INFO_CUST_SEQ      AS athGrpInfoCustSeq
+			,	A.ATH_GRP_ID      AS athGrpId
+			,	A.CUST_ID    AS custId
+			,	A.USE_YN     AS useYn
+			,   B.CUST_NUM   AS custNum
+			,   B.CUST_NM    AS custNm
+			,   B.OGAN_CD    AS oganCd
+			,	FN_GET_BASCD_NM ( '00001' , B.OGAN_CD ) AS orgaNm 
+			,	A.CRTR       AS crtr
+			,	A.MDF_DATE   AS mdfDate
+			,	A.AMDR       AS amdr
+ 		 FROM tpost.TB_ATH_GRP_INFO_CUST A
+ 		INNER JOIN tpost.TB_CUST_INFO B 
+ 	       ON A.CUST_ID = B.CUST_ID 	
+ 	      AND A.ATH_GRP_ID LIKE CONCAT( '%' , #{athGrpId} , '%' ) 
+ 		  AND A.CUST_ID LIKE CONCAT( '%' , #{custId} , '%' ) 
+ 		  AND A.USE_YN = 'Y'
+ 		  AND A.ATH_GRP_ID = #{athGrpIdLink}
+ 	  
+ 		ORDER BY ATH_GRP_ID
+  		) A
+ 	
+  </select>
+  
+  <select id="athGrpMgntCustSelectCnt" parameterType="tpost.common.vo.athGrpMgntCustVO" resultType="int">
+    SELECT /* athGrpMgntCustSelectCnt */
+			count(*) 
+    FROM tpost.TB_ATH_GRP_INFO_CUST
+    WHERE  ATH_GRP_ID LIKE '%'|| #{athGrpId} || '%' 
+ 	  AND CUST_ID LIKE '%' || #{custId} || '%' 
+  </select>
+<!-- 페이징 테스트 ed -->
+
+<!-- 인서트전 맥스값 가져오기 -->
+<select id="athGrpMgntCustInsertSeq" parameterType="tpost.common.vo.athGrpMgntCustVO" resultType="int">
+   SELECT /* athGrpMgntCustInsertSeq */
+          IFNULL( MAX( ATH_GRP_INFO_CUST_SEQ) , 0 )+1  AS CNT  
+     FROM tpost.TB_ATH_GRP_INFO_CUST
+  </select>
+	
+	<insert  id="athGrpMgntCustInsert" parameterType="tpost.common.vo.athGrpMgntCustVO">
+		INSERT /* athGrpMgntCustInsert */  
+		  INTO tpost.TB_ATH_GRP_INFO_CUST
+		(ATH_GRP_INFO_CUST_SEQ , ATH_GRP_ID,CUST_ID, USE_YN ,CRT_DATE , CRTR ,MDF_DATE,  AMDR)
+		 VALUES
+		 <foreach collection="tempList" item="item" separator="," >
+		 ( 
+		 	  #{item.seq   }    
+		 	, #{item.athGrpId     }
+			, #{item.custId   }
+			, 'Y'
+			, NOW()
+			, #{item.amdr         } 
+			, NOW()
+			, #{item.amdr         } 
+		 )
+		 </foreach>
+	</insert>
+	
+	<delete  id="athGrpMgntCustDelete" parameterType="tpost.common.vo.athGrpMgntCustVO">
+	DELETE /* athGrpMgntCustDelete */ 
+	  FROM  tpost.TB_ATH_GRP_INFO_CUST
+	WHERE ATH_GRP_INFO_CUST = #{athGrpInfoCustSeq	}
+	</delete>
+	
+	<update  id="athGrpMgntCustUpdate" parameterType="tpost.common.vo.athGrpMgntCustVO">
+	UPDATE /* athGrpMgntCustUpdate */ 
+	       tpost.TB_ATH_GRP_INFO_CUST
+	   SET USE_YN = 'N'	     
+		 , MDF_DATE = NOW()
+		 , AMDR = #{amdr}
+	WHERE ATH_GRP_INFO_CUST_SEQ = #{athGrpInfoCustSeq     }
+	
+	</update>
+	
+	
+<!-- 권한그룹정보 _AO 테이블 관련 -->
+
+  <select id="athGrpMgntAOSelect" parameterType="tpost.common.vo.athGrpMgntAOVO" resultType="tpost.common.vo.athGrpMgntAOVO">
+   SELECT /* athGrpMgntAOSelect */
+		A.*
+  FROM (
+		SELECT
+			    A.ATH_GRP_INFO_AO_SEQ      AS athGrpInfoAoSeq
+			,	A.ATH_GRP_ID      AS athGrpId
+/*  			,	A.AO_ID    AS aoId */ 
+/*  			,	A.USE_YN   AS useYn */ 
+			,	B.MENU_NM    AS menuNm
+			,	B.MENU_ID    AS menuId						
+			,	A.CRTR       AS crtr
+			,	A.MDF_DATE   AS mdfDate
+			,	A.AMDR       AS amdr
+ 		 FROM tpost.TB_ATH_GRP_INFO_AO A
+ 		 INNER JOIN tpost.TB_MENU_MAIN_MGNT B
+ 		    ON A.MENU_ID = B.MENU_ID 
+ 		  AND A.USE_YN = 'Y'  
+ 		  AND A.ATH_GRP_ID = #{athGrpIdLink}
+    	  AND A.ATH_GRP_INFO_AO_SEQ LIKE CONCAT ( '%' , #{athGrpInfoAoSeq} , '%' ) 
+ 		  AND A.MENU_ID LIKE CONCAT( '%' , #{menuId} , '%' ) 
+  		) A
+ 
+  </select>
+  
+  <select id="menuMgntSelectPopu" parameterType="tpost.common.vo.menuMainMgntVO" resultType="tpost.common.vo.menuMainMgntVO">
+    SELECT /* aoMgntSelectPopu */
+        A.MENU_ID         AS  menuId
+      , A.MENU_NM        AS  menuNm
+      , A.UPR_MENU_NM    AS grpNm
+      , A.DISP_NO        AS dispNo
+  FROM tpost.TB_MENU_MAIN_MGNT A
+ WHERE A.MENU_ID LIKE CONCAT ( '%' ,  #{menuIdSer} , '%' ) 
+   AND A.MENU_NM LIKE CONCAT ( '%' , #{menuNmSer} , '%' )
+  </select>
+  
+  <select id="athGrpMgntAOSelectCnt" parameterType="tpost.common.vo.athGrpMgntAOVO" resultType="int">
+    SELECT /* athGrpMgntAOSelectCnt */
+			count(*) 
+    FROM tpost.TB_ATH_GRP_INFO_AO
+    WHERE  ATH_GRP_INFO_AO_SEQ LIKE CONCAT ( '%' ,  #{athGrpInfoAoSeq} , '%' ) 
+ 		  AND AO_ID LIKE CONCAT (  '%' , #{aoId} ,  '%' ) 
+  </select>
+<!-- 페이징 테스트 ed -->
+	
+	<select id="athGrpMgntAOInsertSeq" parameterType="tpost.common.vo.athGrpMgntCustVO" resultType="int">
+   		SELECT /* athGrpMgntAOInsertSeq */
+   		        IFNULL( MAX( ATH_GRP_INFO_AO_SEQ) , 0 )+1  AS CNT  
+     	  FROM tpost.TB_ATH_GRP_INFO_AO
+  </select>
+	<insert  id="athGrpMgntAOInsert" parameterType="tpost.common.vo.athGrpMgntAOVO">
+		INSERT /* athGrpMgntAOInsert */ 
+		  INTO tpost.TB_ATH_GRP_INFO_AO
+		( ATH_GRP_INFO_AO_SEQ , ATH_GRP_ID, MENU_ID, USE_YN , CRT_DATE ,CRTR ,MDF_DATE, AMDR )
+		 VALUES
+		  <foreach collection="tempList" item="item" separator="," >
+		 ( 
+		   	  #{item.seq   }    
+		 	, #{item.athGrpId     }
+			, #{item.menuId   }
+			, 'Y'
+			, NOW()
+			, #{item.crtr         }
+			, NOW()
+			, #{item.amdr         }
+		 )
+		 </foreach>
+	</insert>
+	
+	<delete  id="athGrpMgntAODelete" parameterType="tpost.common.vo.athGrpMgntAOVO">
+	DELETE /* athGrpMgntAODelete */ 
+	  FROM  tpost.TB_ATH_GRP_INFO_AO
+	WHERE ATH_GRP_INFO_AO_SEQ = #{athGrpInfoAoSeq	}
+	</delete>
+	
+	<update  id="athGrpMgntAOUpdate" parameterType="tpost.common.vo.athGrpMgntAOVO">
+	UPDATE /* athGrpMgntAOUpdate */
+	       tpost.TB_ATH_GRP_INFO_AO
+	   SET USE_YN = 'N'	     
+		 , MDF_DATE = NOW()
+		 , AMDR = #{amdr}
+	WHERE ATH_GRP_INFO_AO_SEQ = #{athGrpInfoAoSeq     }
+	                              
+	</update>
+	
+	
+		
+
+
+
+</mapper>
+
+

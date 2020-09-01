@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.batch.dao.batMoblSndnRsltArgDao">
+
+<insert id="moblSndnRsltArgSuccIns" parameterType="tpost.batch.batchMoblSndnRsltArg.vo.batMoblSndnRsltArgVO" >
+/* 모바일 발송메세지 성공 메세지건 insert*/
+insert /* moblSndnRsltArgSuccIns */
+   into tpost.TB_SNDN_SUCC_MSG ( 
+     OGAN_CD	        /*  '수요기관관리구분코드임', */ 
+	,TRANS_DT	      /*  '요청일자',               */
+	,TMPLT_CD	      /*  '템플릿코드',             */
+	,OFAP_ELCT_ADDR	/*  '공인전자주소',           */
+	,CRT_DATE       	/*  '생성날짜',               */
+	,MDF_DATE       	/*  '수정날짜',               */
+	,AMDR            /*  '수정자',                 */
+	,CRTR            /*  '생성자',                 */
+	,CI_NUM	        /*  '연계정보(CI)',           */
+	,SNDN_DATE	      /*                            */
+	,RCVE_DATE	      /*                            */
+)
+SELECT  
+      A.SVC_ORG_CD  	        /*  '수요기관관리구분코드임', */ 
+	, A.TRANS_DT 	      /*  '요청일자',               */
+	, B.TMPLT_CD 	      /*  '템플릿코드',             */
+	, B.OFAP_ELCT_ADDR 	/*  '공인전자주소',           */
+	, NOW()      	/*  '생성날짜',               */
+	, NOW()        	/*  '수정날짜',               */
+	, 'tpost'          /*  '수정자',                 */
+	, 'tpost'         /*  '생성자',                 */
+	, B.IPIN_CI 	        /*  '연계정보(CI)',           */
+	, (select MAX(C.REQ_DATE) from  tpost.TB_MOBL_RCVE_MSG C where  B.SVC_ORG_CD = C.SVC_ORG_CD and B.TRANS_DT = C.TRANS_DT and B.SEQ_NO = C.SEQ_NO) as REQ_DATE	      /*     발송일시                        */
+	, A.REPORT_DATE	      /*      수신일시                      */
+  FROM tpost.TB_MOBL_RCVE_MSG A
+     , tpost.TB_MOBL_SNDN_MSG B
+where A.SVC_ORG_CD  = B.SVC_ORG_CD
+  and A.TRANS_DT  = B.TRANS_DT
+  and A.SEQ_NO  = B.SEQ_NO
+  AND A.REQ_DATE is not null 
+  and A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:01'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+ and A.RESULT_CD = 0  /*0: 성공  1: 수신시간초과 2: 수신거절*/
+</insert>
+
+<insert id="moblSndnRsltArgFailIns" parameterType="tpost.batch.batchMoblSndnRsltArg.vo.batMoblSndnRsltArgVO" >
+/* 모바일 발송메세지 실패 메세지건 insert*/
+insert /* moblSndnRsltArgFailIns */
+   into tpost.TB_SNDN_FAIL_MSG ( 
+     OGAN_CD	        /*  '수요기관관리구분코드임', */ 
+	,TRANS_DT	      /*  '요청일자',               */
+	,TMPLT_CD	      /*  '템플릿코드',             */
+	,OFAP_ELCT_ADDR	/*  '공인전자주소',           */
+	,CRT_DATE       	/*  '생성날짜',               */
+	,MDF_DATE       	/*  '수정날짜',               */
+	,AMDR            /*  '수정자',                 */
+	,CRTR            /*  '생성자',                 */
+	,CI_NUM	        /*  '연계정보(CI)',           */
+	,SNDN_DATE	      /*                            */
+	,RCVE_DATE	      /*                            */
+)
+SELECT  
+      A.SVC_ORG_CD  	        /*  '수요기관관리구분코드임', */ 
+	, A.TRANS_DT 	      /*  '요청일자',               */
+	, B.TMPLT_CD 	      /*  '템플릿코드',             */
+	, B.OFAP_ELCT_ADDR 	/*  '공인전자주소',           */
+	, NOW()      	/*  '생성날짜',               */
+	, NOW()        	/*  '수정날짜',               */
+	, 'tpost'          /*  '수정자',                 */
+	, 'tpost'         /*  '생성자',                 */
+	, B.IPIN_CI 	        /*  '연계정보(CI)',           */
+	, (select MAX(C.REQ_DATE) from  tpost.TB_MOBL_RCVE_MSG C where  B.SVC_ORG_CD = C.SVC_ORG_CD and B.TRANS_DT = C.TRANS_DT and B.SEQ_NO = C.SEQ_NO) as REQ_DATE	      /*     발송일시                        */
+	, A.REPORT_DATE	      /*      수신일시                      */
+  FROM tpost.TB_MOBL_RCVE_MSG A
+     , tpost.TB_MOBL_SNDN_MSG B
+where A.SVC_ORG_CD  = B.SVC_ORG_CD
+  and A.TRANS_DT  = B.TRANS_DT
+  and A.SEQ_NO  = B.SEQ_NO
+  AND A.REQ_DATE is not null 
+  and A.CRT_DATE between STR_TO_DATE( CONCAT(#{transDt} , '00:00:01'), '%Y%m%d%H:%i:%s') and STR_TO_DATE( CONCAT(#{transDt}, '23:59:59'), '%Y%m%d%H:%i:%s')
+ and A.RESULT_CD != 0  /*0: 성공  1: 수신시간초과 2: 수신거절*/
+</insert>
+
+</mapper>

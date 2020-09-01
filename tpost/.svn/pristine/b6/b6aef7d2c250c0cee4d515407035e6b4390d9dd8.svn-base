@@ -1,0 +1,103 @@
+package tpost.restTestSever;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import tpost.commCode.controller.commCdMgntController;
+import tpost.logIn.service.logInService;
+import tpost.logIn.vo.logInVO;
+
+
+
+@Controller
+public class restTestServer {
+
+	@Autowired
+	logInService logInService;
+
+	@Value("#{properties['aesKey']}") 
+	private String aesKey;
+	
+	/*로그설정 입니다. */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	
+	public restTestServer() {
+	}
+	
+	
+	/*처음화면 호출 */
+	@ResponseBody
+	 @RequestMapping(value = "/restTestServer/restTestServer", method = {RequestMethod.GET, RequestMethod.POST})
+	  public Map logInInit(Model model , @ModelAttribute restTestServerVO restTestServerVO, HttpServletRequest request ) {
+		 log.debug("/restTestServer/restTestServer");
+		 Map<String, Object> resultMap = new HashMap<String, Object>();
+		 
+		 System.out.println("restTestServerVO ==> " +restTestServerVO.getResult());
+		 System.out.println("restTestServerVO header==> " +request.getHeader("headerset")  );
+		 
+		 resultMap.put("result", "Y");
+		 return resultMap;
+		 
+	  }
+	/*처음화면 호출 */
+	@ResponseBody
+	@RequestMapping(value = "/restTestServer/restTestServer1", method = {RequestMethod.PUT} )
+	public Map logInInit1(Model model , @ModelAttribute restTestServerVO restTestServerVO, HttpServletRequest request ) {
+		log.debug("/restTestServer/restTestServer");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		System.out.println("restTestServerVO ==> PUT " +restTestServerVO.getResult());
+		
+		resultMap.put("result", "Y");
+		return resultMap;
+		
+	}
+	/*처음화면 호출 */
+	@ResponseBody
+	@RequestMapping(value = "/restTestServer/restTestServer2", method = {RequestMethod.DELETE })
+	public Map logInInit2(Model model , @ModelAttribute restTestServerVO restTestServerVO, HttpServletRequest request ) {
+		log.debug("/restTestServer/restTestServer delete");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		System.out.println("restTestServerVO ==> DELETE " +restTestServerVO.getResult());
+		
+		resultMap.put("result", "Y");
+		return resultMap;
+		
+	}
+	
+	/*처음화면 호출  */
+	/*@RequestMapping(value = "/error{error_code}", method = { RequestMethod.POST, RequestMethod.GET})*/
+	@ResponseBody
+	@RequestMapping(value = "/restTestServer/{stus}/{id}", method = {RequestMethod.GET })
+	public Map restValue(Model model , @ModelAttribute restTestServerVO restTestServerVO, HttpServletRequest request 
+			,@PathVariable String stus
+			,@PathVariable String id
+			) {
+		log.debug("/restTestServer/restTestServer value => " + stus +"---" + id );
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		System.out.println("restTestServerVO ==> DELETE " +restTestServerVO.getResult());
+		
+		resultMap.put("result", "Y");
+		return resultMap;
+		
+	}
+	 
+	
+}

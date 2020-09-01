@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.commUtil.dao.commUtilDao">   
+
+<select id="getBascdList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getBascdList */
+	TBDC.BASCD 		AS bascd
+	,TBDC.BASCD_NM 	AS bascdNm
+FROM 
+	tpost.TB_BZNS_CD TBC
+	,tpost.TB_BZNS_DETL_CD TBDC
+WHERE 
+	TBC.CFCD = #{cfcd}
+AND TBDC.CFCD = TBC.CFCD
+AND TBDC.BASCD_LST_HIST_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN TBDC.BASCD_APPL_ST_DT AND TBDC.BASCD_APPL_CLOS_DT
+AND IFNULL(TBDC.DTCD, "") = "" 
+ORDER BY TBDC.BASCD
+</select>
+<select id="getDtcdList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getDtcdList */
+	TBDC.DTCD 		AS dtcd
+	,TBDC.DTCD_NM 	AS dtcdNm
+FROM
+	tpost.TB_BZNS_CD TBC
+	,tpost.TB_BZNS_DETL_CD TBDC
+WHERE 
+	TBC.CFCD = #{cfcd}
+AND	TBC.CFCD = TBDC.CFCD
+AND TBDC.BASCD = #{bascd}
+AND TBDC.DTCD_LST_HIST_YN = 'Y'
+AND DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN TBDC.DTCD_APPL_ST_DT AND TBDC.DTCD_APPL_CLOS_DT
+AND TBDC.DTCD IS NOT NULL
+ORDER BY TBDC.DTCD
+</select>
+<select id="getBascdNmOne" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getBascdNmOne */
+	tpost.FN_GET_BASCD_NM(#{cfcd}, #{bascd}) AS bascdNm 
+FROM 
+	DUAL
+</select>
+<select id="getDtcdNmOne" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getDtcdNmOne */
+	tpost.FN_GET_DTCD_NM(#{cfcd}, #{bascd}, #{dtcd}) AS dtcdNm 
+FROM 
+	DUAL
+</select>
+<select id="getOganTmpltList" parameterType="tpost.commUtil.vo.commUtilVO" resultType="tpost.commUtil.vo.commUtilVO">
+SELECT /* getOganTmpltList */
+	TMPLT_CD 		AS tmpltCd
+	,TMPLT_NM 		AS tmpltNm
+FROM tpost.TB_DOC_TMPLT_MGNT
+WHERE 
+	LST_HIST_YN = 'Y'
+AND USE_YN = 'Y'
+<if test="!oganCd.equals('')">	
+AND	OGAN_CD = #{oganCd}
+</if>
+ORDER BY TMPLT_NM
+</select>
+<select id="getHolyYn" parameterType="java.lang.String" resultType="java.lang.String">
+SELECT /* getHolyYn */
+	tpost.FN_GET_HOLI_YN(NOW()) 
+FROM 
+	DUAL
+</select>
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.common.dao.menuMainMgntDao">
+                   
+ <!-- 왼쪽 메뉴조회  -->
+<select id="menuMainIndexSelect" parameterType="tpost.logIn.vo.logInVO" resultType="tpost.common.vo.menuMainMgntVO">
+  SELECT  /* menuMainIndexSelect */
+       A.MENU_DEPT 			AS menuDept
+     , A.MENU_ID				AS menuId
+     , A.MENU_NM				AS menuNm
+     , A.UPR_MENU_ID			AS uprMenuId
+     , A.PATH_NM				AS pathNm
+     , A.DISP_NO              AS dispNo
+  FROM tpost.TB_MENU_MAIN_MGNT A
+     , tpost.TB_ATH_GRP_INFO_AO C
+     , tpost.TB_ATH_GRP_INFO D
+     , tpost.TB_ATH_GRP_INFO_CUST E
+WHERE  C.USE_YN = 'Y'
+  AND A.MENU_ID = C.MENU_ID 
+  AND C.ATH_GRP_ID  = D.ATH_GRP_ID
+  AND D.ATH_GRP_ID = E.ATH_GRP_ID
+  AND E.CUST_ID = #{custId}
+  AND A.MENU_DEPT = '10'
+  AND E.USE_YN = 'Y'
+  AND D.USE_YN = 'Y'
+  ORDER BY A.DISP_NO
+  </select>
+  
+ <!-- 탑메뉴조회  -->
+<select id="menuMainGnbSelect" parameterType="tpost.logIn.vo.logInVO" resultType="tpost.common.vo.menuMainMgntVO">
+  SELECT  /* menuMainGnbSelect */
+       A.MENU_DEPT 			AS menuDept
+     , A.MENU_ID				AS menuId
+     , A.MENU_NM				AS menuNm
+     , A.UPR_MENU_ID			AS uprMenuId
+     , A.PATH_NM				AS pathNm
+     , A.DISP_NO              AS dispNo
+  FROM tpost.TB_MENU_MAIN_MGNT A
+     , tpost.TB_ATH_GRP_INFO_AO C
+     , tpost.TB_ATH_GRP_INFO D
+     , tpost.TB_ATH_GRP_INFO_CUST E
+WHERE 1=1
+  AND A.MENU_ID = C.MENU_ID
+  AND C.USE_YN = 'Y'
+  AND C.ATH_GRP_ID  = D.ATH_GRP_ID
+  AND D.ATH_GRP_ID = E.ATH_GRP_ID
+  AND E.CUST_ID = #{custId}
+  AND A.MENU_DEPT = '20'
+  AND A.UPR_MENU_ID = #{uprMenuId}
+  AND E.USE_YN = 'Y'
+  AND D.USE_YN = 'Y'
+  ORDER BY A.DISP_NO DESC
+  </select>
+  
+  
+  <select id="menuMainMgntSelect" parameterType="tpost.common.vo.menuMainMgntVO" resultType="tpost.common.vo.menuMainMgntVO">
+    SELECT /* menuMainMgntSelect */ 
+		A.*
+  FROM (
+		SELECT
+				MENU_DEPT  		AS menuDept
+			,	MENU_ID   		AS menuId
+			-- ,	MENU_NM			AS menuNm
+			, CASE WHEN UPR_MENU_ID > ' ' THEN
+				CONCAT('└>',MENU_NM)
+			ELSE
+				MENU_NM
+			END	AS menuNm
+			,	UPR_MENU_ID		AS uprMenuId
+			,	UPR_MENU_NM		AS uprMenuNm
+			,	GRP_YN			AS grpYn
+			,	DISP_NO			AS dispNo
+			,  PATH_NM          AS pathNm
+			,	CRT_DATE		AS crtDate
+			,	CRTR			AS crtr
+			,	MDF_DATE		AS mdfDate
+			,	AMDR			AS amdr
+		    ,   @ROWNUM:=@ROWNUM+1  AS rnum 
+		    
+ 		 FROM tpost.TB_MENU_MAIN_MGNT AA
+ 		    ,(SELECT @ROWNUM := 0) TMP
+ 		WHERE MENU_ID LIKE CONCAT( '%' ,  #{menuIdSer} , '%') 
+ 		  AND MENU_NM LIKE CONCAT( '%' ,  #{menuNmSer} , '%' )
+ 		ORDER BY DISP_NO	 
+  		) A
+
+  </select>
+  
+  <select id="menuMainMgntSelectCnt" parameterType="tpost.common.vo.menuMainMgntVO" resultType="int">
+    SELECT /* menuMainMgntSelectCnt */
+			count(*) 
+    FROM tpost.TB_MENU_MAIN_MGNT
+    WHERE MENU_ID LIKE CONCAT('%', #{menuIdSer} , '%' ) 
+ 		  AND MENU_NM LIKE CONCAT('%', #{menuNmSer} , '%' ) 
+   
+  </select>
+<!-- 페이징 테스트 ed -->
+
+
+	<insert  id="menuMainMgntInsert" parameterType="tpost.common.vo.menuMainMgntVO">
+INSERT /* menuMainMgntInsert */ 
+  INTO tpost.TB_MENU_MAIN_MGNT
+(
+	  MENU_DEPT
+	, MENU_ID
+	, MENU_NM
+	, UPR_MENU_ID
+	, UPR_MENU_NM
+	, GRP_YN
+	, DISP_NO
+	, AO_ID
+	, PATH_NM
+	, CRT_DATE
+	, MDF_DATE
+	, CRTR
+	, AMDR
+)
+VALUES (
+	  #{menuDept	}
+	, #{menuId	}
+	, #{menuNm  }
+	, #{uprMenuId}
+	, #{uprMenuNm}
+	, #{grpYn   }
+	, #{dispNo  }
+	, #{aoId    }
+	, #{pathNm    }
+	, NOW()
+	, NOW()
+	, #{crtr } 
+	, #{amdr }
+	)
+	</insert>
+	
+	<delete  id="menuMainMgntDelete" parameterType="tpost.common.vo.menuMainMgntVO">
+	DELETE /* menuMainMgntDelete */ 
+	 FROM  tpost.TB_MENU_MAIN_MGNT
+	WHERE MENU_ID = #{menuId	}
+	</delete>
+	
+	<update  id="menuMainMgntUpdate" parameterType="tpost.common.vo.menuMainMgntVO">
+	UPDATE /* menuMainMgntUpdate */
+	       tpost.TB_MENU_MAIN_MGNT
+	   SET MENU_NM =  #{menuNm  }
+	     , UPR_MENU_ID = #{uprMenuId}
+	     , UPR_MENU_NM = #{uprMenuNm}
+	     , MENU_DEPT = #{menuDept	}
+		, GRP_YN = #{grpYn}	     
+		, DISP_NO = #{dispNo}
+		, AO_ID = #{aoId}
+		, PATH_NM = #{pathNm    }
+		, MDF_DATE = NOW()
+		, AMDR = #{amdr }
+	WHERE MENU_ID = #{menuId	}
+	
+	</update>
+
+</mapper>
+
+

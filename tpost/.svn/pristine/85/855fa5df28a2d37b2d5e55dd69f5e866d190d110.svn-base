@@ -1,0 +1,399 @@
+package tpost.common.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import tpost.commCode.controller.commCdMgntController;
+import tpost.commUtil.commUtil;
+import tpost.common.service.codeMgntService;
+import tpost.common.vo.codeMgntVO;
+import tpost.egovcomm.EgovUserDetailsHelper;
+
+@Controller
+@RequestMapping(value = "/common")
+public class codeMgntController {
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Autowired
+	codeMgntService codeMgntService;
+	
+	@RequestMapping(value = "/codeMgnt", method = RequestMethod.POST)
+	public String codeMgntInit(Model model) {
+		log.debug("/common/codeMgnt - codeMgntInit");
+		
+		codeMgntVO codeMgntVO = new codeMgntVO();
+		codeMgntVO.setInputCfcd("");
+		codeMgntVO.setInputCfcdNm("");
+		codeMgntVO.setInputBasc("");
+		codeMgntVO.setInputBascNm("");
+	
+		codeMgntSelect(model, codeMgntVO);
+		
+		return "common/codeMgnt";
+	}
+	
+	//상단 조회 버튼 클릭 시
+	@RequestMapping(value = "/codeMgntSelect", method = RequestMethod.POST)
+	public String codeMgntSelect(Model model, @ModelAttribute codeMgntVO codeMgntVO) {
+		log.debug("/common/codeMgntSelect - codeMgntSelect");
+		
+		model.addAttribute("inputCfcd",codeMgntVO.getInputCfcd());
+		model.addAttribute("inputCfcdNm",codeMgntVO.getInputCfcdNm());
+		model.addAttribute("inputBasc",codeMgntVO.getInputBasc());
+		model.addAttribute("inputBascNm",codeMgntVO.getInputBascNm());
+		
+		List<codeMgntVO> codeMgntCfcdLst = new ArrayList<codeMgntVO>();
+		List<codeMgntVO> codeMgntBascLst = new ArrayList<codeMgntVO>();
+		List<codeMgntVO> codeMgntDtcdLst = new ArrayList<codeMgntVO>();
+		
+		//1.조회조건이 없을 경우
+		//2.기본코드 조회조건은 없고, 분류코드 혹은 분류코드명에 조회조건이 있을 경우
+		//3.그외
+		if(codeMgntVO.getInputCfcd().isEmpty() && codeMgntVO.getInputCfcdNm().isEmpty()
+				&& codeMgntVO.getInputBasc().isEmpty() && codeMgntVO.getInputBascNm().isEmpty()) {
+			codeMgntCfcdLst = codeMgntService.codeMgntCfcdStdrSelect(codeMgntVO);
+			model.addAttribute("codeMgntCfcdLst", codeMgntCfcdLst);
+		} else if(codeMgntVO.getInputBasc().isEmpty() && codeMgntVO.getInputBascNm().isEmpty()
+				&& (!codeMgntVO.getInputCfcd().isEmpty() || !codeMgntVO.getInputCfcdNm().isEmpty())){
+			codeMgntCfcdLst = codeMgntService.codeMgntCfcdStdrSelect(codeMgntVO);
+			model.addAttribute("codeMgntCfcdLst", codeMgntCfcdLst);	
+		} else {
+			codeMgntBascLst = codeMgntService.codeMgntBascdStdrSelect(codeMgntVO);
+			
+			model.addAttribute("codeMgntBascLst", codeMgntBascLst);
+			
+			if(codeMgntBascLst.size() > 0) {
+				codeMgntCfcdLst.add(codeMgntBascLst.get(0));
+				for(int i = 1; i < codeMgntBascLst.size(); i++) {
+					if(!codeMgntCfcdLst.get(codeMgntCfcdLst.size() - 1).getCfcd().equals(codeMgntBascLst.get(i).getCfcd())) {
+						codeMgntCfcdLst.add(codeMgntBascLst.get(i));
+					}
+				}
+				model.addAttribute("codeMgntCfcdLst", codeMgntCfcdLst);	
+			}
+		}
+		
+		//조회된 대상건 중 첫번째 값을 기준으로 기본 또는 상세코드 추가 조회
+		//조회된 대상건이 분류코드일 경우 -> 첫번째 분류코드의 기본코드 / 첫번째 기본코드의 상세코드 추가 조회
+		//조회된 대상건이 기본코드일 경우 -> 첫번째 기본코드의 상세코드 추가 조회
+		if(codeMgntBascLst.size() > 0) {
+			codeMgntVO tempVO = new codeMgntVO();
+			tempVO.setDetlPk(codeMgntBascLst.get(0).getDetlPk());
+			codeMgntDtcdLst = codeMgntService.bascToDtcdSelect(tempVO);
+			model.addAttribute("codeMgntDtcdLst", codeMgntDtcdLst);
+		} else if(codeMgntCfcdLst.size() > 0){
+			codeMgntVO tempVO = new codeMgntVO();
+			tempVO.setInputCfcd(codeMgntCfcdLst.get(0).getCfcd());
+			codeMgntBascLst = codeMgntService.cfcdToBascSelect(tempVO);
+			model.addAttribute("codeMgntBascLst", codeMgntBascLst);
+			
+			if(codeMgntBascLst.size() > 0) {
+				tempVO.setDetlPk(codeMgntBascLst.get(0).getDetlPk());
+				codeMgntDtcdLst = codeMgntService.bascToDtcdSelect(tempVO);
+				model.addAttribute("codeMgntDtcdLst", codeMgntDtcdLst);
+			}
+		}
+		
+		//하단 상세조회 중에서 분류코드 셋팅
+		if(codeMgntCfcdLst.size() > 0) {
+			model.addAttribute("_cfcd", codeMgntCfcdLst.get(0).getCfcd());
+			model.addAttribute("_cfcdNm",codeMgntCfcdLst.get(0).getCfcdNm());
+			model.addAttribute("_cfcdDesc",codeMgntCfcdLst.get(0).getCfcdDesc());		
+		}
+		
+		//기본코드가 있을경우 제일 첫번재 값으로 하단상세조회 중에서 기본코드 값 세팅
+		if(codeMgntBascLst.size() > 0) {
+			model.addAttribute("_basc", codeMgntBascLst.get(0).getBasc());
+			model.addAttribute("_bascNm",codeMgntBascLst.get(0).getBascNm());
+			model.addAttribute("_bascDesc",codeMgntBascLst.get(0).getBascDesc());
+			model.addAttribute("_bascApplStDt",codeMgntBascLst.get(0).getBascApplStDt());
+			model.addAttribute("_bascApplClosDt",codeMgntBascLst.get(0).getBascApplClosDt());
+			model.addAttribute("_bascLstHistYn",codeMgntBascLst.get(0).getBascLstHistYn());	
+		}
+		else { //기본코드 없을 경우 셋팅하지 않음
+			model.addAttribute("_basc", null);
+			model.addAttribute("_bascNm", null);
+			model.addAttribute("_bascDesc",null);
+			model.addAttribute("_bascApplStDt",null);
+			model.addAttribute("_bascApplClosDt",null);
+			model.addAttribute("_bascLstHistYn",null);	
+		}
+		
+		//상세코드가 있을 경우 제일 첫번째 값으로 하단상세조회 중에서 상세코드 값 세팅
+		if(codeMgntDtcdLst.size() > 0) {
+			model.addAttribute("_dtcd",codeMgntDtcdLst.get(0).getDtcd());
+			model.addAttribute("_dtcdNm",codeMgntDtcdLst.get(0).getDtcdNm());
+			model.addAttribute("_dtcdDesc",codeMgntDtcdLst.get(0).getDtcdDesc());
+			model.addAttribute("_dtcdApplStDt",codeMgntDtcdLst.get(0).getDtcdApplStDt());
+			model.addAttribute("_dtcdApplClosDt",codeMgntDtcdLst.get(0).getDtcdApplClosDt());
+			model.addAttribute("_dtcdLstHistYn",codeMgntDtcdLst.get(0).getDtcdLstHistYn());		
+		}
+		else {//상세코드 없을 경우 셋팅하지 않음
+			model.addAttribute("_dtcd",null);
+			model.addAttribute("_dtcdNm",null);
+			model.addAttribute("_dtcdDesc",null);
+			model.addAttribute("_dtcdApplStDt",null);
+			model.addAttribute("_dtcdApplClosDt",null);
+			model.addAttribute("_dtcdLstHistYn",null);	
+		}
+		
+		return "common/codeMgnt";
+	}
+	
+	//분류코드명 클릭 시 기본코드 조회
+	@ResponseBody
+	@RequestMapping(value = "/cfcdToBascSelect.ajax")
+	public Map cfcdToBascSelect(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/cfcdToBascSelect - cfcdToBascSelect.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+		
+		List<codeMgntVO> codeMgntBascLst = codeMgntService.cfcdToBascSelect(codeMgntVO);
+		List<codeMgntVO> codeMgntDtcdLst = new ArrayList<codeMgntVO>();
+		
+		if(codeMgntBascLst.size() > 0) {
+			codeMgntVO tempVO = codeMgntBascLst.get(0);
+			codeMgntDtcdLst = codeMgntService.bascToDtcdSelect(tempVO);			
+		}
+
+		resultMap.put("bascList", codeMgntBascLst);
+		resultMap.put("dtcdList", codeMgntDtcdLst);
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//기본코드명 클릭 시 세부코드 조회
+	@ResponseBody
+	@RequestMapping(value = "/bascToDtcdSelect.ajax")
+	public Map bascToDtcdSelect(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/bascToDtcdSelect - bascToDtcdSelect.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+
+		resultMap.put("dtcdList", codeMgntService.bascToDtcdSelect(codeMgntVO));
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//븐류코드명 클릭 시 하단 상세정보 조회
+	@ResponseBody
+	@RequestMapping(value = "/cfcdSelect.ajax")
+	public Map cfcdSelect(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/cfcdSelect - cfcdSelect.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+
+		resultMap.put("detailInfo", codeMgntService.cfcdSelect(codeMgntVO));
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//기본코드명 클릭 시 하단 상세정보 조회
+	@ResponseBody
+	@RequestMapping(value = "/bascSelect.ajax")
+	public Map bascSelect(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/bascSelect - bascSelect.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+
+		resultMap.put("detailInfo", codeMgntService.bascSelect(codeMgntVO));
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//상세코드명 클릭 시 하단 상세정보 조회
+	@ResponseBody
+	@RequestMapping(value = "/dtcdSelect.ajax")
+	public Map dtcdSelect(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/dtcdSelect - dtcdSelect.ajax");		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+
+		resultMap.put("detailInfo", codeMgntService.dtcdSelect(codeMgntVO));
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//codeClfPopu (분류코드 등록/수정) 화면 이동
+	@ResponseBody
+	@RequestMapping(value = "/goCodeClfPopu.ajax")
+	public Map goCodeClfPopu(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/goCodeClfPopu - goCodeClfPopu.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+		
+		if(codeMgntVO.getPopKnd().equals("1")) {
+			codeMgntVO popuInfo = codeMgntService.cfcdSelect(codeMgntVO).get(0);
+			resultMap.put("popuInfo", popuInfo);
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//분류코드 등록
+	@ResponseBody
+	@RequestMapping(value = "/cfcdInsert.ajax")
+	public Map cfcdInsert(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/cfcdInsert - cfcdInsert.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		codeMgntVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		codeMgntService.cfcdInsert(codeMgntVO);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", "");
+		
+		return resultMap;
+	}
+	
+	//codeClfPopu (기본코드 등록/수정) 화면 이동
+	@ResponseBody
+	@RequestMapping(value = "/goCodeBascPopu.ajax")
+	public Map goCodeBascPopu(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/codeBascPopu - goCodeBascPopu.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+		
+		if(codeMgntVO.getPopKnd().equals("1")) {
+			codeMgntVO popuInfo = codeMgntService.bascSelect(codeMgntVO).get(0);
+			popuInfo.setBascApplStDt(commUtil.textToDate(popuInfo.getBascApplStDt()));
+			popuInfo.setBascApplClosDt(commUtil.textToDate(popuInfo.getBascApplClosDt()));
+			
+			resultMap.put("popuInfo", popuInfo);
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//기본코드 등록
+	@ResponseBody
+	@RequestMapping(value = "/bascInsert.ajax")
+	public Map bascInsert(@ModelAttribute("codeMgntVO") codeMgntVO codeMgntVO) {
+		log.debug("/common/bascInsert - bascInsert.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		codeMgntVO.setDetlPk(codeMgntService.maxDetlPk());
+		codeMgntVO.setBascApplStDt(commUtil.dateToText(codeMgntVO.getBascApplStDt()));
+		codeMgntVO.setBascApplClosDt(commUtil.dateToText(codeMgntVO.getBascApplClosDt()));
+		codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		codeMgntVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		codeMgntService.bascInsert(codeMgntVO);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", "");
+		
+		return resultMap;
+	}
+	
+	//기본코드 업데이트
+	@ResponseBody
+	@RequestMapping(value = "/bascUpdate.ajax")
+	public Map bascUpdate(@ModelAttribute codeMgntVO codeMgntVO) {
+		log.debug("/common/bascUpdate - bascUpdate.ajax" + codeMgntVO.getDetlPk());
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		codeMgntService.bascUpdate(codeMgntVO);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", "");
+
+		return resultMap;
+	}
+	
+	//codeClfPopu (상세코드 등록/수정) 화면 이동
+	@ResponseBody
+	@RequestMapping(value = "/goCodeDetlPopu.ajax")
+	public Map goCodeDetlPopu(@ModelAttribute codeMgntVO codeMgntVO) {
+		log.debug("/common/codeDetlPopu - goCodeDetlPopu.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";	
+		
+		if(codeMgntVO.getPopKnd().equals("1")) {
+			codeMgntVO popuInfo = codeMgntService.dtcdSelect(codeMgntVO).get(0);
+			popuInfo.setDtcdApplStDt(commUtil.textToDate(popuInfo.getDtcdApplStDt()));
+			popuInfo.setDtcdApplClosDt(commUtil.textToDate(popuInfo.getDtcdApplClosDt()));
+			resultMap.put("popuInfo", popuInfo);
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	//세부코드 등록
+	@ResponseBody
+	@RequestMapping(value = "/dtcdInsert.ajax")
+	public Map dtcdInsert(@ModelAttribute codeMgntVO codeMgntVO) {
+		log.debug("/common/dtcdInsert - dtcdInsert.ajax");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		codeMgntVO.setDetlPk(codeMgntService.maxDetlPk());
+		
+		codeMgntVO.setDtcdApplStDt(commUtil.dateToText(codeMgntVO.getDtcdApplStDt()));
+		codeMgntVO.setDtcdApplClosDt(commUtil.dateToText(codeMgntVO.getDtcdApplClosDt()));
+		codeMgntVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		codeMgntVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		codeMgntService.dtcdInsert(codeMgntVO);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", "");
+
+		return resultMap;
+	}
+	
+	//세부코드 업데이트
+	@ResponseBody
+	@RequestMapping(value = "/dtcdUpdate.ajax")
+	public Map dtcdUpdate(@ModelAttribute codeMgntVO codeMgntVO) {
+		log.debug("/common/dtcdUpdate - dtcdUpdate.ajax" + codeMgntVO.getDetlPk());
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		codeMgntService.dtcdUpdate(codeMgntVO);
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", "");
+
+		return resultMap;
+	}
+}

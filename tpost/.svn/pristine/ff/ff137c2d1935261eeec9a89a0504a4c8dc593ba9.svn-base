@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.acmdCerf.dao.acmdCerfDao">   
+<select id="acmdCerfListSelect" parameterType="tpost.acmdCerf.vo.acmdCerfVO" resultType="tpost.acmdCerf.vo.acmdCerfVO">
+SELECT /* acmdCerfListSelect */ 
+	pk																														AS pk
+	,DATE_FORMAT(STR_TO_DATE(A.apctDate, '%Y%m%d%s'), '%Y-%m-%d')																			AS apctDate
+	,DATE_FORMAT(STR_TO_DATE(A.trnsDate, '%Y%m%d%s'), '%Y-%m-%d') 																			AS trnsDate
+	,tpost.FN_GET_BASCD_NM('00001',A.apctOgan)																					AS apctOgan
+	,A.apctOgan AS oganCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = A.tmpltCd AND OGAN_CD = A.apctOgan GROUP BY TMPLT_NM) AS tmpltCd
+	,name 																													AS name
+	,IF(A.bsrpCls = '100', CONCAT(SUBSTR(A.ofapElctAddr,1,3), '-', SUBSTR(A.ofapElctAddr,4,2), '-', SUBSTR(A.ofapElctAddr,6,8))
+						 , CONCAT(SUBSTR(A.ofapElctAddr,1,3), '-', SUBSTR(A.ofapElctAddr,4,3), '-', SUBSTR(A.ofapElctAddr,7,2), '-', SUBSTR(A.ofapElctAddr,9,5)))  		AS ofapElctAddr
+	,ciNum 																													AS ciNum
+	,tpost.FN_GET_BASCD_NM('00007',A.issCls)																						AS issCls
+	,apctCls 																												AS apctCls
+	,dwldUrl 																												AS dwldUrl
+	,RNUM																													AS rn
+FROM(
+	SELECT
+		M.ACMD_CERF_MGNT_PK 	AS pk
+		,M.APCT_DATE			AS apctDate
+		,M.TRNS_DATE			AS trnsDate
+		,M.OGAN_CD 				AS apctOgan
+		,M.TMPLT_CD 			AS tmpltCd
+		,M.NAME					AS name
+		,M.OFAP_ELCT_ADDR 		AS ofapElctAddr
+		,OEA.BSRP_CLS 			AS bsrpCls
+		,M.CI_NUM 				AS ciNum
+		,M.ISS_CLS 				AS issCls
+		,M.APCT_CLS				AS apctCls
+		,IFNULL(M.DWLD_URL, ' ') AS dwldUrl
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM
+		tpost.TB_ACMD_CERF_MGNT M
+		,tpost.TB_OFAP_ELCT_ADDR OEA
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		M.APCT_DATE BETWEEN #{inputRengStDt} AND #{inputRengClosDt}
+	AND M.LST_HIST_YN = 'Y'
+	AND OEA.OFAP_ELCT_ADDR = M.OFAP_ELCT_ADDR 
+	<if test="!inputIssCls.equals('')">
+	AND  M.ISS_CLS = #{inputIssCls}
+	</if>
+	<if test="!inputName.equals('')">
+	AND  M.NAME LIKE CONCAT('%', #{inputName}, '%') 
+	</if>
+	<if test="!inputOfapElctAddr.equals('')">
+	AND  M.OFAP_ELCT_ADDR LIKE CONCAT('%', #{inputOfapElctAddr}, '%') 
+	</if>
+	<if test="!inputCiNum.equals('')">
+	AND  M.CI_NUM LIKE CONCAT('%', #{inputCiNum}, '%') 
+	</if> 
+	)A
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+ORDER BY A.apctDate DESC
+</select>
+<select id="acmdCerfAddrListCountSelect" parameterType="tpost.acmdCerf.vo.acmdCerfVO" resultType="java.lang.Integer">
+SELECT /* acmdCerfAddrListCountSelect */ 
+	COUNT(pk)
+FROM(
+	SELECT
+		ACMD_CERF_MGNT_PK 	AS pk
+	FROM
+		tpost.TB_ACMD_CERF_MGNT
+	WHERE
+		APCT_DATE BETWEEN #{inputRengStDt} AND #{inputRengClosDt}
+	AND LST_HIST_YN = 'Y'
+	<if test="!inputIssCls.equals('')">
+	AND  ISS_CLS = #{inputIssCls}
+	</if>
+	<if test="!inputName.equals('')">
+	AND  NAME LIKE CONCAT('%', #{inputName}, '%') 
+	</if>
+	<if test="!inputOfapElctAddr.equals('')">
+	AND  OFAP_ELCT_ADDR LIKE CONCAT('%', #{inputOfapElctAddr}, '%') 
+	</if>
+	<if test="!inputCiNum.equals('')">
+	AND  CI_NUM LIKE CONCAT('%', #{inputCiNum}, '%') 
+	</if> 
+	)A
+</select>
+<insert id="acmdCerfInsert" parameterType="tpost.acmdCerf.vo.acmdCerfVO">
+INSERT /* acmdCerfInsert */  
+INTO tpost.TB_ACMD_CERF_MGNT ( 
+	ACMD_CERF_MGNT_PK
+	,OGAN_CD
+	,APCT_DATE
+	,TRNS_DATE
+	,TMPLT_CD
+	,NAME
+	,OFAP_ELCT_ADDR
+	,CI_NUM
+	,ISS_CLS
+	,APCT_CLS
+	,DWLD_URL
+	,LST_HIST_YN
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES
+(
+	#{pk}
+	,#{inputPopuOganCd}
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,#{inputPopuTrnsDate}
+	,#{inputPopuTmpltCd}
+	,#{inputPopuName}
+	,#{inputPopuOfapElctAddr}
+	,#{inputPopuCiNum}
+	,'100'
+	,'0'
+	,null
+	,'Y'
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+)
+</insert>
+<update id="acmdCerfDwUpdate" parameterType="tpost.acmdCerf.vo.acmdCerfVO">
+UPDATE /* acmdCerfDwUpdate */ 
+	tpost.TB_ACMD_CERF_MGNT 
+SET
+	LST_HIST_YN = 'N'
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE
+	LST_HIST_YN = 'Y'
+AND ACMD_CERF_MGNT_PK = '2'
+AND ISS_CLS = '400'
+</update>
+<insert id="acmdCerfDwInsert" parameterType="tpost.acmdCerf.vo.acmdCerfVO">
+INSERT /* acmdCerfDwInsert */
+INTO tpost.TB_ACMD_CERF_MGNT  (
+	ACMD_CERF_MGNT_PK 
+	,OGAN_CD 
+	,APCT_DATE
+	,TRNS_DATE 
+	,TMPLT_CD 
+	,NAME
+	,OFAP_ELCT_ADDR 
+	,CI_NUM 
+	,ISS_CLS
+	,LST_HIST_YN 
+	,DWLD_URL 
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+SELECT 
+	ACMD_CERF_MGNT_PK 
+	,OGAN_CD 
+	,APCT_DATE
+	,TRNS_DATE 
+	,TMPLT_CD 
+	,NAME
+	,OFAP_ELCT_ADDR 
+	,CI_NUM 
+	,'500'
+	,'Y' 
+	,'' 
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+FROM 
+	tpost.TB_ACMD_CERF_MGNT 
+WHERE 
+	ACMD_CERF_MGNT_PK = #{pk}
+AND ISS_CLS = '400'
+AND LST_HIST_YN = 'N'
+</insert>
+<select id="getMaxPk" resultType="java.lang.Integer">
+SELECT /* getMaxPk */
+	IFNULL(MAX(ACMD_CERF_MGNT_PK) + 1, 1) AS pk
+FROM tpost.TB_ACMD_CERF_MGNT
+</select>
+</mapper>

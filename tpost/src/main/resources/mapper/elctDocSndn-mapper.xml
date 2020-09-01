@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.elctDoc.dao.elctDocSndnDao">   
+<select id="elctDocSndnListSelect" parameterType="tpost.elctDoc.vo.elctDocSndnVO" resultType="tpost.elctDoc.vo.elctDocSndnVO">
+SELECT /* elctDocSndnListSelect */
+	STR_TO_DATE(EDSM.TRANS_DT, '%Y%m%d')			AS transDt
+	,STR_TO_DATE(EDSM.SNDN_DTM, '%Y%m%d')			AS sndnD
+	,EDSM.SNDN_DTM									AS sndnDtm
+	,EDSM.OGAN_CD 									AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001', EDSM.OGAN_CD) 	AS oganNm
+	,tpost.FN_GET_BASCD_NM('00002', EDSM.MSG_TYPE) 	AS sndnCd
+	,EDSM.TMPLT_CD 									AS tmpltCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = EDSM.TMPLT_CD AND OGAN_CD = EDSM.OGAN_CD GROUP BY TMPLT_NM) 		AS tmpltNm
+	,EDSM.MSG_TITLE 								AS msgTitle
+	,EDSM.SRC_CALL_NO 								AS srcCallNo
+	,EDSM.APR_YN 									AS aprYn 
+	,EDSM.ALL_STTS									AS allStts
+FROM
+	tpost.TB_ELCT_DOC_SNDN_MGNT EDSM
+WHERE
+	EDSM.TRANS_DT BETWEEN #{iSndnStDt} AND #{iSndnClosDt}
+<if test="!iSndnCd.equals('')">	
+AND EDSM.MSG_TYPE = #{iSndnCd}
+</if>
+<if test="!iOganCd.equals('')">	
+AND EDSM.OGAN_CD  = #{iOganCd}
+</if>
+<if test="!iTmpltCd.equals('')">	
+AND EDSM.TMPLT_CD = #{iTmpltCd}
+</if>
+<if test="!iMsgTitle.equals('')">	
+AND EDSM.MSG_TITLE LIKE CONCAT('%', #{iMsgTitle},'%')
+</if>
+ORDER BY transDt DESC
+</select>
+<update id="elctDocSndnAprYnUpdate" parameterType="tpost.elctDoc.vo.elctDocSndnVO">
+UPDATE /* elctDocSndnAprYnUpdate */
+	tpost.TB_ELCT_DOC_SNDN_MGNT
+SET 
+	APR_YN = #{aprYn}
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE 
+	OGAN_CD  = #{oganCd}
+AND TMPLT_CD = #{tmpltCd}
+AND TRANS_DT = #{transDt}
+AND SNDN_DTM = #{sndnDtm}
+</update>
+<select id="elctDocSndnDetlSelect" parameterType="tpost.elctDoc.vo.elctDocSndnVO" resultType="tpost.elctDoc.vo.elctDocSndnVO">
+SELECT /* elctDocSndnDetlSelect */
+	EDSM.OGAN_CD 									AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001', EDSM.OGAN_CD)	AS oganNm
+	,EDSM.TMPLT_CD 									AS tmpltCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = EDSM.TMPLT_CD AND OGAN_CD = EDSM.OGAN_CD GROUP BY TMPLT_NM) 		AS tmpltNm
+	,STR_TO_DATE(EDSM.TRANS_DT, '%Y%m%d')			AS transDt
+	,EDSM.SNDN_DTM									AS sndnDtm
+	,EDSM.MSG_TYPE								 	AS sndnCd
+	,EDSM.MULTI_MBL_PRC_GBN 						AS multiMblPrcGbn
+	,EDSM.MSG_TITLE 								AS msgTitle
+	,EDSM.MSG_TEXT 									AS msgText
+	,EDSM.MMS_IMG									AS mmsImg
+	,EDSM.URL_INCL_YN								AS urlYn
+	,EDSM.SRC_CALL_NO 								AS srcCallNo
+	,EDSM.MSG_SNDN_CLCD								AS msgSndnGbn
+FROM
+	tpost.TB_ELCT_DOC_SNDN_MGNT EDSM
+WHERE
+	EDSM.OGAN_CD = #{oganCd}
+AND EDSM.TMPLT_CD = #{tmpltCd}
+AND EDSM.TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d')
+AND EDSM.SNDN_DTM = #{sndnDtm}
+</select>
+<select id="elctDocSndnDupCheck" parameterType="tpost.elctDoc.vo.elctDocSndnVO" resultType="java.lang.Integer">
+SELECT 
+	COUNT(MSG_TITLE) 
+FROM 
+	tpost.TB_ELCT_DOC_SNDN_MGNT
+WHERE
+	OGAN_CD = #{oganCd}
+AND TMPLT_CD = #{tmpltCd}
+AND TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d')
+</select>
+<insert id="elctDocSndnInsert" parameterType="tpost.elctDoc.vo.elctDocSndnVO">
+INSERT /* elctDocSndnInsert */
+INTO tpost.TB_ELCT_DOC_SNDN_MGNT (
+	OGAN_CD
+	,TMPLT_CD
+	,TRANS_DT
+	,SNDN_DTM
+	,MSG_TYPE
+	,MSG_TITLE
+	,MSG_TEXT
+	,MMS_IMG_SIZE
+	,MMS_IMG
+	,MULTI_MBL_PRC_GBN
+	,SRC_CALL_NO
+	,APR_YN
+	,URL_INCL_YN
+	,MSG_SNDN_CLCD
+	,ALL_STTS
+	,CMPLT_DT
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+)
+VALUES (
+	#{oganCd}
+	,#{tmpltCd}
+	,DATE_FORMAT(#{transDt}, '%Y%m%d') 
+	,#{sndnDtm}
+	,#{sndnCd}
+	,#{msgTitle}
+	,#{msgText}
+	,#{imgSize}
+	,#{mmsImg}
+	,#{multiMblPrcGbn}
+	,tpost.FN_GET_DTCD_NM('00010', #{oganCd}, #{srcCallNo})
+	,'N'
+	,#{urlYn}
+	,#{msgSndnGbn}
+	,'0'
+	,null
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+)
+</insert>
+<update id="elctDocSndnUpdate" parameterType="tpost.elctDoc.vo.elctDocSndnVO">
+UPDATE /* elctDocSndnUpdate */
+	tpost.TB_ELCT_DOC_SNDN_MGNT
+SET 
+	SNDN_DTM = #{sndnDtm}
+	,MSG_TYPE = #{sndnCd}
+	,MSG_TITLE = #{msgTitle}
+	,MSG_TEXT = #{msgText}
+<if test="saveFn.equals('')">
+	,MMS_IMG_SIZE = #{imgSize}
+	,MMS_IMG = #{mmsImg}
+</if>
+	,MULTI_MBL_PRC_GBN = #{multiMblPrcGbn}
+	,SRC_CALL_NO = tpost.FN_GET_DTCD_NM('00010', #{oganCd}, #{srcCallNo})
+	,URL_INCL_YN = #{urlYn}
+	,MSG_SNDN_CLCD = #{msgSndnGbn}
+	,MDF_DATE = NOW()
+	,AMDR = #{amdr}
+WHERE 
+	OGAN_CD  = #{oganCd}
+AND TMPLT_CD = #{tmpltCd}
+AND TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d') 
+</update>
+</mapper>

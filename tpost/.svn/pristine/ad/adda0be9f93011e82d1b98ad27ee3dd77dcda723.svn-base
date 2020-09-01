@@ -1,0 +1,24 @@
+package tpost.batch.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.acmdCerf.vo.ofapElctAddrVO;
+import tpost.batch.controller.kakaoTest;
+import tpost.batch.vo.kakaoTestVO;
+import tpost.commCode.controller.commCdMgntController;
+
+@Repository
+public class fileTestDao {
+	
+ 
+	
+	
+
+}

@@ -1,0 +1,31 @@
+package tpost.msgRcve.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.msgRcve.vo.guAcmdCerfVO;
+
+@Repository
+public class guAcmdCerfDao {
+	@Autowired
+	SqlSession sqlSessionTemplate;
+	
+	public List<guAcmdCerfVO> guAcmdCerfMListSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return sqlSessionTemplate.selectList("tpost.msgRcve.dao.guAcmdCerfDao.guAcmdCerfMListSelect", guAcmdCerfVO);
+	}
+	
+	public int guAcmdCerfMListCountSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return sqlSessionTemplate.selectOne("tpost.msgRcve.dao.guAcmdCerfDao.guAcmdCerfMListCountSelect", guAcmdCerfVO);
+	}
+	
+	public guAcmdCerfVO guAcmdCerfSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return sqlSessionTemplate.selectOne("tpost.msgRcve.dao.guAcmdCerfDao.guAcmdCerfSelect", guAcmdCerfVO);
+	}
+	
+	public List<guAcmdCerfVO> rdngListSelect(guAcmdCerfVO guAcmdCerfVO) {
+		return sqlSessionTemplate.selectList("tpost.msgRcve.dao.guAcmdCerfDao.rdngListSelect", guAcmdCerfVO);
+	}
+}

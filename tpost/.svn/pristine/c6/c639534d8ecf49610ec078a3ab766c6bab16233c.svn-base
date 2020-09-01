@@ -1,0 +1,210 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui" %>  <!-- 전자정부태그라이브러리 -->
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>  <!-- jstl펑션 -->
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- CSS  STYLE -->
+<link rel="stylesheet" href="/tpost/resource/css/admin/common.css">
+
+<!--     JS     -->
+<script src="/tpost/resource/js/jquery.min.js"></script>
+<script src="/tpost/resource/js/jquery-migrate-1.2.1.min.js"></script>
+<script src="/tpost/resource/js/comm.js"></script>
+<!-- ---------- -->
+
+<script type="text/javascript">
+function js_init()
+{
+	
+	commCd_bas("oganCdSel", "00001");  /*공단종류*/
+	commCd_bas("oganCd", "00001");  /*공단종류*/
+}
+
+
+
+/*테이블 row 클릭시 이벤트 발생 */
+$( document ).ready(function() {
+
+	/*그리드 클릭시 이벤트 전달하는것*/
+	$("#resultListTable tr").click(function(event) { // 실행하고자 하는 jQuery 코드
+			// 현재 클릭된 Row(<tr>)
+			var tr = $(this);
+//			resultList(tr);		
+	});
+});
+
+
+
+/****************************************************************************************************/
+/* 화면조회 */
+function custInf_sel(){
+	  
+	  $('#pageIndex').val(1); /*첫조회는 페이지가 1로 조회*/
+	  var custInf_sel = document.getElementById("custInfMgnt_sel");
+	  custInf_sel.action = "custInfMgntInfSel-popu";
+	  
+	  custInf_sel.method = "post";
+	  custInf_sel.submit();
+	  
+}
+
+
+/*다음페이지*/
+ function linkPage(pageNo){
+	  
+	  if(pageIndex == ""){
+		  pageIndex = 1;
+	  }
+	  
+	$('#pageIndex').val(pageNo);
+
+	var custInf_selForm = document.getElementById("custInfMgnt_sel");
+	custInf_selForm.action = "custInfMgntInfSel-popu";
+	custInf_selForm.method = "post";
+	custInf_selForm.submit();
+		
+}	
+
+function custInf_confirm(){
+	
+	$('#pageIndex').val(1);
+	custInf_array();
+	
+	var ath_sel = document.getElementById("custInfMgnt_sel");
+	ath_sel.action = "athGrpMgntCust-insert";
+	  
+	ath_sel.method = "post";
+	ath_sel.submit();
+	
+	close();
+
+}
+function custInf_confirm2(){
+	custInf_array();
+}
+
+/*체크박스로 보낼 array 값 만들기 */
+function custInf_array(){
+	 var checkbox = $("input[name=chk_info]:checked") ;
+	 
+	 var custId = Array();
+	checkbox.each(function(i) {
+		 var  tr= checkbox.parent().parent().eq(i);
+		 var td = tr.children();
+		 custId[i] = td.eq(1).text();
+	 	}
+	 )
+	 
+	 $('#custId').val(custId);
+}  
+
+
+/*고객정보확인목록 취소*/
+function custInf_cancel(){
+	
+	alert("custInf_cancel");
+}
+
+
+</script>
+</head>
+<body onload= "js_init();">
+<form id="custInfMgnt_sel">	
+
+<input type="hidden" id="pageIndex" name="pageIndex" value="${searchVO.pageIndex}"/>
+<input type="hidden" id="athGrpIdLink" name="athGrpIdLink" value="${athGrpIdLink}"/>
+<input type="hidden" id="custId" name="custId" value=""/>
+
+
+										
+ <div id="wrap">
+	<section>
+		<div ><h2 class="title1">고객정보등록</h2></div>
+         	<div >
+                <div >
+                    <span class ="title3">기관회사 </span>
+                    <!-- 기관콤보박스 -->
+                    <select id="oganCdSel" name="oganCdSel" >
+                    </select>
+                    <span class ="title3">고객명 </span>
+                    <input id="custNmSel" name="custNmSel"  type="text" value="${aoNmSel}">
+                    <button type="button" class="btn black" onclick="custInf_sel();" >조회</button>
+                </div>
+            </div> <!--//align-col2-wrapper-->
+
+		<table class="table center">
+          <colgroup>
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+          </colgroup>
+          <thead>
+              <tr>
+                  <th></th>
+                  <th>고객ID</th>
+                  <th>기관코드</th>
+                  <th>고객번호</th>
+                  <th>고객명</th>
+                  <th>기관(회사)명</th>
+                  <th>사용여부</th>
+                  <th>전화번호</th>
+                  <th>휴대전화</th>
+                  <th>E-mail</th>
+              </tr>
+          </thead>
+          <tbody id="resultListTable" name="resultListTable">
+          <c:forEach var="resultList" items="${resultList}">
+			<tr>
+				<td><input type="checkbox" id="chk_info" name="chk_info" ></td>
+				<td>${resultList.custId}</td>
+				<td>${resultList.oganCd}</td>
+				<td>${resultList.custNum}</td>
+				<td>${resultList.custNm}</td>
+				<td>${resultList.deptNm}</td>
+				<td>${resultList.useYn}</td>
+				<td>${resultList.telNum}</td>
+				<td>${resultList.celpNum}</td>
+				<td>${resultList.emaiId}</td>
+			</tr>
+			</c:forEach>
+         </tbody>
+      </table>
+     	<!-- 페이징 처리  -->
+     <div>
+<!--      	<tbody> -->
+<!-- 			<div class="paging-wrap"> -->
+<%-- 				<c:if test="${fn:length(resultList) ne 0 }">   --%>
+<!-- 					<ul> -->
+<%-- 						<ui:pagination paginationInfo="${paginationInfo}" type="text" jsFunction="linkPage" /> --%>
+<!-- 					</ul> -->
+<%-- 				</c:if> --%>
+<!-- 			</div> -->
+<!-- 		</tbody> -->
+	</div>
+          <div>
+                <button type="button" class="btn black" onclick="custInf_confirm();" >등록</button>
+                <button type="button" class="btn black" onclick="custInf_cancel();" >취소</button>
+          </div>
+	</section>
+
+
+	<footer id="footer">
+		
+	</footer>
+</div> <!--//wrap-->
+</form>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tpost.msgRcve.dao.guAcmdCerfDao">   
+<select id="guAcmdCerfMListSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* guAcmdCerfMListSelect */
+	AA.oganCd AS oganCd
+	,tpost.FN_GET_BASCD_NM('00001',AA.oganCd) AS oganNm
+	,AA.tmpltCd
+	,(SELECT TMPLT_NM FROM tpost.TB_DOC_TMPLT_MGNT WHERE TMPLT_CD = AA.tmpltCd AND OGAN_CD = AA.oganCd GROUP BY TMPLT_NM) AS tmpltNm
+	,AA.transdt AS transDt
+	,AA.ofapElctAddr As ofapElctAddr
+	,DATE_FORMAT(STR_TO_DATE(AA.sndnDate, '%Y%m%d%s'), '%Y-%m-%d') AS sndnDate
+FROM (
+	SELECT
+		A.OGAN_CD 		AS oganCd
+		,A.TMPLT_CD 	AS tmpltCd
+		,A.TRANS_DT		AS transDt
+		,B.SNDN_DATE 	AS sndnDate
+		,B.OFAP_ELCT_ADDR AS ofapElctAddr
+		,@ROWNUM:=@ROWNUM+1 AS RNUM
+	FROM
+		tpost.TB_STTC_INFO A
+		,tpost.TB_SNDN_SUCC_MSG B
+		,(SELECT @ROWNUM:=0) TMP
+	WHERE
+		A.OGAN_CD = B.OGAN_CD
+	AND A.TMPLT_CD = B.TMPLT_CD 
+	AND A.TRANS_DT = B.TRANS_DT 
+	AND B.CI_NUM = #{ciNum}
+	AND B.SNDN_DATE BETWEEN #{inputRcveStDt} AND #{inputRcveClosDt}
+	<if test="!inputOganCd.equals('')">
+	AND A.OGAN_CD = #{inputOganCd}
+	</if>
+	ORDER BY B.SNDN_DATE DESC
+	) AA
+WHERE 
+	RNUM BETWEEN #{firstIndex} + 1 AND #{lastIndex}
+</select>
+<select id="guAcmdCerfMListCountSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="java.lang.Integer">
+SELECT/* guAcmdCerfMListCountSelect */ 
+	COUNT(*)
+FROM
+	tpost.TB_STTC_INFO A
+	,tpost.TB_SNDN_SUCC_MSG B
+WHERE
+	A.OGAN_CD = B.OGAN_CD
+AND A.TMPLT_CD = B.TMPLT_CD 
+AND A.TRANS_DT = B.TRANS_DT 
+AND B.CI_NUM = #{ciNum}
+AND B.SNDN_DATE BETWEEN #{inputRcveStDt} AND #{inputRcveClosDt}
+<if test="!inputOganCd.equals('')">
+AND A.OGAN_CD = #{inputOganCd}
+</if>
+</select>
+<select id="guAcmdCerfSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* guAcmdCerfSelect */
+	DATE_FORMAT(STR_TO_DATE(M.APCT_DATE, '%Y%m%d%s'), '%Y-%m-%d') 			AS apctDate
+	,B.NAME 				AS apctName
+	,tpost.FN_GET_BASCD_NM('00007', M.ISS_CLS) 				AS issCls
+	,IFNULL(M.DWLD_URL, ' ') AS dwldUrl
+FROM
+	tpost.TB_ACMD_CERF_MGNT M
+	,tpost.TB_OFAP_ELCT_ADDR A
+	,tpost.TB_RCVE_CI_INFO B
+WHERE
+	M.APCT_CLS = '1'
+AND M.OGAN_CD = #{oganCd}
+AND M.TMPLT_CD = #{tmpltCd}
+AND M.TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d')
+AND M.OFAP_ELCT_ADDR = A.OFAP_ELCT_ADDR 
+AND A.CI_NUM = B.CI_NUM 
+AND B.CI_NUM = #{ciNum}
+</select>
+<select id="rdngListSelect" parameterType="tpost.msgRcve.vo.guAcmdCerfVO" resultType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* rdngListSelect */
+	B.HIST_SEQ + 1 AS histSeq
+	,DATE_FORMAT(B.RDNG_DATE, '%Y-%m-%d %h:%i:%s') AS rdngDate
+FROM 
+	tpost.TB_SNDN_SUCC_MSG A
+	,tpost.TB_SNDN_RDNG_MGNT B
+WHERE
+	A.OGAN_CD = B.OGAN_CD
+AND A.TMPLT_CD = B.TMPLT_CD
+AND A.TRANS_DT = B.TRANS_DT 
+AND A.OFAP_ELCT_ADDR = B.OFAP_ELCT_ADDR 
+AND A.OGAN_CD = #{oganCd}
+AND A.TMPLT_CD = #{tmpltCd}
+AND DATE_FORMAT(A.SNDN_DATE, '%Y%m%d') = DATE_FORMAT(#{sndnDate}, '%Y%m%d') 
+AND A.CI_NUM = #{ciNum}
+</select>
+<insert id="guAcmdCerfInsert" parameterType="tpost.msgRcve.vo.guAcmdCerfVO">
+INSERT /* guAcmdCerfInsert */  
+INTO tpost.TB_ACMD_CERF_MGNT ( 
+	OGAN_CD
+	,TMPLT_CD
+	,TRANS_DT
+	,ACMD_CERF_SEQ
+	,OFAP_ELCT_ADDR	
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,APCT_CLS
+	,APCT_DATE
+	,ISS_CLS
+	,DWLD_URL
+)
+VALUES
+(
+	#{oganCd}
+	,#{tmpltCd}
+	,#{transDt}
+	,#{acmdCerfSeq}
+	,#{ofapElctAddr}
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+	,'1'
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,#{issCls}
+	,null
+)
+</insert>
+<insert id="guAcmdCerfHisInsert" parameterType="tpost.msgRcve.vo.guAcmdCerfVO">
+INSERT /* guAcmdCerfHisInsert */  
+INTO tpost.TB_ACMD_CERF_MGNT_HIS ( 
+	ISS_CLS
+	,OGAN_CD
+	,TMPLT_CD
+	,TRANS_DT
+	,ACMD_CERF_SEQ
+	,OFAP_ELCT_ADDR	
+	,CRT_DATE
+	,MDF_DATE
+	,CRTR
+	,AMDR
+	,APCT_CLS
+	,APCT_DATE
+	,DWLD_URL
+)
+VALUES
+(
+	#{issCls}
+	,#{oganCd}
+	,#{tmpltCd}
+	,#{transDt}
+	,#{acmdCerfSeq}
+	,#{ofapElctAddr}
+	,NOW()
+	,NOW()
+	,#{crtr}
+	,#{amdr}
+	,'1'
+	,DATE_FORMAT(NOW(), '%Y%m%d') 
+	,null
+)
+</insert>
+<select id="getMaxSeq" resultType="java.lang.Integer" parameterType="tpost.msgRcve.vo.guAcmdCerfVO">
+SELECT /* getMaxSeq */
+		IFNULL(MAX(ACMD_CERF_SEQ ) + 1, 1) AS acmdCerfSeq
+FROM 
+	tpost.TB_ACMD_CERF_MGNT
+WHERE
+	OGAN_CD = #{oganCd}
+AND TMPLT_CD = #{tmpltCd}
+AND TRANS_DT = DATE_FORMAT(#{transDt}, '%Y%m%d')
+AND OFAP_ELCT_ADDR = #{ofapElctAddr}
+</select>
+</mapper>

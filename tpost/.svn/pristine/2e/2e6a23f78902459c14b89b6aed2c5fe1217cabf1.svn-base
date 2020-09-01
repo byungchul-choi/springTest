@@ -1,0 +1,42 @@
+@charset "utf-8";
+/* CSS Document */
+
+@import url("reset.css"); /* HTML 초기화 */
+@import url("main.css"); /* HTML 초기화 */
+html{background:#f5f6f9;}
+body{background:#f5f6f9; color: #333; }
+
+#mobileheader {width:100%; height:85px; line-height:85px; text-align:center; z-index:100; overflow:hidden; margin:0 auto;position: fixed;background:#f5f6f9; }
+#mobileheader h2{ background: #db4550; color: #fff; font-size:20px; height:80px; line-height:80px; }
+#mobileheader button{position:absolute; left:0;width:80px; height:80px;margin:0 ;padding:0; background: none; border: none;}
+#mobileheader button:before{height:30px; vertical-align:middle; display: inline-block; background: url("../images/nav_back.png") no-repeat; background-size: 100% auto; width: 30px; content: ""}
+
+#container{text-align:center; margin:0 auto; padding:0; overflow:auto; max-width:100%; overflow-x: hidden; position: relative;top:80px;}
+
+#container h2{ background: #db4550; color: #fff; font-size:30px; height:80px; line-height:80px; }
+#container h3{font-size: 17px; font-weight: 400; height: 100px; line-height: 100px; text-align: left}
+.contents-wrap {margin: 0 5%;width: 100% auto;}.contents-wrap ul {margin: 20px 0;}
+.contents-wrap ul li{ height: 70px; line-height: 70px; background: #fff; border: 1px solid #ebebeb; border-radius: 10px; margin: 20px 0 0 ; color: #666 ; clear: both; width: 100%;font-size: 15px; text-align: left; }
+.contents-wrap ul.certi li span{display:inline-block; background: #fff; border: 1px solid #ebebeb; border-radius: 10px; width: calc(100% - 88px) }
+.contents-wrap ul label { font-weight: 700; width: 20%; font-weight: 400;  margin-left: 3%; display: inline-block}
+.contents-wrap ul input, .contents-wrap ul select{border: none; height: 50px; line-height: 50px; color: #333; font-size: 15px; margin-left: 3%; }
+
+.contents-wrap ul.certi li {background: none; border:none;}
+.contents-wrap ul.certi button{float: right;width: 80px; background: #dedede; height: 70px; line-height: 70px; border-radius: 10px; padding: 0 5px; font-weight: 400;  position: relative;right: 0; }
+.inputfield button + button { margin-left: 12px!important;}
+.inputfield button {border-radius: 10px!important; height: 60px; line-height: 60px; float: left; margin-bottom: 20px; padding: 0 50px }
+#container .article{background: #fff;  margin: 0 auto; text-align: left;width: 100% auto; padding:15px; }
+.article p{	margin: 30px; font-size: 15px; }
+.footer button{  height:50px; font-size:14px; display:inline-block; margin:0 auto;  border-radius:40px; width: 45%!important; }
+.footer {width:100%; text-align:center;padding:20px 0; clear: both;/* 하단 고정용 스타일 position:fixed; bottom:0; background:#fff; z-index: 999; box-shadow:0 0 3px rgba(0,0,0,0.1); */}
+::-webkit-input-placeholder{/*Edge*/ color: #999;}
+::-ms-input-placeholder{/*IE 10-11*/ color: #999;}
+::placeholder{color: #999;}
+.agree-check { text-align:left; margin:20px 0;}
+
+select {padding: 0 40px 6px 6px; background-position-y: 10px;}
+
+input[placeholder]{ width: 65% }
+
+.certi input {width: calc(100% - 160px)}
+ul.certi label { width: 40%; max-width:95px}

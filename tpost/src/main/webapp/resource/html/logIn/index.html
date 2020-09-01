@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>공공알림문자</title>
+	<link rel="stylesheet" type="text/css" href="resources/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/main.css">
+	<script src="resources/jquery-3.4.1.min.js"></script>
+	<script>
+		jQuery(document).ready(function () {
+			// 좌측 메뉴 클릭 시
+			jQuery("#snb ul li").click(function () {
+				var objLI = jQuery(this);
+				if(objLI.hasClass("state-current"))	return;
+
+				objLI.parent().children().removeClass("state-current");
+				jQuery("#gnb").prop("contentWindow").loadMenu(objLI.attr("class"));
+				objLI.addClass("state-current");
+			});
+
+			// gnb 영역 load
+			jQuery("#gnb").attr("src", "gnb.html");
+			jQuery("#gnb").on("load", function(){
+				// jQuery("#snb ul li:first-child").click();
+				jQuery("#snb ul li:last-child").click();
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<!-- wrap -->
+	<div id="wrap" class="bg">
+		<!-- header -->
+		<div id="header">
+			<h1><a href="#">공공알림문자서비스</a></h1>
+			<div class="gnbArea"><iframe id="gnb"></iframe></div>
+		</div>
+		<!-- //header -->
+		<!-- snb -->
+		<div id="snb">
+			<div id="menu">
+				<ul class="nav">
+					<li class="mnu-docu"><a href="javascript:;">전자문서</a></li>
+					<li class="mnu-certi"><a href="javascript:;">유통증명관리</a></li>
+					<li class="mnu-login"><a href="javascript:;">로그인</a></li>
+					<li class="mnu-system"><a href="javascript:;">시스템관리</a></li>
+				</ul>
+			</div>
+
+			<!-- footer -->
+			<footer>
+				<p>COPYRIGHT ⓒ<br>SK TELECOM CO., LTD.<br>ALL RIGHTS RESERVED.</p>
+			</footer>
+			<!-- //footer -->
+		</div>
+		<!-- //snb -->
+
+		<!-- container -->
+		<div id="container">
+			<iframe id="page" src="./page/content1.html"></iframe>
+		</div>
+		<!-- //container -->
+	</div>
+	<!-- //wrap -->
+</body>
+
+</html>

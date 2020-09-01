@@ -1,0 +1,18 @@
+
+db.driver=com.mysql.jdbc.Driver
+#db.url=jdbc:mysql://10.10.19.64:3306/  /*\ub85c\uadf8\uc124\uc815\uc704\ud574 \ubcc0\uacbd*/
+#db.name=tpost_svc
+#db.password=PK_svc_135
+db.name=root
+db.password=PK_root00
+
+#\ub85c\uadf8\uc124\uc815\uc704\ud574 11
+db.driverClassName=net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+#db.url=jdbc:log4jdbc:mysql://172.27.30.60:3306/tpost?useUnicode=true&characterEncoding=utf8
+db.url=jdbc:log4jdbc:mysql://10.10.19.64:3306/tpost?useUnicode=true&characterEncoding=utf8
+
+#\uc554\ud638\ud654\ud0a4\uc124\uc815  11
+aesKey=devTpost 
+
+#\uc11c\ubc84\uad6c\ubd84 111
+server=dev

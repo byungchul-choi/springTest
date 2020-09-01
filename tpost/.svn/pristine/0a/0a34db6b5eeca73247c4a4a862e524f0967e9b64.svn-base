@@ -1,0 +1,37 @@
+package tpost.batch.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import tpost.acmdCerf.vo.ofapElctAddrVO;
+import tpost.batch.controller.kakaoTest;
+import tpost.batch.vo.fileTestVO;
+import tpost.batch.vo.kakaoTestVO;
+import tpost.batch.vo.tbMoblSndnMsgVO;
+import tpost.commCode.controller.commCdMgntController;
+
+@Repository
+public class kakaoTestDao {
+	
+  @Autowired
+  SqlSession sqlSessionTemplate;
+
+  /*로그설정 입니다. */
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+
+	public void kakaoTestInsert(kakaoTestVO kakaoTestVO) {
+		// TODO Auto-generated method stub
+		log.debug("kakaoTestInsert ==> " );
+		sqlSessionTemplate.insert("tpost.batch.dao.kakaoTestDao.kakaoTestInsert", kakaoTestVO);
+	}
+	
+	
+	
+
+}

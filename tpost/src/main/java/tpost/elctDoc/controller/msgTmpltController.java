@@ -1,0 +1,273 @@
+package tpost.elctDoc.controller;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.nhncorp.lucy.security.xss.XssSaxFilter;
+
+import egovframework.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+import tpost.commCode.controller.commCdMgntController;
+import tpost.egovcomm.EgovUserDetailsHelper;
+import tpost.elctDoc.service.msgTmpltService;
+import tpost.elctDoc.vo.elctDocVO;
+import tpost.elctDoc.vo.msgTmpltVO;
+
+@Controller
+@RequestMapping(value = "/elctDoc")
+public class msgTmpltController {
+	Logger log = (Logger) LogManager.getLogger(commCdMgntController.class);
+	
+	@Autowired
+	msgTmpltService msgTmpltService;
+	
+	
+	@RequestMapping(value="/msgTmpltMgnt", method = RequestMethod.POST)
+	public String msgTmpltInit(Model model) {
+		log.debug("/msgTmplt/msgTmpltMgnt - msgTmpltInit :: " + EgovUserDetailsHelper.getAthLev());
+		
+		msgTmpltVO msgTmpltVO = new msgTmpltVO();
+		if(EgovUserDetailsHelper.getAthLev().equals("00")) {
+			msgTmpltVO.setInputOganCd("");
+		} else if(EgovUserDetailsHelper.getAthLev().equals("01")) {
+			msgTmpltVO.setInputOganCd(EgovUserDetailsHelper.getOganCd());
+		}
+		
+		msgTmpltVO.setInputTmpltNm("");
+		msgTmpltVO.setInputTmpltUseYn("");
+		
+		tmpltLstSelect(model, msgTmpltVO);
+		
+		return "elctDoc/msgTmpltMgnt";
+	}
+	
+	@RequestMapping(value="/tmpltLstSelect", method = RequestMethod.POST)
+	public String tmpltLstSelect(Model model, @ModelAttribute msgTmpltVO msgTmpltVO) {
+		log.debug("/msgTmplt/msgTmpltMgnt - msgTmpltInit :: " + EgovUserDetailsHelper.getAthLev());
+		
+		model.addAttribute("inputOganCd", msgTmpltVO.getInputOganCd());
+		model.addAttribute("inputTmpltNm", msgTmpltVO.getInputTmpltNm());
+		model.addAttribute("inputTmpltUseYn", msgTmpltVO.getInputTmpltUseYn());
+		model.addAttribute("athLev", EgovUserDetailsHelper.getAthLev());
+		
+		PaginationInfo paginationInfo = new PaginationInfo();
+		paginationInfo.setCurrentPageNo(msgTmpltVO.getPageIndex()); //현재 페이지 번호
+		paginationInfo.setRecordCountPerPage(5);  //한 페이지에 게시되는 게시물 건수
+		paginationInfo.setPageSize(10); //페이징 리스트의 사이즈
+		
+		msgTmpltVO.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		msgTmpltVO.setLastIndex(paginationInfo.getLastRecordIndex());
+		msgTmpltVO.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+		
+		model.addAttribute("tmpltList", msgTmpltService.tmpltLstSelect(msgTmpltVO));
+		
+		paginationInfo.setTotalRecordCount((Integer)msgTmpltService.tmpltLstCntSelect(msgTmpltVO));
+		model.addAttribute("paginationInfo", paginationInfo);
+		
+		return "elctDoc/msgTmpltMgnt";
+	}
+	
+	//메시지 템플릿 기본 내역 가져오기
+	@ResponseBody
+	@RequestMapping(value="/msgTmpltDetlSelect.ajax")
+	public Map msgTmpltDetlSelect(@ModelAttribute("msgTmpltVO") msgTmpltVO msgTmpltVO) {
+		log.debug("/elctDoc/msgTmpltDetlSelect - msgTmpltDetlSelect");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";
+		
+		msgTmpltVO resultVO = msgTmpltService.msgTmpltDetlSelect(msgTmpltVO);
+		
+		String temp = resultVO.getMsgImg();
+		temp = temp.replace("C:\\image\\file\\", "");
+		resultVO.setMsgImg(temp);
+		
+		resultMap.put("msgTmpltDetl", resultVO);
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/msgTmpltMgntInsert.ajax")
+	public Map msgTmpltMgntInsert(MultipartHttpServletRequest request, @ModelAttribute("msgTmpltVO") msgTmpltVO msgTmpltVO) {
+		log.debug("/elctDoc/msgTmpltMgntInsert - msgTmpltMgntInsert");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";
+		
+		msgTmpltVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		msgTmpltVO.setCrtr(EgovUserDetailsHelper.getUserId());	//생성자 셋팅
+		
+		if(!msgTmpltVO.getMsgImgSize().equals("0")) {
+			String fileNm = msgFileUpload(request, msgTmpltVO.getOganCd());
+			 
+			String osName = System.getProperty("os.name");
+			if(osName.toLowerCase().startsWith("window"))  {
+				fileNm = fileNm.substring(14) ;
+			}else {
+				fileNm = fileNm.substring(22);
+			}
+			
+			if(!"file_creation_failure".equals(fileNm) && !"file_format_not_supported".equals(fileNm)) {
+				msgTmpltVO.setMsgImg(fileNm);
+			} else if("file_creation_failure".equals(fileNm)) {
+				msgTmpltVO.setMsgImg("");
+				errorMessage = "파일을 저장하지 못했습니다.";
+			}else if("file_format_not_supported".equals(fileNm)) {
+				msgTmpltVO.setMsgImg("");
+				errorMessage = "지원하는 이미지 파일 형식이 아닙니다.";
+			}
+		}else {
+			msgTmpltVO.setMsgImg("");
+		}
+		
+		if(errorMessage.equals("")) {
+			XssSaxFilter filter = XssSaxFilter.getInstance("lucy-xss-sax.xml", true);
+			msgTmpltVO.setMsgTitle(filter.doFilter(msgTmpltVO.getMsgTitle()));
+			msgTmpltVO.setMsgText(filter.doFilter(msgTmpltVO.getMsgText()));
+			
+			msgTmpltService.msgTmpltDetlInsert(msgTmpltVO);
+		}
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/msgTmpltMgntUpdate.ajax")
+	public Map msgTmpltMgntUpdate(MultipartHttpServletRequest request, @ModelAttribute("msgTmpltVO") msgTmpltVO msgTmpltVO) {
+		log.debug("/elctDoc/msgTmpltMgntUpdate - msgTmpltMgntUpdate");
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String errorMessage = "";
+		
+		msgTmpltVO.setAmdr(EgovUserDetailsHelper.getUserId());	//수정자 셋팅
+		
+		log.debug("log : " + msgTmpltVO.getMsgImgSize());
+		log.debug("log : " + msgTmpltVO.getSaveFn());
+		
+		if(!msgTmpltVO.getMsgImgSize().equals("0")) {
+			String fileNm = msgFileUpload(request, msgTmpltVO.getOganCd());
+			 
+			String osName = System.getProperty("os.name");
+			if(osName.toLowerCase().startsWith("window"))  {
+				fileNm = fileNm.substring(14) ;
+			}else {
+				fileNm = fileNm.substring(22);
+			}
+			
+			if(!"file_creation_failure".equals(fileNm) && !"file_format_not_supported".equals(fileNm)) {
+				msgTmpltVO.setMsgImg(fileNm);
+			} else if("file_creation_failure".equals(fileNm)) {
+				msgTmpltVO.setMsgImg("");
+				errorMessage = "파일을 저장하지 못했습니다.";
+			}else if("file_format_not_supported".equals(fileNm)) {
+				msgTmpltVO.setMsgImg("");
+				errorMessage = "지원하는 이미지 파일 형식이 아닙니다.";
+			}
+		}else {
+			if(msgTmpltVO.getSaveFn().equals("")) {
+				msgTmpltVO.setMsgImg("");	
+				msgTmpltVO.setMsgImgSize("0");
+			}
+		}
+		
+		if(errorMessage.equals("")) {
+			XssSaxFilter filter = XssSaxFilter.getInstance("lucy-xss-sax.xml", true);
+			msgTmpltVO.setMsgTitle(filter.doFilter(msgTmpltVO.getMsgTitle()));
+			msgTmpltVO.setMsgText(filter.doFilter(msgTmpltVO.getMsgText()));
+			
+			msgTmpltService.msgTmpltDetlUpdate(msgTmpltVO);
+		}
+		
+		
+		resultMap.put("result", "Y");
+		resultMap.put("errorMessage", errorMessage);
+		
+		return resultMap;
+	}
+	
+	
+	//파일저장
+	public String msgFileUpload(MultipartHttpServletRequest request, String oganCd) {
+ 		log.debug("/fileUpload");
+ 		
+		 String osName = System.getProperty("os.name");
+		 String saveDir = "";
+     
+	    if(osName.toLowerCase().startsWith("window"))  {
+	    	saveDir = "C:\\image\\file\\" ;
+		}else {
+			saveDir = "/nfsdata01/tpost/file/"+ oganCd.toLowerCase()+"/mmsFile/";
+		}
+	    
+	    List<MultipartFile> fileList = request.getFiles("img");
+    
+	    if(request.getFiles("img").get(0).getSize() != 0){ 
+	    	fileList = request.getFiles("img");
+	    }
+	    
+	    String saveFileName = "";
+	    String originFileName = "";
+	    String extx = "";
+	    for (MultipartFile mf : fileList) { 
+	    	String[] fn = mf.getOriginalFilename().split("\\.");
+	    		
+	    	extx = "." + fn[fn.length-1];
+	    	if(extx.toLowerCase().equals(".jpg") || extx.toLowerCase().equals(".jpeg") || extx.toLowerCase().equals(".gif") || extx.toLowerCase().equals(".sis"))
+	    	{
+	    		for(int i = 0; i < fn.length-1; i++) {
+		    		originFileName += fn[i]; // 원본 파일 명	
+		    	}
+	    		
+		    	/*파일명 확인있는경우 뒤에 1 2 3 붙여줌*/
+		    	File f = new File(saveDir+originFileName+extx);
+		    	if(f.exists()) {
+		    	     for (int i=0; i < 10000 ; i++) {
+		    	    	 saveFileName = originFileName +"_"+i+extx;
+		    	    	 f = new File(saveDir+saveFileName);
+		    	    	 
+		    	    	 if(f.exists()) {
+		    	    		 log.debug("파일 존재 ==> " +  saveFileName);
+		    	    	 }else {
+		    	    		 break;
+		    	    	 }
+		    	     }
+		    	} else {
+		    		  log.debug("파일 없음");    
+		    	      saveFileName = originFileName+extx;
+		    	}
+		    	
+		    	try { // 파일생성
+		    		   mf.transferTo(new File(saveDir, saveFileName)); 
+		    	} catch (Exception e) { 
+		    		e.printStackTrace(); 
+		    		return "file_creation_failure";
+		    	}
+	    	} else {
+	    		return "file_format_not_supported";
+	    	}
+    	}
+	    
+		 return saveDir + saveFileName;
+ 	}
+}

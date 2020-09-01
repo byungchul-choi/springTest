@@ -1,0 +1,17 @@
+package tpost.batch.vo;
+
+public class moblSndnRsltArgVO {
+	
+	private String transDt;
+
+	public String getTransDt() {
+		return transDt;
+	}
+
+	public void setTransDt(String transDt) {
+		this.transDt = transDt;
+	}
+
+	
+	
+}
